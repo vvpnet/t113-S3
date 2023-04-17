@@ -1,0 +1,21 @@
+diff -uprN gst-plugins-good-1.20.4/sys/v4l2/gstv4l2transform.c gst-plugins-good-1.20.4-sk/sys/v4l2/gstv4l2transform.c
+--- gst-plugins-good-1.20.4/sys/v4l2/gstv4l2transform.c	2022-10-12 18:39:51.000000000 +0300
++++ gst-plugins-good-1.20.4-sk/sys/v4l2/gstv4l2transform.c	2023-01-08 15:23:54.369278715 +0300
+@@ -398,11 +398,15 @@ static GstCaps *
+ gst_v4l2_transform_transform_caps (GstBaseTransform * btrans,
+     GstPadDirection direction, GstCaps * caps, GstCaps * filter)
+ {
++  GstV4l2Transform *self = GST_V4L2_TRANSFORM (btrans);
+   GstCaps *tmp, *tmp2;
+   GstCaps *result;
+ 
+-  /* Get all possible caps that we can transform to */
+-  tmp = gst_v4l2_transform_caps_remove_format_info (caps);
++  if (self->probed_srccaps)
++    tmp = gst_v4l2_transform_caps_remove_format_info (self->probed_srccaps);
++  else
++    /* Get all possible caps that we can transform to */
++    tmp = gst_v4l2_transform_caps_remove_format_info (caps);
+ 
+   if (filter) {
+     tmp2 = gst_caps_intersect_full (filter, tmp, GST_CAPS_INTERSECT_FIRST);

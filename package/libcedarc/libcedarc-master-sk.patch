@@ -1,0 +1,24 @@
+diff -uprN libcedarc-master/openmax/vdec/src/omx_vdec.c libcedarc-master-sk/openmax/vdec/src/omx_vdec.c
+--- libcedarc-master/openmax/vdec/src/omx_vdec.c	2020-06-01 13:30:18.000000000 +0300
++++ libcedarc-master-sk/openmax/vdec/src/omx_vdec.c	2022-11-23 16:13:08.253377267 +0300
+@@ -1064,7 +1064,7 @@ static OMX_ERRORTYPE __AwOmxVdecInit(OMX
+     impl->bHadInitDecoderFlag   = OMX_FALSE;
+     impl->bDecodeForceStopFlag  = OMX_FALSE;
+ 
+-    strncpy((char*)impl->m_cName, pComponentName, OMX_MAX_STRINGNAME_SIZE);
++    strncpy((char*)impl->m_cName, pComponentName, OMX_MAX_STRINGNAME_SIZE - 1);
+     err = omxSetRole(impl, NULL);
+     if(err != OMX_ErrorNone)
+         return err;
+diff -uprN libcedarc-master/openmax/venc/omx_venc.c libcedarc-master-sk/openmax/venc/omx_venc.c
+--- libcedarc-master/openmax/venc/omx_venc.c	2020-06-01 13:30:18.000000000 +0300
++++ libcedarc-master-sk/openmax/venc/omx_venc.c	2022-11-23 16:11:52.909656242 +0300
+@@ -452,7 +452,7 @@ static OMX_ERRORTYPE __AwOmxVencInit(OMX
+     }
+ 
+     //init the compression format by component name.
+-    strncpy((char*)impl->m_cName, pComponentName, OMX_MAX_STRINGNAME_SIZE);
++    strncpy((char*)impl->m_cName, pComponentName, OMX_MAX_STRINGNAME_SIZE - 1);
+ 
+     if (!strncmp((char*)impl->m_cName, "OMX.allwinner.video.encoder.avc", OMX_MAX_STRINGNAME_SIZE))
+     {

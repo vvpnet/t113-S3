@@ -1,0 +1,134 @@
+diff --git a/docs/plugins/gst_plugins_cache.json b/docs/plugins/gst_plugins_cache.json
+index 78a0b8973b0403255cef76451be14e902fa17c84..a2920d986020f1afe0354418a970086e1a7ea917 100644
+--- a/docs/plugins/gst_plugins_cache.json
++++ b/docs/plugins/gst_plugins_cache.json
+@@ -28210,6 +28210,18 @@
+                         "type": "gboolean",
+                         "writable": true
+                     },
++                    "clear-fbs": {
++                        "blurb": "When enabled framebuffers of unselected planes associated with the selected CRTC will be removed",
++                        "conditionally-available": false,
++                        "construct": true,
++                        "construct-only": false,
++                        "controllable": false,
++                        "default": "true",
++                        "mutable": "null",
++                        "readable": true,
++                        "type": "gboolean",
++                        "writable": true
++                    },
+                     "connector-id": {
+                         "blurb": "DRM connector id",
+                         "conditionally-available": false,
+diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
+index 5c68d8c65b166f12acb4765f0bf4857614b1f9f5..5209c37da6825acadde0aec03583404bbd4321a8 100644
+--- a/sys/kms/gstkmssink.c
++++ b/sys/kms/gstkmssink.c
+@@ -92,6 +92,7 @@ enum
+   PROP_PLANE_ID,
+   PROP_FORCE_MODESETTING,
+   PROP_RESTORE_CRTC,
++  PROP_CLEAR_FBS,
+   PROP_CAN_SCALE,
+   PROP_DISPLAY_WIDTH,
+   PROP_DISPLAY_HEIGHT,
+@@ -355,6 +356,35 @@ find_main_monitor (int fd, drmModeRes * res)
+   return conn;
+ }
+ 
++static int
++remove_unused_framebuffers (GstKMSSink * self)
++{
++  drmModePlaneRes *pres;
++  int count;
++  int i;
++
++  count = 0;
++  drmSetClientCap (self->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
++  if (!(pres = drmModeGetPlaneResources (self->fd)))
++    return -1;
++
++  for (i = 0; i < pres->count_planes; i++) {
++    drmModePlane *plane;
++
++    plane = drmModeGetPlane (self->fd, pres->planes[i]);
++    if ((plane->crtc_id == self->crtc_id) &&
++        (plane->plane_id != self->plane_id)) {
++      drmModeSetPlane (self->fd, plane->plane_id, 0, 0, 0,
++          0, 0, 0, 0, 0, 0, 0, 0);
++      count++;
++    }
++    drmModeFreePlane (plane);
++  }
++  drmModeFreePlaneResources (pres);
++
++  return count;
++}
++
+ static void
+ log_drm_version (GstKMSSink * self)
+ {
+@@ -788,6 +818,9 @@ retry_find_plane:
+   self->crtc_id = crtc->crtc_id;
+   self->plane_id = plane->plane_id;
+ 
++  if (self->clear_fbs)
++    remove_unused_framebuffers (self);
++
+   GST_INFO_OBJECT (self, "connector id = %d / crtc id = %d / plane id = %d",
+       self->conn_id, self->crtc_id, self->plane_id);
+ 
+@@ -1804,6 +1837,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
+     case PROP_RESTORE_CRTC:
+       sink->restore_crtc = g_value_get_boolean (value);
+       break;
++    case PROP_CLEAR_FBS:
++      sink->clear_fbs = g_value_get_boolean (value);
++      break;
+     case PROP_CAN_SCALE:
+       sink->can_scale = g_value_get_boolean (value);
+       break;
+@@ -1861,6 +1897,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
+     case PROP_RESTORE_CRTC:
+       g_value_set_boolean (value, sink->restore_crtc);
+       break;
++    case PROP_CLEAR_FBS:
++      g_value_set_boolean (value, sink->clear_fbs);
++      break;
+     case PROP_CAN_SCALE:
+       g_value_set_boolean (value, sink->can_scale);
+       break;
+@@ -2018,6 +2057,20 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+       "be restored when going to NULL state.", TRUE,
+       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT);
+ 
++  /**
++   * kmssink:clear-fbs:
++   *
++   * Remove framebuffers attached to unselected planes associated with
++   * the selected crtc
++   *
++   * Since: 1.20
++   */
++  g_properties[PROP_CLEAR_FBS] =
++      g_param_spec_boolean ("clear-fbs", "Clear Unused Framebuffers",
++      "When enabled framebuffers of unselected planes associated with the"
++      " selected CRTC will be removed", TRUE,
++      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT);
++
+   /**
+    * kmssink:can-scale:
+    *
+diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
+index 428c057e77643adbd1c58093cffc44f56de15ac7..c8ddccdeca50b8dfc12a831a67e9123f06f04604 100644
+--- a/sys/kms/gstkmssink.h
++++ b/sys/kms/gstkmssink.h
+@@ -66,6 +66,7 @@ struct _GstKMSSink {
+ 
+   gboolean modesetting_enabled;
+   gboolean restore_crtc;
++  gboolean clear_fbs;
+   GstStructure *connector_props;
+   GstStructure *plane_props;
+ 
