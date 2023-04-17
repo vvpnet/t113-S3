@@ -28,6 +28,7 @@ config BR2_TARGET_SK_BOOT_MMC0
 
 endchoice
 
+source "boot/awboot-t113/Config.in"
 source "boot/afboot-stm32/Config.in"
 source "boot/at91bootstrap/Config.in"
 source "boot/at91bootstrap3/Config.in"

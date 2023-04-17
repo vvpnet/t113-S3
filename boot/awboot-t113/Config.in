@@ -1,0 +1,22 @@
+config BR2_TARGET_AWBOOT_T113
+	bool "awboot-t113"
+	depends on BR2_arm
+	help
+	  Small linux bootloader for Allwinner T113-S3
+
+	  https://github.com/szemzoa/awboot
+
+if BR2_TARGET_AWBOOT_T113
+
+config BR2_TARGET_AWBOOT_T113_BOOT_SDCARD
+	bool "SD Card boot"
+	default "BR2_TARGET_AWBOOT_T113_BOOT_SDCARD"
+	help
+	  Create an MBR or GPT partition table and a FAT32 partition with an offset of 4MB or more using fdisk.
+	  sudo fdisk /dev/(your sd device)
+	  write awboot-boot.bin to sdcard with an offset of:
+		MBR: 8KB (sector 16)
+		GPT: 128KB (sector 256)
+	  sudo dd if=awboot-boot-sd.bin of=/dev/(your sd device) bs=1024 seek=8
+
+endif
