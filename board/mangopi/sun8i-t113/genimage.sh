@@ -2,21 +2,15 @@
 
 BOARD_DIR="$(dirname $0)"
 
-if grep -Eq "^BR2_TARGET_SK_NANO=y$" ${BR2_CONFIG}; then
-    BRD="sun8i-t113-nano"
-elif grep -Eq "^BR2_TARGET_SK_NANO_LV=y$" ${BR2_CONFIG}; then
-    BRD="sun8i-t113-nano-lv"
-    install -m 0755 $BOARD_DIR/S04gpio $1/etc/init.d/
+if grep -Eq "^BR2_TARGET_AWBOOT_T113=y$" ${BR2_CONFIG}; then
+	BRD="sun8i-t113"
+	# install -m 0755 $BOARD_DIR/S04gpio $1/etc/init.d/
 else
-    BRD="unknown"
+	BRD="unknown"
 fi
 
-if grep -Eq "^BR2_TARGET_SK_BOOT_NAND=y$" ${BR2_CONFIG}; then
-    DEV="nand"
-elif grep -Eq "^BR2_TARGET_SK_BOOT_EMMC=y$" ${BR2_CONFIG}; then
-    DEV="emmc"
-elif grep -Eq "^BR2_TARGET_SK_BOOT_MMC0=y$" ${BR2_CONFIG}; then
-    DEV="mmc0"
+if grep -Eq "^BR2_TARGET_AWBOOT_T113_BOOT_SDCARD=y$" ${BR2_CONFIG}; then
+    DEV="mangopi-dual"
 else
     DEV="unknown"
 fi
@@ -70,11 +64,4 @@ genimage \
 	--config "${GENIMAGE_CFG}"
 
 
-if [ "$DEV" = "nand" ]; then
-  cp $BINARIES_DIR/awboot-boot.bin $BINARIES_DIR/$BRD-$DEV/
-  cp $BINARIES_DIR/sun8i-t113-sk.dtb $BINARIES_DIR/$BRD-$DEV/
-  cp $BINARIES_DIR/zImage $BINARIES_DIR/$BRD-$DEV/
-  cp $BINARIES_DIR/rootfs.ubi $BINARIES_DIR/$BRD-$DEV/
-else
-  cp $BINARIES_DIR/sdcard.img $BINARIES_DIR/$BRD-$DEV/
-fi
+# cp $BINARIES_DIR/sdcard.img $BINARIES_DIR/$BRD-$DEV/

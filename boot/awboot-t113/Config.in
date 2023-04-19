@@ -9,7 +9,7 @@ config BR2_TARGET_AWBOOT_T113
 if BR2_TARGET_AWBOOT_T113
 
 config BR2_TARGET_AWBOOT_T113_BOOT_SDCARD
-	bool "SD Card boot"
+	bool "SD Card"
 	default "BR2_TARGET_AWBOOT_T113_BOOT_SDCARD"
 	help
 	  Create an MBR or GPT partition table and a FAT32 partition with an offset of 4MB or more using fdisk.
