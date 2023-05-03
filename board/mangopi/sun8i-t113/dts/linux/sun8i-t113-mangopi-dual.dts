@@ -62,15 +62,15 @@
 		vin-supply = <&reg_vcc>;
 	};
 
-	spi_mipi: spi {
-		compatible = "spi-gpio";
-		#address-cells = <0x1>;
-		#size-cells = <0x0>;
-		sck-gpios = <&pio 4 12 GPIO_ACTIVE_HIGH>; /* PE12 */
-		miso-gpios = <&pio 4 13 GPIO_ACTIVE_HIGH>; /* PE13 */
-		/* mosi-gpios is ignored for a 3 wire bus */
-		num-chipselects = <0>;
-	};
+//	spi_mipi: spi {
+//		compatible = "spi-gpio";
+//		#address-cells = <0x1>;
+//		#size-cells = <0x0>;
+//		sck-gpios = <&pio 4 12 GPIO_ACTIVE_HIGH>; /* PE12 */
+//		miso-gpios = <&pio 4 13 GPIO_ACTIVE_HIGH>; /* PE13 */
+//		/* mosi-gpios is ignored for a 3 wire bus */
+//		num-chipselects = <0>;
+//	};
 
 	dmic_codec: dmic-codec {
 		compatible = "dmic-codec";
@@ -143,6 +143,34 @@
 //			};
 //		};
 //	};
+
+
+	panel {
+		compatible = "nv3052c";
+
+		width-mm = <153>;
+		height-mm = <90>;
+		data-mapping = "vesa-24";
+
+		panel-timing {
+			/* 1024x600 @60Hz */
+			clock-frequency = <52000000>;
+			hactive = <1024>;
+			vactive = <600>;
+			hsync-len = <20>;
+			hfront-porch = <180>;
+			hback-porch = <160>;
+			vfront-porch = <12>;
+			vback-porch = <23>;
+			vsync-len = <5>;
+		};
+
+		port { /* change names here */
+			rgb_panel_in: endpoint {
+				remote-endpoint = <&tcon_lcd0_out_rgb>;
+			};
+		};
+	};
 };
 
 &reg_aldo {
@@ -184,6 +212,7 @@
 	};
 };
 
+/*
 &spi_mipi {
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -198,6 +227,7 @@
 		};
 	};
 };
+*/
 
 // &dsi {
 // 	pinctrl-0 = <&dsi_4lane_pins>;
