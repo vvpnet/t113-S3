@@ -72,6 +72,17 @@
 //		num-chipselects = <0>;
 //	};
 
+	spi_panel: spi {
+		compatible = "spi-gpio";
+		#address-cells = <0x1>;
+		#size-cells = <0x0>;
+
+		sck-gpios = <&pio 4 0 GPIO_ACTIVE_HIGH>; /* PE0 */
+		miso-gpios = <&pio 4 1 GPIO_ACTIVE_HIGH>; /* PE1 */
+		num-chipselects = <0>;
+	};
+
+
 	dmic_codec: dmic-codec {
 		compatible = "dmic-codec";
 		num-channels = <2>;
@@ -144,32 +155,32 @@
 //		};
 //	};
 
-	panel {
-		compatible = "panel-lvds";
+//	panel {
+//		compatible = "panel-lvds";
 
-		width-mm = <153>;
-		height-mm = <90>;
-		data-mapping = "jeida-18"; /* RGB666 */
+//		width-mm = <153>;
+//		height-mm = <90>;
+//		data-mapping = "jeida-18"; /* RGB666 */
 
-		panel-timing {
-			/* 640x480 @60Hz */
-			clock-frequency = <21000000>;
-			hactive = <640>;
-			vactive = <480>;
-			hsync-len = <4>;
-			hfront-porch = <34>;
-			hback-porch = <20>;
-			vfront-porch = <12>;
-			vback-porch = <6>;
-			vsync-len = <4>;
-		};
+//		panel-timing {
+//			/* 640x480 @60Hz */
+//			clock-frequency = <21000000>;
+//			hactive = <640>;
+//			vactive = <480>;
+//			hsync-len = <4>;
+//			hfront-porch = <34>;
+//			hback-porch = <20>;
+//			vfront-porch = <12>;
+//			vback-porch = <6>;
+//			vsync-len = <4>;
+//		};
 
-		port {
-			rgb_panel_in: endpoint {
-				remote-endpoint = <&tcon_lcd0_out_rgb>;
-			};
-		};
-	};
+//		port {
+//			rgb_panel_in: endpoint {
+//				remote-endpoint = <&tcon_lcd0_out_rgb>;
+//			};
+//		};
+//	};
 };
 
 &reg_aldo {
@@ -227,6 +238,21 @@
 	};
 };
 */
+
+&spi_panel {
+	panel@0 {
+		compatible = "leadtek,ltk035c5444t";
+		spi-3wire;
+		reg = <0>;
+		power-supply = <&reg_vcc>;
+		reset-gpios = <&pio 4 4 GPIO_ACTIVE_LOW>; /* PE4 */
+		port {
+			rgb_panel_in: endpoint {
+			remote-endpoint = <&tcon_lcd0_out_rgb>;
+			};
+		};
+	};
+};
 
 // &dsi {
 // 	pinctrl-0 = <&dsi_4lane_pins>;
