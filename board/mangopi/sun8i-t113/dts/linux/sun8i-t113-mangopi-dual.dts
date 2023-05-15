@@ -62,16 +62,6 @@
 		vin-supply = <&reg_vcc>;
 	};
 
-//	spi_mipi: spi {
-//		compatible = "spi-gpio";
-//		#address-cells = <0x1>;
-//		#size-cells = <0x0>;
-//		sck-gpios = <&pio 4 12 GPIO_ACTIVE_HIGH>; /* PE12 */
-//		miso-gpios = <&pio 4 13 GPIO_ACTIVE_HIGH>; /* PE13 */
-//		/* mosi-gpios is ignored for a 3 wire bus */
-//		num-chipselects = <0>;
-//	};
-
 	spi_panel: spi {
 		compatible = "spi-gpio";
 		#address-cells = <0x1>;
@@ -81,7 +71,6 @@
 		miso-gpios = <&pio 4 1 GPIO_ACTIVE_HIGH>; /* PE1 */
 		num-chipselects = <0>;
 	};
-
 
 	dmic_codec: dmic-codec {
 		compatible = "dmic-codec";
@@ -129,58 +118,6 @@
 		pinctrl-0 = <&clk_pg11_pin>;
 		pinctrl-names = "default";
 	};
-
-//	panel {
-//		compatible = "nv3052c";
-/*        backlight = <&backlight>; */
-/*        power-supply = <&reg_sw>; */
-//		port {
-//			panel_input: endpoint {
-//				remote-endpoint = <&tcon_lcd0_out_panel_in>;
-//			};
-//		};
-//	};
-
-//	panel {
-//		compatible = "techstar,ts8550b", "sitronix,st7701";
-//		reg = <0>;
-//		VCC-supply = <&reg_vcc_3v3>;
-//		IOVCC-supply = <&reg_vcc_3v3>;
-/*		reset-gpios = <&pio 3 24 GPIO_ACTIVE_HIGH>; */
-/*		backlight = <&backlight>; */
-//		port {
-//			panel_input: endpoint {
-//				remote-endpoint = <&tcon_lcd0_out_panel_in>;
-//			};
-//		};
-//	};
-
-//	panel {
-//		compatible = "panel-lvds";
-
-//		width-mm = <153>;
-//		height-mm = <90>;
-//		data-mapping = "jeida-18"; /* RGB666 */
-
-//		panel-timing {
-//			/* 640x480 @60Hz */
-//			clock-frequency = <21000000>;
-//			hactive = <640>;
-//			vactive = <480>;
-//			hsync-len = <4>;
-//			hfront-porch = <34>;
-//			hback-porch = <20>;
-//			vfront-porch = <12>;
-//			vback-porch = <6>;
-//			vsync-len = <4>;
-//		};
-
-//		port {
-//			rgb_panel_in: endpoint {
-//				remote-endpoint = <&tcon_lcd0_out_rgb>;
-//			};
-//		};
-//	};
 };
 
 &reg_aldo {
@@ -222,23 +159,6 @@
 	};
 };
 
-/*
-&spi_mipi {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	panel@0 {
-		compatible = "leadtek,ltk035c5444t";
-		reg = <0>;
-		spi-3wire;
-		port {
-			rgb_panel_in: endpoint {
-			remote-endpoint = <&tcon_lcd0_out_rgb>;
-			};
-		};
-	};
-};
-*/
-
 &spi_panel {
 	panel@0 {
 		compatible = "leadtek,ltk035c5444t";
@@ -253,27 +173,6 @@
 		};
 	};
 };
-
-// &dsi {
-// 	pinctrl-0 = <&dsi_4lane_pins>;
-// 	pinctrl-names = "default";
-// 	status = "disabled";
-
-//         panel: panel@0 {
-// 			reg = <0>;
-// 			compatible = "newvision,nv3052c";
-// 			pinctrl-names = "default";
-
-// 			// pinctrl-0 = <&panel_pin>;
-
-// 			// port {
-// 			// 		panel_in: endpoint {
-// 			// 				remote-endpoint = <&dsi0_out>;
-// 			// 		};
-// 			// };
-
-//         };
-// };
 
 &pio {
 
@@ -359,25 +258,6 @@
 			};
 		};
 	};
-
-//	panel@0 {
-//		#address-cells = <2>;
-//		#size-cells = <2>;
-//		compatible = "leadtek,ltk035c5444t";
-//		reg = <0>;
-//		spi-3wire;
-//		spi-max-frequency = <3125000>;
-//		/* reset-gpios = <&pio PE 11 GPIO_ACTIVE_LOW>; */
-//		/* backlight = <&backlight>; */
-//		power-supply = <&reg_vcc_3v3>;
-//		port {
-//			panel_in: endpoint {
-//				remote-endpoint = <&tcon_lcd0_out_panel_in>;
-//			};
-//		};
-//	};
-
-
 };
 
 &mmc0 {
