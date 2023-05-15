@@ -160,6 +160,7 @@
 };
 
 &spi_panel {
+	status = "okay";
 	panel@0 {
 		compatible = "leadtek,ltk035c5444t";
 		spi-3wire;
