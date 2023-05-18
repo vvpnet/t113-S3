@@ -68,7 +68,7 @@
 		#size-cells = <0x0>;
 
 		sck-gpios = <&pio 4 0 GPIO_ACTIVE_HIGH>; /* PE0 */
-		miso-gpios = <&pio 4 1 GPIO_ACTIVE_HIGH>; /* PE1 */
+		mosi-gpios = <&pio 4 1 GPIO_ACTIVE_HIGH>; /* PE1 */
 		num-chipselects = <0>;
 	};
 
