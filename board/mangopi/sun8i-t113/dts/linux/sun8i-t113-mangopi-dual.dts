@@ -118,6 +118,24 @@
 		pinctrl-0 = <&clk_pg11_pin>;
 		pinctrl-names = "default";
 	};
+
+	backlight: backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm 7 5000000>;
+		power-supply = <&reg_vcc>;
+		pinctrl-0 = <&pwm7_pd22_pin>;
+		pinctrl-names = "default";
+		brightness-levels = <0 4 8 16 32 64 128 255>;
+		default-brightness-level = <6>;
+		post-pwm-on-delay-ms = <10>;
+		pwm-off-delay-ms = <10>;
+	};
+
+};
+
+&pwm {
+	#pwm-cells = <2>;
+	status = "okay";
 };
 
 &reg_aldo {
@@ -165,6 +183,7 @@
 		compatible = "leadtek,ltk035c5444t";
 		spi-3wire;
 		reg = <0>;
+		backlight = <&backlight>;
 		power-supply = <&reg_vcc>;
 		reset-gpios = <&pio 4 4 GPIO_ACTIVE_LOW>; /* PE4 */
 		port {
