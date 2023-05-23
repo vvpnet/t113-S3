@@ -118,6 +118,14 @@
 		pinctrl-0 = <&clk_pg11_pin>;
 		pinctrl-names = "default";
 	};
+
+	wm8782: wm8782 {
+		compatible = "wlf,wm8782";
+		#sound-dai-cells = <0>;
+		Vdd-supply = <&reg_vcc_3v3>;
+		Vdda-supply = <&reg_vcc_3v3>;
+		status = "okay";
+	};
 };
 
 &reg_aldo {
