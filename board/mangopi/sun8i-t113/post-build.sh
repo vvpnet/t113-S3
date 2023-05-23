@@ -24,12 +24,12 @@ rm $BINARIES_DIR/*.bin
 cp -f $BOARD_DIR/$AWBOOT.bin $BINARIES_DIR/
 cp -f $BINARIES_DIR/$AWBOOT.bin $BINARIES_DIR/awboot-boot.bin
 
-install -m 0644 $BOARD_DIR/profile.sh $1/etc/profile.d/
-install -m 0644 $BOARD_DIR/interfaces $1/etc/network/
+# install -m 0644 $BOARD_DIR/profile.sh $1/etc/profile.d/
+# install -m 0644 $BOARD_DIR/interfaces $1/etc/network/
 # install -m 0644 $BOARD_DIR/inittab $1/etc/
-install -m 0644 $BOARD_DIR/vsftpd.conf $1/etc/
-install -m 0644 $BOARD_DIR/asound.conf $1/etc/
-install -m 0755 $BOARD_DIR/S03sound $1/etc/init.d/
+# install -m 0644 $BOARD_DIR/vsftpd.conf $1/etc/
+# install -m 0644 $BOARD_DIR/asound.conf $1/etc/
+# install -m 0755 $BOARD_DIR/S03sound $1/etc/init.d/
 
 # install -m 0644 $BOARD_DIR/a2002011001-e02-8kHz.wav $1/root
 test -d $1/etc/usbmount && install -m 0644 $BOARD_DIR/usbmount.conf $1/etc/usbmount/
