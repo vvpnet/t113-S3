@@ -98,6 +98,7 @@
 		};
 	};
 
+/*
 	leds {
 		compatible = "gpio-leds";
 
@@ -107,7 +108,7 @@
 			gpios = <&pio 3 22 GPIO_ACTIVE_HIGH>;
 		};
 	};
-
+*/
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		clocks = <&ccu CLK_FANOUT1>;
@@ -156,8 +157,8 @@
 		compatible = "pwm-backlight";
 		pwms = <&pwm 7 5000000>;
 		power-supply = <&reg_vcc>;
-//		pinctrl-0 = <&pwm7_pd22_pin>;
-//		pinctrl-names = "default";
+		pinctrl-0 = <&pwm7_pd22_pin>;
+		pinctrl-names = "default";
 		brightness-levels = <0 4 8 16 32 64 128 255>;
 		default-brightness-level = <6>;
 		post-pwm-on-delay-ms = <10>;
