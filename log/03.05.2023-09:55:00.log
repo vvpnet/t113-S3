@@ -1,0 +1,618 @@
+[I] booting linux...
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 6.0.1-gd7d8c971c9c5-dirty (vpopov@ThinkPad-P14s) (arm-none-linux-gnueabihf-gcc (GNU Toolchain for the A-profile Arch3
+[    0.000000] CPU: ARMv7 Processor [410fc075] revision 5 (ARMv7), cr=10c5387d
+[    0.000000] CPU: div instructions available: patching division code
+[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+[    0.000000] OF: fdt: Machine model: MangoPi MQ-Dual
+[    0.000000] Memory policy: Data cache writealloc
+[    0.000000] cma: Failed to reserve 72 MiB
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000040000000-0x0000000047ffffff]
+[    0.000000]   HighMem  empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x0000000047ffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x0000000047ffffff]
+[    0.000000] percpu: Embedded 11 pages/cpu s15508 r8192 d21356 u45056
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 32512
+[    0.000000] Kernel command line: mem=128M cma=72M root=/dev/mmcblk0p2 init=/sbin/init rootwait console=tty0 console=ttyS0,115200 earlyprintk=s0
+[    0.000000] Unknown kernel command line parameters "earlyprintk=sunxi-uart,0x2500000", will be passed to user space.
+[    0.000000] Dentry cache hash table entries: 16384 (order: 4, 65536 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 8192 (order: 3, 32768 bytes, linear)
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] Memory: 116224K/131072K available (8192K kernel code, 943K rwdata, 2120K rodata, 1024K init, 269K bss, 14848K reserved, 0K cma-res)
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu:     RCU restricting CPUs from NR_CPUS=8 to nr_cpu_ids=2.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer(s) running at 24.00MHz (phys).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x588fe9dc0, max_idle_ns: 440795202592 ns
+[    0.000001] sched_clock: 56 bits at 24MHz, resolution 41ns, wraps every 4398046511097ns
+[    0.000012] Switching to timer-based delay loop, resolution 41ns
+[    0.000197] clocksource: timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.000718] Console: colour dummy device 80x30
+[    0.001052] printk: console [tty0] enabled
+[    0.001095] Calibrating delay loop (skipped), value calculated using timer frequency.. 48.00 BogoMIPS (lpj=240000)
+[    0.001124] pid_max: default: 32768 minimum: 301
+[    0.001288] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.001319] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.001866] CPU: Testing write buffer coherency: ok
+[    0.002190] /cpus/cpu@0 missing clock-frequency property
+[    0.002241] /cpus/cpu@1 missing clock-frequency property
+[    0.002262] CPU0: thread -1, cpu 0, socket 0, mpidr 80000000
+[    0.003012] Setting up static identity map for 0x40100000 - 0x40100060
+[    0.003183] rcu: Hierarchical SRCU implementation.
+[    0.003204] rcu:     Max phase no-delay instances is 1000.
+[    0.003738] smp: Bringing up secondary CPUs ...
+[    0.004447] CPU1: thread -1, cpu 1, socket 0, mpidr 80000001
+[    0.004566] smp: Brought up 1 node, 2 CPUs
+[    0.004606] SMP: Total of 2 processors activated (96.00 BogoMIPS).
+[    0.004622] CPU: All CPU(s) started in SVC mode.
+[    0.005136] devtmpfs: initialized
+[    0.009278] VFP support v0.3: implementor 41 architecture 2 part 30 variant 7 rev 5
+[    0.009502] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.009545] futex hash table entries: 512 (order: 3, 32768 bytes, linear)
+[    0.009696] pinctrl core: initialized pinctrl subsystem
+[    0.010993] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.011312] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.012094] thermal_sys: Registered thermal governor 'step_wise'
+[    0.012336] hw-breakpoint: found 5 (+1 reserved) breakpoint and 4 watchpoint registers.
+[    0.012383] hw-breakpoint: maximum watchpoint size is 8 bytes.
+[    0.019615] platform 5460000.tcon-top: Fixing up cyclic dependency with 5200000.mixer
+[    0.019717] platform 5460000.tcon-top: Fixing up cyclic dependency with 5100000.mixer
+[    0.020078] platform 5461000.lcd-controller: Fixing up cyclic dependency with 5460000.tcon-top
+[    0.020549] platform 5470000.lcd-controller: Fixing up cyclic dependency with 5604000.tv-encoder
+[    0.020626] platform 5470000.lcd-controller: Fixing up cyclic dependency with 5460000.tcon-top
+[    0.021393] platform 7090000.rtc: Fixing up cyclic dependency with 7010000.clock-controller
+[    0.023066] platform panel: Fixing up cyclic dependency with 5461000.lcd-controller
+[    0.031471] SCSI subsystem initialized
+[    0.031978] usbcore: registered new interface driver usbfs
+[    0.032038] usbcore: registered new interface driver hub
+[    0.032087] usbcore: registered new device driver usb
+[    0.032302] mc: Linux media interface: v0.10
+[    0.032362] videodev: Linux video capture interface: v2.00
+[    0.032447] pps_core: LinuxPPS API ver. 1 registered
+[    0.032463] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.032493] PTP clock support registered
+[    0.032932] Advanced Linux Sound Architecture Driver Initialized.
+[    0.034087] clocksource: Switched to clocksource arch_sys_counter
+[    0.041817] NET: Registered PF_INET protocol family
+[    0.042044] IP idents hash table entries: 2048 (order: 2, 16384 bytes, linear)
+[    0.042580] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.042628] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.042655] TCP established hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.042685] TCP bind hash table entries: 1024 (order: 1, 8192 bytes, linear)
+[    0.042715] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.042806] UDP hash table entries: 256 (order: 1, 8192 bytes, linear)
+[    0.042850] UDP-Lite hash table entries: 256 (order: 1, 8192 bytes, linear)
+[    0.043016] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.043542] RPC: Registered named UNIX socket transport module.
+[    0.043583] RPC: Registered udp transport module.
+[    0.043596] RPC: Registered tcp transport module.
+[    0.043608] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    0.044705] Initialise system trusted keyrings
+[    0.044978] workingset: timestamp_bits=30 max_order=15 bucket_order=0
+[    0.049719] NFS: Registering the id_resolver key type
+[    0.049804] Key type id_resolver registered
+[    0.049819] Key type id_legacy registered
+[    0.049866] Key type asymmetric registered
+[    0.049881] Asymmetric key parser 'x509' registered
+[    0.050018] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 246)
+[    0.050043] io scheduler mq-deadline registered
+[    0.050057] io scheduler kyber registered
+[    0.107979] Serial: 8250/16550 driver, 8 ports, IRQ sharing disabled
+[    0.116516] SPI driver nv3052c has no spi_device_id for leadtek,ltk035c5444t
+[    0.118695] CAN device driver interface
+[    0.119475] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    0.119499] ehci-platform: EHCI generic platform driver
+[    0.119651] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    0.119684] ohci-platform: OHCI generic platform driver
+[    0.122092] sun6i-rtc 7090000.rtc: registered as rtc0
+[    0.122239] sun6i-rtc 7090000.rtc: setting system clock to 1970-01-02T00:11:21 UTC (87081)
+[    0.122386] sun6i-rtc 7090000.rtc: RTC enabled
+[    0.122733] i2c_dev: i2c /dev entries driver
+[    0.124582] sunxi-wdt 20500a0.watchdog: Watchdog enabled (timeout=16 sec, nowayout=0)
+[    0.125762] sun8i-ce 3040000.crypto: Set mod clock to 300000000 (300 Mhz) from 400000000 (400 Mhz)
+[    0.126112] sun8i-ce 3040000.crypto: will run requests pump with realtime priority
+[    0.126308] sun8i-ce 3040000.crypto: will run requests pump with realtime priority
+[    0.126462] sun8i-ce 3040000.crypto: will run requests pump with realtime priority
+[    0.126610] sun8i-ce 3040000.crypto: will run requests pump with realtime priority
+[    0.126714] sun8i-ce 3040000.crypto: Register cbc(aes)
+[    0.126748] sun8i-ce 3040000.crypto: Register ecb(aes)
+[    0.126767] sun8i-ce 3040000.crypto: Register cbc(des3_ede)
+[    0.126786] sun8i-ce 3040000.crypto: Register ecb(des3_ede)
+[    0.126825] sun8i-ce 3040000.crypto: CryptoEngine Die ID 0
+[    0.127675] usbcore: registered new interface driver usbhid
+[    0.127705] usbhid: USB HID core driver
+[    0.130379] NET: Registered PF_PACKET protocol family
+[    0.130434] can: controller area network core
+[    0.130511] NET: Registered PF_CAN protocol family
+[    0.130530] can: raw protocol
+[    0.130544] can: broadcast manager protocol
+[    0.130561] can: netlink gateway - max_hops=1
+[    0.130755] Key type dns_resolver registered
+[    0.130858] Registering SWP/SWPB emulation handler
+[    0.130965] Loading compiled-in X.509 certificates
+[    0.148622] sun20i-d1-pinctrl 2000000.pinctrl: initialized sunXi PIO driver
+[    0.149822] printk: console [ttyS0] disabled
+[    0.170097] 2500000.serial: ttyS0 at MMIO 0x2500000 (irq = 231, base_baud = 1500000) is a 16550A
+[    1.055970] printk: console [ttyS0] enabled
+[    1.081934] 2500400.serial: ttyS1 at MMIO 0x2500400 (irq = 232, base_baud = 1500000) is a 16550A
+[    1.092898] phy phy-4100400.phy.0: Changing dr_mode to 1
+[    1.094164] usb_phy_generic usb_phy_generic.1.auto: dummy supplies not allowed for exclusive requests
+[    1.098288] ehci-platform 4101000.usb: EHCI Host Controller
+[    1.107968] musb-hdrc musb-hdrc.2.auto: MUSB HDRC host driver
+[    1.113021] ehci-platform 4101000.usb: new USB bus registered, assigned bus number 1
+[    1.118781] musb-hdrc musb-hdrc.2.auto: new USB bus registered, assigned bus number 2
+[    1.126626] ehci-platform 4101000.usb: irq 233, io mem 0x04101000
+[    1.135105] hub 2-0:1.0: USB hub found
+[    1.141379] ehci-platform 4200000.usb: EHCI Host Controller
+[    1.144306] hub 2-0:1.0: 1 port detected
+[    1.154909] ehci-platform 4200000.usb: new USB bus registered, assigned bus number 3
+[    1.157885] ohci-platform 4200400.usb: Generic Platform OHCI controller
+[    1.162808] ehci-platform 4200000.usb: irq 235, io mem 0x04200000
+[    1.169352] ohci-platform 4200400.usb: new USB bus registered, assigned bus number 4
+[    1.175475] ehci-platform 4101000.usb: USB 2.0 started, EHCI 1.00
+[    1.183276] ohci-platform 4200400.usb: irq 237, io mem 0x04200400
+[    1.192878] ALSA device list:
+[    1.198473]   No soundcards found.
+[    1.202621] sunxi-mmc 4020000.mmc: Got CD GPIO
+[    1.204194] sunxi-mmc 4021000.mmc: allocated mmc-pwrseq
+[    1.207482] hub 1-0:1.0: USB hub found
+[    1.216138] ehci-platform 4200000.usb: USB 2.0 started, EHCI 1.00
+[    1.222532] hub 1-0:1.0: 1 port detected
+[    1.227653] hub 3-0:1.0: USB hub found
+[    1.231470] hub 3-0:1.0: 1 port detected
+[    1.235742] sunxi-mmc 4020000.mmc: initialized, max. request size: 2048 KB, uses new timings mode
+[    1.236669] sunxi-mmc 4021000.mmc: initialized, max. request size: 2048 KB, uses new timings mode
+
+[I] AWBoot r6160 starting...
+[I] SMHC: sdhci0 controller v50310 initialized
+[I] SHMC: SD card detected
+[I] FATFS: read sun8i-t113-mangopi-dual.dtb addr=44000000
+[I] FATFS: read zImage addr=44800000
+[I] booting linux...
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 6.0.1-gd7d8c971c9c5-dirty (vpopov@ThinkPad-P14s) (arm-none-linux-gnueabihf-gcc (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 10.3.1 20210621, GNU ld (GNU 3
+[    0.000000] CPU: ARMv7 Processor [410fc075] revision 5 (ARMv7), cr=10c5387d
+[    0.000000] CPU: div instructions available: patching division code
+[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+[    0.000000] OF: fdt: Machine model: MangoPi MQ-Dual
+[    0.000000] Memory policy: Data cache writealloc
+[    0.000000] cma: Failed to reserve 72 MiB
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000040000000-0x0000000047ffffff]
+[    0.000000]   HighMem  empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x0000000047ffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x0000000047ffffff]
+[    0.000000] percpu: Embedded 11 pages/cpu s15508 r8192 d21356 u45056
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 32512
+[    0.000000] Kernel command line: mem=128M cma=72M root=/dev/mmcblk0p2 init=/sbin/init rootwait console=tty0 console=ttyS0,115200 earlyprintk=sunxi-uart,0x2500000
+[    0.000000] Unknown kernel command line parameters "earlyprintk=sunxi-uart,0x2500000", will be passed to user space.
+[    0.000000] Dentry cache hash table entries: 16384 (order: 4, 65536 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 8192 (order: 3, 32768 bytes, linear)
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] Memory: 116224K/131072K available (8192K kernel code, 943K rwdata, 2120K rodata, 1024K init, 269K bss, 14848K reserved, 0K cma-reserved, 0K highmem)
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu:     RCU restricting CPUs from NR_CPUS=8 to nr_cpu_ids=2.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer(s) running at 24.00MHz (phys).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x588fe9dc0, max_idle_ns: 440795202592 ns
+[    0.000001] sched_clock: 56 bits at 24MHz, resolution 41ns, wraps every 4398046511097ns
+[    0.000013] Switching to timer-based delay loop, resolution 41ns
+[    0.000196] clocksource: timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.000715] Console: colour dummy device 80x30
+[    0.001062] printk: console [tty0] enabled
+[    0.001106] Calibrating delay loop (skipped), value calculated using timer frequency.. 48.00 BogoMIPS (lpj=240000)
+[    0.001135] pid_max: default: 32768 minimum: 301
+[    0.001301] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.001331] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.001883] CPU: Testing write buffer coherency: ok
+[    0.002208] /cpus/cpu@0 missing clock-frequency property
+[    0.002258] /cpus/cpu@1 missing clock-frequency property
+[    0.002278] CPU0: thread -1, cpu 0, socket 0, mpidr 80000000
+[    0.003031] Setting up static identity map for 0x40100000 - 0x40100060
+[    0.003203] rcu: Hierarchical SRCU implementation.
+[    0.003224] rcu:     Max phase no-delay instances is 1000.
+[    0.003757] smp: Bringing up secondary CPUs ...
+[    0.004456] CPU1: thread -1, cpu 1, socket 0, mpidr 80000001
+[    0.004578] smp: Brought up 1 node, 2 CPUs
+[    0.004618] SMP: Total of 2 processors activated (96.00 BogoMIPS).
+[    0.004635] CPU: All CPU(s) started in SVC mode.
+[    0.005142] devtmpfs: initialized
+[    0.009277] VFP support v0.3: implementor 41 architecture 2 part 30 variant 7 rev 5
+[    0.009501] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.009544] futex hash table entries: 512 (order: 3, 32768 bytes, linear)
+[    0.009692] pinctrl core: initialized pinctrl subsystem
+[    0.010997] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.011311] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.012097] thermal_sys: Registered thermal governor 'step_wise'
+[    0.012339] hw-breakpoint: found 5 (+1 reserved) breakpoint and 4 watchpoint registers.
+[    0.012386] hw-breakpoint: maximum watchpoint size is 8 bytes.
+[    0.019616] platform 5460000.tcon-top: Fixing up cyclic dependency with 5200000.mixer
+[    0.019719] platform 5460000.tcon-top: Fixing up cyclic dependency with 5100000.mixer
+[    0.020082] platform 5461000.lcd-controller: Fixing up cyclic dependency with 5460000.tcon-top
+[    0.020554] platform 5470000.lcd-controller: Fixing up cyclic dependency with 5604000.tv-encoder
+[    0.020629] platform 5470000.lcd-controller: Fixing up cyclic dependency with 5460000.tcon-top
+[    0.021400] platform 7090000.rtc: Fixing up cyclic dependency with 7010000.clock-controller
+[    0.023070] platform panel: Fixing up cyclic dependency with 5461000.lcd-controller
+[    0.031486] SCSI subsystem initialized
+[    0.032002] usbcore: registered new interface driver usbfs
+[    0.032063] usbcore: registered new interface driver hub
+[    0.032115] usbcore: registered new device driver usb
+[    0.032325] mc: Linux media interface: v0.10
+[    0.032385] videodev: Linux video capture interface: v2.00
+[    0.032469] pps_core: LinuxPPS API ver. 1 registered
+[    0.032484] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.032514] PTP clock support registered
+[    0.032950] Advanced Linux Sound Architecture Driver Initialized.
+[    0.034107] clocksource: Switched to clocksource arch_sys_counter
+[    0.041786] NET: Registered PF_INET protocol family
+[    0.042010] IP idents hash table entries: 2048 (order: 2, 16384 bytes, linear)
+[    0.042542] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.042588] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.042614] TCP established hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.042644] TCP bind hash table entries: 1024 (order: 1, 8192 bytes, linear)
+[    0.042673] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.042768] UDP hash table entries: 256 (order: 1, 8192 bytes, linear)
+[    0.042813] UDP-Lite hash table entries: 256 (order: 1, 8192 bytes, linear)
+[    0.042977] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.043648] RPC: Registered named UNIX socket transport module.
+[    0.043690] RPC: Registered udp transport module.
+[    0.043703] RPC: Registered tcp transport module.
+[    0.043715] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    0.044759] Initialise system trusted keyrings
+[    0.045039] workingset: timestamp_bits=30 max_order=15 bucket_order=0
+[    0.049784] NFS: Registering the id_resolver key type
+[    0.049877] Key type id_resolver registered
+[    0.049891] Key type id_legacy registered
+[    0.049941] Key type asymmetric registered
+[    0.049956] Asymmetric key parser 'x509' registered
+[    0.050098] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 246)
+[    0.050121] io scheduler mq-deadline registered
+[    0.050135] io scheduler kyber registered
+[    0.108007] Serial: 8250/16550 driver, 8 ports, IRQ sharing disabled
+[    0.116516] SPI driver nv3052c has no spi_device_id for leadtek,ltk035c5444t
+[    0.118713] CAN device driver interface
+[    0.119487] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    0.119514] ehci-platform: EHCI generic platform driver
+[    0.119667] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    0.119702] ohci-platform: OHCI generic platform driver
+[    0.122118] sun6i-rtc 7090000.rtc: registered as rtc0
+[    0.122268] sun6i-rtc 7090000.rtc: setting system clock to 1970-01-02T00:12:17 UTC (87137)
+[    0.122422] sun6i-rtc 7090000.rtc: RTC enabled
+[    0.122771] i2c_dev: i2c /dev entries driver
+[    0.124613] sunxi-wdt 20500a0.watchdog: Watchdog enabled (timeout=16 sec, nowayout=0)
+[    0.125792] sun8i-ce 3040000.crypto: Set mod clock to 300000000 (300 Mhz) from 400000000 (400 Mhz)
+[    0.126156] sun8i-ce 3040000.crypto: will run requests pump with realtime priority
+[    0.126353] sun8i-ce 3040000.crypto: will run requests pump with realtime priority
+[    0.126500] sun8i-ce 3040000.crypto: will run requests pump with realtime priority
+[    0.126668] sun8i-ce 3040000.crypto: will run requests pump with realtime priority
+[    0.126771] sun8i-ce 3040000.crypto: Register cbc(aes)
+[    0.126805] sun8i-ce 3040000.crypto: Register ecb(aes)
+[    0.126824] sun8i-ce 3040000.crypto: Register cbc(des3_ede)
+[    0.126842] sun8i-ce 3040000.crypto: Register ecb(des3_ede)
+[    0.126881] sun8i-ce 3040000.crypto: CryptoEngine Die ID 0
+[    0.127722] usbcore: registered new interface driver usbhid
+[    0.127752] usbhid: USB HID core driver
+[    0.130429] NET: Registered PF_PACKET protocol family
+[    0.130484] can: controller area network core
+[    0.130566] NET: Registered PF_CAN protocol family
+[    0.130585] can: raw protocol
+[    0.130599] can: broadcast manager protocol
+[    0.130617] can: netlink gateway - max_hops=1
+[    0.130812] Key type dns_resolver registered
+[    0.130920] Registering SWP/SWPB emulation handler
+[    0.131028] Loading compiled-in X.509 certificates
+[    0.148681] sun20i-d1-pinctrl 2000000.pinctrl: initialized sunXi PIO driver
+[    0.149886] printk: console [ttyS0] disabled
+[    0.170196] 2500000.serial: ttyS0 at MMIO 0x2500000 (irq = 231, base_baud = 1500000) is a 16550A
+[    1.056141] printk: console [ttyS0] enabled
+[    1.082110] 2500400.serial: ttyS1 at MMIO 0x2500400 (irq = 232, base_baud = 1500000) is a 16550A
+[    1.093058] phy phy-4100400.phy.0: Changing dr_mode to 1
+[    1.094313] usb_phy_generic usb_phy_generic.1.auto: dummy supplies not allowed for exclusive requests
+[    1.098463] ehci-platform 4101000.usb: EHCI Host Controller
+[    1.108125] musb-hdrc musb-hdrc.2.auto: MUSB HDRC host driver
+[    1.113184] ehci-platform 4101000.usb: new USB bus registered, assigned bus number 1
+[    1.118943] musb-hdrc musb-hdrc.2.auto: new USB bus registered, assigned bus number 2
+[    1.126793] ehci-platform 4101000.usb: irq 233, io mem 0x04101000
+[    1.135303] hub 2-0:1.0: USB hub found
+[    1.141519] ehci-platform 4200000.usb: EHCI Host Controller
+[    1.144459] hub 2-0:1.0: 1 port detected
+[    1.154564] ehci-platform 4200000.usb: new USB bus registered, assigned bus number 3
+[    1.155671] ohci-platform 4200400.usb: Generic Platform OHCI controller
+[    1.162463] ehci-platform 4200000.usb: irq 235, io mem 0x04200000
+[    1.168997] ohci-platform 4200400.usb: new USB bus registered, assigned bus number 4
+[    1.169107] ohci-platform 4200400.usb: irq 237, io mem 0x04200400
+[    1.179101] sunxi-mmc 4020000.mmc: Got CD GPIO
+[    1.184969] ALSA device list:
+[    1.189265] ehci-platform 4101000.usb: USB 2.0 started, EHCI 1.00
+[    1.193384]   No soundcards found.
+[    1.197114] hub 1-0:1.0: USB hub found
+[    1.206079] sunxi-mmc 4021000.mmc: allocated mmc-pwrseq
+[    1.209798] hub 1-0:1.0: 1 port detected
+[    1.222586] sunxi-mmc 4020000.mmc: initialized, max. request size: 2048 KB, uses new timings mode
+[    1.231692] ehci-platform 4200000.usb: USB 2.0 started, EHCI 1.00
+[    1.238589] hub 3-0:1.0: USB hub found
+[    1.240201] sunxi-mmc 4021000.mmc: initialized, max. request size: 2048 KB, uses new timings mode
+[    1.242473] hub 3-0:1.0: 1 port detected
+[    1.258782] hub 4-0:1.0: USB hub found
+[    1.262701] hub 4-0:1.0: 1 port detected
+[    1.268960] sunxi-mmc 4021000.mmc: card claims to support voltages below defined range
+[    1.296722] mmc1: new high speed SDIO card at address 0001
+[    1.320869] mmc0: new high speed SDXC card at address aaaa
+[    1.327240] mmcblk0: mmc0:aaaa SD64G 59.5 GiB 
+[    1.334329]  mmcblk0: p1 p2
+[    1.354245] ohci-platform 4101400.usb: Generic Platform OHCI controller
+[    1.360910] ohci-platform 4101400.usb: new USB bus registered, assigned bus number 5
+[    1.368841] ohci-platform 4101400.usb: irq 236, io mem 0x04101400
+[    1.448824] hub 5-0:1.0: USB hub found
+[    1.452621] hub 5-0:1.0: 1 port detected
+[    1.462883] EXT4-fs (mmcblk0p2): INFO: recovery required on readonly filesystem
+[    1.470280] EXT4-fs (mmcblk0p2): write access will be enabled during recovery
+[    1.595311] EXT4-fs (mmcblk0p2): recovery complete
+[    1.603433] EXT4-fs (mmcblk0p2): mounted filesystem with ordered data mode. Quota mode: disabled.
+[    1.612433] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
+[    1.619904] devtmpfs: mounted
+[    1.624087] Freeing unused kernel image (initmem) memory: 1024K
+[    1.630193] Run /sbin/init as init process
+[    1.818908] EXT4-fs (mmcblk0p2): re-mounted. Quota mode: disabled.
+Starting syslogd: OK
+Starting klogd: OK
+Running sysctl: OK
+Invalid card number '0'.
+/usr/bin/gpioset: error setting the GPIO line values: Device or resource busy
+Populating /dev using udev: [    2.111030] udevd[117]: starting version 3.2.11
+[    7.254078] random: crng init done
+[    7.290853] udevd[118]: starting eudev-3.2.11
+done
+Initializing random number generator: OK
+Saving random seed: OK
+Starting network: Cannot find device "eth0"
+Cannot find device "eth0"
+Cannot find device "eth0"
+Cannot find device "can0"
+FAIL
+Starting dropbear sshd: OK
+Starting vsftpd: OK
+
+Welcome to Buildroot
+buildroot login: [   11.355063] platform 5461000.lcd-controller: deferred probe pending
+root
+Password: 
+# gpioinfo 0
+gpiochip0 - 224 lines:
+        line   0:      unnamed       unused   input  active-high 
+        line   1:      unnamed       unused   input  active-high 
+        line   2:      unnamed       unused   input  active-high 
+        line   3:      unnamed       unused   input  active-high 
+        line   4:      unnamed       unused   input  active-high 
+        line   5:      unnamed       unused   input  active-high 
+        line   6:      unnamed       unused   input  active-high 
+        line   7:      unnamed       unused   input  active-high 
+        line   8:      unnamed       unused   input  active-high 
+        line   9:      unnamed       unused   input  active-high 
+        line  10:      unnamed       unused   input  active-high 
+        line  11:      unnamed       unused   input  active-high 
+        line  12:      unnamed       unused   input  active-high 
+        line  13:      unnamed       unused   input  active-high 
+        line  14:      unnamed       unused   input  active-high 
+        line  15:      unnamed       unused   input  active-high 
+        line  16:      unnamed       unused   input  active-high 
+        line  17:      unnamed       unused   input  active-high 
+        line  18:      unnamed       unused   input  active-high 
+        line  19:      unnamed       unused   input  active-high 
+        line  20:      unnamed       unused   input  active-high 
+        line  21:      unnamed       unused   input  active-high 
+        line  22:      unnamed       unused   input  active-high 
+        line  23:      unnamed       unused   input  active-high 
+        line  24:      unnamed       unused   input  active-high 
+        line  25:      unnamed       unused   input  active-high 
+        line  26:      unnamed       unused   input  active-high 
+        line  27:      unnamed       unused   input  active-high 
+        line  28:      unnamed       unused   input  active-high 
+        line  29:      unnamed       unused   input  active-high 
+        line  30:      unnamed       unused   input  active-high 
+        line  31:      unnamed       unused   input  active-high 
+        line  32:      unnamed       unused   input  active-high 
+        line  33:      unnamed       unused   input  active-high 
+        line  34:      unnamed       unused   input  active-high 
+        line  35:      unnamed       unused   input  active-high 
+        line  36:      unnamed       unused   input  active-high 
+        line  37:      unnamed       unused   input  active-high 
+        line  38:      unnamed       unused   input  active-high 
+        line  39:      unnamed       unused   input  active-high 
+        line  40:      unnamed       unused   input  active-high 
+        line  41:      unnamed       unused   input  active-high 
+        line  42:      unnamed       unused   input  active-high 
+        line  43:      unnamed       unused   input  active-high 
+        line  44:      unnamed       unused   input  active-high 
+        line  45:      unnamed       unused   input  active-high 
+        line  46:      unnamed       unused   input  active-high 
+        line  47:      unnamed       unused   input  active-high 
+        line  48:      unnamed       unused   input  active-high 
+        line  49:      unnamed       unused   input  active-high 
+        line  50:      unnamed       unused   input  active-high 
+        line  51:      unnamed       unused   input  active-high 
+        line  52:      unnamed       unused   input  active-high 
+        line  53:      unnamed       unused   input  active-high 
+        line  54:      unnamed       unused   input  active-high 
+        line  55:      unnamed       unused   input  active-high 
+        line  56:      unnamed       unused   input  active-high 
+        line  57:      unnamed       unused   input  active-high 
+        line  58:      unnamed       unused   input  active-high 
+        line  59:      unnamed       unused   input  active-high 
+        line  60:      unnamed       unused   input  active-high 
+        line  61:      unnamed       unused   input  active-high 
+        line  62:      unnamed       unused   input  active-high 
+        line  63:      unnamed       unused   input  active-high 
+        line  64:      unnamed       unused   input  active-high 
+        line  65:      unnamed       unused   input  active-high 
+        line  66:      unnamed       unused   input  active-high 
+        line  67:      unnamed       unused   input  active-high 
+        line  68:      unnamed       unused   input  active-high 
+        line  69:      unnamed       unused   input  active-high 
+        line  70:      unnamed       unused   input  active-high 
+        line  71:      unnamed       unused   input  active-high 
+        line  72:      unnamed       unused   input  active-high 
+        line  73:      unnamed       unused   input  active-high 
+        line  74:      unnamed       unused   input  active-high 
+        line  75:      unnamed       unused   input  active-high 
+        line  76:      unnamed       unused   input  active-high 
+        line  77:      unnamed       unused   input  active-high 
+        line  78:      unnamed       unused   input  active-high 
+        line  79:      unnamed       unused   input  active-high 
+        line  80:      unnamed       unused   input  active-high 
+        line  81:      unnamed       unused   input  active-high 
+        line  82:      unnamed       unused   input  active-high 
+        line  83:      unnamed       unused   input  active-high 
+        line  84:      unnamed       unused   input  active-high 
+        line  85:      unnamed       unused   input  active-high 
+        line  86:      unnamed       unused   input  active-high 
+        line  87:      unnamed       unused   input  active-high 
+        line  88:      unnamed       unused   input  active-high 
+        line  89:      unnamed       unused   input  active-high 
+        line  90:      unnamed       unused   input  active-high 
+        line  91:      unnamed       unused   input  active-high 
+        line  92:      unnamed       unused   input  active-high 
+        line  93:      unnamed       unused   input  active-high 
+        line  94:      unnamed       unused   input  active-high 
+        line  95:      unnamed       unused   input  active-high 
+        line  96:      unnamed       unused   input  active-high 
+        line  97:      unnamed       unused   input  active-high 
+        line  98:      unnamed       unused   input  active-high 
+        line  99:      unnamed       unused   input  active-high 
+        line 100:      unnamed       unused   input  active-high 
+        line 101:      unnamed       unused   input  active-high 
+        line 102:      unnamed       unused   input  active-high 
+        line 103:      unnamed       unused   input  active-high 
+        line 104:      unnamed       unused   input  active-high 
+        line 105:      unnamed       unused   input  active-high 
+        line 106:      unnamed       unused   input  active-high 
+        line 107:      unnamed       unused   input  active-high 
+        line 108:      unnamed       unused   input  active-high 
+        line 109:      unnamed       unused   input  active-high 
+        line 110:      unnamed       unused   input  active-high 
+        line 111:      unnamed       unused   input  active-high 
+        line 112:      unnamed       unused   input  active-high 
+        line 113:      unnamed       unused   input  active-high 
+        line 114:      unnamed       unused   input  active-high 
+        line 115:      unnamed       unused   input  active-high 
+        line 116:      unnamed       unused   input  active-high 
+        line 117:      unnamed       unused   input  active-high 
+        line 118:      unnamed "blue:status" output active-high [used]
+        line 119:      unnamed       unused   input  active-high 
+        line 120:      unnamed       unused   input  active-high 
+        line 121:      unnamed       unused   input  active-high 
+        line 122:      unnamed       unused   input  active-high 
+        line 123:      unnamed       unused   input  active-high 
+        line 124:      unnamed       unused   input  active-high 
+        line 125:      unnamed       unused   input  active-high 
+        line 126:      unnamed       unused   input  active-high 
+        line 127:      unnamed       unused   input  active-high 
+        line 128:      unnamed       unused   input  active-high 
+        line 129:      unnamed       unused   input  active-high 
+        line 130:      unnamed       kernel   input  active-high [used]
+        line 131:      unnamed       kernel   input  active-high [used]
+        line 132:      unnamed       unused   input  active-high 
+        line 133:      unnamed       unused   input  active-high 
+        line 134:      unnamed       unused   input  active-high 
+        line 135:      unnamed       unused   input  active-high 
+        line 136:      unnamed       unused   input  active-high 
+        line 137:      unnamed       unused   input  active-high 
+        line 138:      unnamed       unused   input  active-high 
+        line 139:      unnamed       unused   input  active-high 
+        line 140:      unnamed       unused   input  active-high 
+        line 141:      unnamed       unused   input  active-high 
+        line 142:      unnamed       unused   input  active-high 
+        line 143:      unnamed       unused   input  active-high 
+        line 144:      unnamed       unused   input  active-high 
+        line 145:      unnamed       unused   input  active-high 
+        line 146:      unnamed       unused   input  active-high 
+        line 147:      unnamed       unused   input  active-high 
+        line 148:      unnamed       unused   input  active-high 
+        line 149:      unnamed       unused   input  active-high 
+        line 150:      unnamed       unused   input  active-high 
+        line 151:      unnamed       unused   input  active-high 
+        line 152:      unnamed       unused   input  active-high 
+        line 153:      unnamed       unused   input  active-high 
+        line 154:      unnamed       unused   input  active-high 
+        line 155:      unnamed       unused   input  active-high 
+        line 156:      unnamed       unused   input  active-high 
+        line 157:      unnamed       unused   input  active-high 
+        line 158:      unnamed       unused   input  active-high 
+        line 159:      unnamed       unused   input  active-high 
+        line 160:      unnamed       kernel   input  active-high [used]
+        line 161:      unnamed       kernel   input  active-high [used]
+        line 162:      unnamed       kernel   input  active-high [used]
+        line 163:      unnamed       kernel   input  active-high [used]
+        line 164:      unnamed       kernel   input  active-high [used]
+        line 165:      unnamed       kernel   input  active-high [used]
+        line 166:      unnamed         "cd"   input   active-low [used]
+        line 167:      unnamed       unused   input  active-high 
+        line 168:      unnamed       unused   input  active-high 
+        line 169:      unnamed       unused   input  active-high 
+        line 170:      unnamed       unused   input  active-high 
+        line 171:      unnamed       unused   input  active-high 
+        line 172:      unnamed       unused   input  active-high 
+        line 173:      unnamed       unused   input  active-high 
+        line 174:      unnamed       unused   input  active-high 
+        line 175:      unnamed       unused   input  active-high 
+        line 176:      unnamed       unused   input  active-high 
+        line 177:      unnamed       unused   input  active-high 
+        line 178:      unnamed       unused   input  active-high 
+        line 179:      unnamed       unused   input  active-high 
+        line 180:      unnamed       unused   input  active-high 
+        line 181:      unnamed       unused   input  active-high 
+        line 182:      unnamed       unused   input  active-high 
+        line 183:      unnamed       unused   input  active-high 
+        line 184:      unnamed       unused   input  active-high 
+        line 185:      unnamed       unused   input  active-high 
+        line 186:      unnamed       unused   input  active-high 
+        line 187:      unnamed       unused   input  active-high 
+        line 188:      unnamed       unused   input  active-high 
+        line 189:      unnamed       unused   input  active-high 
+        line 190:      unnamed       unused   input  active-high 
+        line 191:      unnamed       unused   input  active-high 
+        line 192:      unnamed       kernel   input  active-high [used]
+        line 193:      unnamed       kernel   input  active-high [used]
+        line 194:      unnamed       kernel   input  active-high [used]
+        line 195:      unnamed       kernel   input  active-high [used]
+        line 196:      unnamed       kernel   input  active-high [used]
+        line 197:      unnamed       kernel   input  active-high [used]
+        line 198:      unnamed       kernel   input  active-high [used]
+        line 199:      unnamed       kernel   input  active-high [used]
+        line 200:      unnamed       kernel   input  active-high [used]
+        line 201:      unnamed       kernel   input  active-high [used]
+        line 202:      unnamed       unused   input  active-high 
+        line 203:      unnamed       kernel   input  active-high [used]
+        line 204:      unnamed      "reset"  output   active-low [used]
+        line 205:      unnamed       unused   input  active-high 
+        line 206:      unnamed       unused   input  active-high 
+        line 207:      unnamed       unused   input  active-high 
+        line 208:      unnamed       unused   input  active-high 
+        line 209:      unnamed       unused   input  active-high 
+        line 210:      unnamed       unused   input  active-high 
+        line 211:      unnamed       unused   input  active-high 
+        line 212:      unnamed       unused   input  active-high 
+        line 213:      unnamed       unused   input  active-high 
+        line 214:      unnamed       unused   input  active-high 
+        line 215:      unnamed       unused   input  active-high 
+        line 216:      unnamed       unused   input  active-high 
+        line 217:      unnamed       unused   input  active-high 
+        line 218:      unnamed       unused   input  active-high 
+        line 219:      unnamed       unused   input  active-high 
+        line 220:      unnamed       unused   input  active-high 
+        line 221:      unnamed       unused   input  active-high 
+        line 222:      unnamed       unused   input  active-high 
+        line 223:      unnamed       unused   input  active-high 

@@ -62,13 +62,13 @@
 		vin-supply = <&reg_vcc>;
 	};
 
-	spi_mipi: spi {
+	spi_panel: spi {
 		compatible = "spi-gpio";
 		#address-cells = <0x1>;
 		#size-cells = <0x0>;
-		sck-gpios = <&pio 4 12 GPIO_ACTIVE_HIGH>; /* PE12 */
-		miso-gpios = <&pio 4 13 GPIO_ACTIVE_HIGH>; /* PE13 */
-		/* mosi-gpios is ignored for a 3 wire bus */
+
+		sck-gpios = <&pio 4 0 GPIO_ACTIVE_HIGH>; /* PE0 */
+		mosi-gpios = <&pio 4 1 GPIO_ACTIVE_HIGH>; /* PE1 */
 		num-chipselects = <0>;
 	};
 
@@ -118,31 +118,6 @@
 		pinctrl-0 = <&clk_pg11_pin>;
 		pinctrl-names = "default";
 	};
-
-//	panel {
-//		compatible = "nv3052c";
-/*        backlight = <&backlight>; */
-/*        power-supply = <&reg_sw>; */
-//		port {
-//			panel_input: endpoint {
-//				remote-endpoint = <&tcon_lcd0_out_panel_in>;
-//			};
-//		};
-//	};
-
-//	panel {
-//		compatible = "techstar,ts8550b", "sitronix,st7701";
-//		reg = <0>;
-//		VCC-supply = <&reg_vcc_3v3>;
-//		IOVCC-supply = <&reg_vcc_3v3>;
-/*		reset-gpios = <&pio 3 24 GPIO_ACTIVE_HIGH>; */
-/*		backlight = <&backlight>; */
-//		port {
-//			panel_input: endpoint {
-//				remote-endpoint = <&tcon_lcd0_out_panel_in>;
-//			};
-//		};
-//	};
 };
 
 &reg_aldo {
@@ -184,13 +159,14 @@
 	};
 };
 
-&spi_mipi {
-	#address-cells = <1>;
-	#size-cells = <0>;
+&spi_panel {
+	status = "okay";
 	panel@0 {
 		compatible = "leadtek,ltk035c5444t";
-		reg = <0>;
 		spi-3wire;
+		reg = <0>;
+		power-supply = <&reg_vcc>;
+		reset-gpios = <&pio 4 4 GPIO_ACTIVE_LOW>; /* PE4 */
 		port {
 			rgb_panel_in: endpoint {
 			remote-endpoint = <&tcon_lcd0_out_rgb>;
@@ -198,27 +174,6 @@
 		};
 	};
 };
-
-// &dsi {
-// 	pinctrl-0 = <&dsi_4lane_pins>;
-// 	pinctrl-names = "default";
-// 	status = "disabled";
-
-//         panel: panel@0 {
-// 			reg = <0>;
-// 			compatible = "newvision,nv3052c";
-// 			pinctrl-names = "default";
-
-// 			// pinctrl-0 = <&panel_pin>;
-
-// 			// port {
-// 			// 		panel_in: endpoint {
-// 			// 				remote-endpoint = <&dsi0_out>;
-// 			// 		};
-// 			// };
-
-//         };
-// };
 
 &pio {
 
@@ -243,12 +198,18 @@
 };
 
 &uart1 {
-        uart-has-rtscts;
-        pinctrl-0 = <&uart1_pg6_pins>, <&uart1_pg8_rts_cts_pins>;
-        pinctrl-names = "default";
-        status = "okay";
+	uart-has-rtscts;
+	pinctrl-0 = <&uart1_pg6_pins>, <&uart1_pg8_rts_cts_pins>;
+	pinctrl-names = "default";
+	status = "okay";
 
-        /* XR829 bluetooth is connected here */
+	/* XR829/RTL8723bs/RTL8189fs bluetooth is connected here */
+	rtl8723bs_bt: bluetooth {
+		compatible = "realtek,rtl8723bs-bt";
+		device-wake-gpios = <&pio 6 13 GPIO_ACTIVE_HIGH>;   /* PG13 */
+		enable-gpios = <&pio 6 15 GPIO_ACTIVE_HIGH>;        /* PG15 */
+		host-wake-gpios = <&pio 6 10 GPIO_ACTIVE_HIGH>;     /* PG10 */
+	};
 };
 /*
 &uart5 {
@@ -304,25 +265,6 @@
 			};
 		};
 	};
-
-//	panel@0 {
-//		#address-cells = <2>;
-//		#size-cells = <2>;
-//		compatible = "leadtek,ltk035c5444t";
-//		reg = <0>;
-//		spi-3wire;
-//		spi-max-frequency = <3125000>;
-//		/* reset-gpios = <&pio PE 11 GPIO_ACTIVE_LOW>; */
-//		/* backlight = <&backlight>; */
-//		power-supply = <&reg_vcc_3v3>;
-//		port {
-//			panel_in: endpoint {
-//				remote-endpoint = <&tcon_lcd0_out_panel_in>;
-//			};
-//		};
-//	};
-
-
 };
 
 &mmc0 {
