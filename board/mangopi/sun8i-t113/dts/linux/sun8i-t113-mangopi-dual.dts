@@ -123,7 +123,7 @@
 		compatible = "rotary-encoder";
 		pinctrl-names = "default";
 		gpios = <&pio 4 5 GPIO_ACTIVE_LOW>, <&pio 4 6 GPIO_ACTIVE_LOW>; /* PE5, PE6 */
-		linux,axis = <0>; /* REL_X */
+		linux,axis = <8>; /* REL_WHEEL */
 		rotary-encoder,encoding = "gray";
 		rotary-encoder,relative-axis;
 	};
@@ -132,10 +132,9 @@
 		compatible = "rotary-encoder";
 		pinctrl-names = "default";
 		gpios = <&pio 4 7 GPIO_ACTIVE_LOW>, <&pio 4 8 GPIO_ACTIVE_LOW>; /* PE7, PE8 */
-		linux,axis = <1>; /* ABS_Y */
-		rotary-encoder,steps = <24>;
-		rotary-encoder,encoding = "binary";
-		rotary-encoder,rollover;
+		linux,axis = <6>; /* REL_HWHEEL */
+		rotary-encoder,encoding = "gray";
+		rotary-encoder,relative-axis;
 	};
 
 	rotary@1_button {
