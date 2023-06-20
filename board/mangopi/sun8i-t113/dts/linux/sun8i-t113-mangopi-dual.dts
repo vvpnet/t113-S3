@@ -101,7 +101,6 @@
 /*
 	leds {
 		compatible = "gpio-leds";
-
 		status_led {
 			linux,default-trigger = "heartbeat";
 			label = "blue:status";
@@ -159,7 +158,7 @@
 		power-supply = <&reg_vcc>;
 		pinctrl-0 = <&pwm7_pd22_pin>;
 		pinctrl-names = "default";
-		brightness-levels = <0 4 8 16 32 64 128 255>;
+		brightness-levels = <0 4 8 16 32 64 128 254>;
 		default-brightness-level = <6>;
 		post-pwm-on-delay-ms = <10>;
 		pwm-off-delay-ms = <10>;
@@ -229,7 +228,6 @@
 };
 
 &pio {
-
 	vcc-pb-supply = <&reg_vcc_3v3>;
 	vcc-pc-supply = <&reg_vcc_3v3>;
 	vcc-pd-supply = <&reg_vcc_3v3>;
@@ -237,17 +235,15 @@
 	vcc-pf-supply = <&reg_vcc_3v3>;
 	vcc-pg-supply = <&reg_vcc_3v3>;
 
-
 	uart5_pb4_pins: uart5-pb4-pins {
-	    pins = "PB4", "PB5";
-	    function = "uart5";
+		pins = "PB4", "PB5";
+		function = "uart5";
 	};
 
 	clk_pg11_pin: clk-pg11-pin {
-			pins = "PG11";
-			function = "clk";
+		pins = "PG11";
+		function = "clk";
 	};
-
 };
 
 &uart1 {
@@ -257,13 +253,14 @@
 	status = "okay";
 
 	/* XR829/RTL8723bs/RTL8189fs bluetooth is connected here */
-	rtl8723bs_bt: bluetooth {
-		compatible = "realtek,rtl8723bs-bt";
-		device-wake-gpios = <&pio 6 13 GPIO_ACTIVE_HIGH>;   /* PG13 */
-		enable-gpios = <&pio 6 15 GPIO_ACTIVE_HIGH>;        /* PG15 */
-		host-wake-gpios = <&pio 6 10 GPIO_ACTIVE_HIGH>;     /* PG10 */
-	};
+//	rtl8723bs_bt: bluetooth {
+//		compatible = "realtek,rtl8723bs-bt";
+//		device-wake-gpios = <&pio 6 13 GPIO_ACTIVE_HIGH>;   /* PG13 */
+//		enable-gpios = <&pio 6 15 GPIO_ACTIVE_HIGH>;        /* PG15 */
+//		host-wake-gpios = <&pio 6 10 GPIO_ACTIVE_HIGH>;     /* PG10 */
+//	};
 };
+
 /*
 &uart5 {
 	pinctrl-0 = <&uart5_pb4_pins>;
@@ -271,6 +268,7 @@
 	status = "okay";
 };
 */
+
 &uart0 {
 	pinctrl-0 = <&uart0_pe2_pins>;
 	pinctrl-names = "default";
@@ -342,10 +340,10 @@
 	status = "okay";
 
 	rtl8189fs: sdio_wifi@1 {
-			reg = <1>;
-	interrupt-parent = <&pio>;
-	interrupts = <6 10 IRQ_TYPE_LEVEL_HIGH>; /* PG10 */
-	interrupt-names = "host-wake";
+		reg = <1>;
+		interrupt-parent = <&pio>;
+		interrupts = <6 10 IRQ_TYPE_LEVEL_HIGH>; /* PG10 */
+		interrupt-names = "host-wake";
 	};
 };
 
