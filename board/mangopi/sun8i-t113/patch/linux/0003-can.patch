@@ -1,0 +1,146 @@
+diff --git a/arch/arm/boot/dts/sun8i-t113.dtsi b/arch/arm/boot/dts/sun8i-t113.dtsi
+index 5c542a69a..0dd813904 100644
+--- a/arch/arm/boot/dts/sun8i-t113.dtsi
++++ b/arch/arm/boot/dts/sun8i-t113.dtsi
+@@ -1258,9 +1258,8 @@ gic: interrupt-controller@3021000 {
+                         #interrupt-cells = <3>;
+                 };
+ 
+-/*
+ 		can0: can@02504000 {
+-			compatible = "allwinner,sun4i-a10-can";
++			compatible = "allwinner,sun8i-r40-can";
+ 			reg = <0x02504000 0x400>;
+ 			interrupts = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&ccu CLK_BUS_CAN0>;
+@@ -1270,7 +1269,7 @@ can0: can@02504000 {
+ 		};
+ 
+ 		can1: can@02504400 {
+-			compatible = "allwinner,sun4i-a10-can";
++			compatible = "allwinner,sun8i-r40-can";
+ 			reg = <0x02504400 0x400>;
+ 			interrupts = <GIC_SPI 22 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&ccu CLK_BUS_CAN1>;
+@@ -1278,6 +1277,5 @@ can1: can@02504400 {
+ 			resets = <&ccu RST_BUS_CAN1>;
+ 			status = "disabled";
+ 		};
+-*/
+ 	};
+ };
+diff --git a/drivers/clk/sunxi-ng/ccu-sun20i-d1.c b/drivers/clk/sunxi-ng/ccu-sun20i-d1.c
+index 695607c5a..2fea907dc 100644
+--- a/drivers/clk/sunxi-ng/ccu-sun20i-d1.c
++++ b/drivers/clk/sunxi-ng/ccu-sun20i-d1.c
+@@ -461,6 +461,11 @@ static SUNXI_CCU_GATE_HWS(bus_i2c2_clk, "bus-i2c2", apb1_hws,
+ static SUNXI_CCU_GATE_HWS(bus_i2c3_clk, "bus-i2c3", apb1_hws,
+ 			  0x91c, BIT(3), 0);
+ 
++static SUNXI_CCU_GATE_HWS(bus_can0_clk, "bus-can0", apb1_hws,
++			  0x92c, BIT(0), 0);
++static SUNXI_CCU_GATE_HWS(bus_can1_clk, "bus-can1", apb1_hws,
++			  0x92c, BIT(1), 0);
++
+ static const struct clk_parent_data spi_parents[] = {
+ 	{ .fw_name = "hosc" },
+ 	{ .hw = &pll_periph0_clk.hw },
+@@ -989,6 +994,8 @@ static struct ccu_common *sun20i_d1_ccu_clks[] = {
+ 	&bus_i2c1_clk.common,
+ 	&bus_i2c2_clk.common,
+ 	&bus_i2c3_clk.common,
++	&bus_can0_clk.common,
++	&bus_can1_clk.common,
+ 	&spi0_clk.common,
+ 	&spi1_clk.common,
+ 	&bus_spi0_clk.common,
+@@ -1139,6 +1146,8 @@ static struct clk_hw_onecell_data sun20i_d1_hw_clks = {
+ 		[CLK_BUS_I2C1]		= &bus_i2c1_clk.common.hw,
+ 		[CLK_BUS_I2C2]		= &bus_i2c2_clk.common.hw,
+ 		[CLK_BUS_I2C3]		= &bus_i2c3_clk.common.hw,
++		[CLK_BUS_CAN0]		= &bus_can0_clk.common.hw,
++		[CLK_BUS_CAN1]		= &bus_can1_clk.common.hw,
+ 		[CLK_SPI0]		= &spi0_clk.common.hw,
+ 		[CLK_SPI1]		= &spi1_clk.common.hw,
+ 		[CLK_BUS_SPI0]		= &bus_spi0_clk.common.hw,
+@@ -1244,6 +1253,8 @@ static struct ccu_reset_map sun20i_d1_ccu_resets[] = {
+ 	[RST_BUS_I2C1]		= { 0x91c, BIT(17) },
+ 	[RST_BUS_I2C2]		= { 0x91c, BIT(18) },
+ 	[RST_BUS_I2C3]		= { 0x91c, BIT(19) },
++	[RST_BUS_CAN0]		= { 0x92c, BIT(16) },
++	[RST_BUS_CAN1]		= { 0x92c, BIT(17) },
+ 	[RST_BUS_SPI0]		= { 0x96c, BIT(16) },
+ 	[RST_BUS_SPI1]		= { 0x96c, BIT(17) },
+ 	[RST_BUS_EMAC]		= { 0x97c, BIT(16) },
+diff --git a/drivers/clk/sunxi-ng/ccu-sun20i-d1.h b/drivers/clk/sunxi-ng/ccu-sun20i-d1.h
+index e303176f0..b14da36e2 100644
+--- a/drivers/clk/sunxi-ng/ccu-sun20i-d1.h
++++ b/drivers/clk/sunxi-ng/ccu-sun20i-d1.h
+@@ -10,6 +10,6 @@
+ #include <dt-bindings/clock/sun20i-d1-ccu.h>
+ #include <dt-bindings/reset/sun20i-d1-ccu.h>
+ 
+-#define CLK_NUMBER		(CLK_FANOUT2 + 1)
++#define CLK_NUMBER		(CLK_BUS_CAN1 + 1)
+ 
+ #endif /* _CCU_SUN20I_D1_H_ */
+diff --git a/drivers/pinctrl/sunxi/pinctrl-sun20i-d1.c b/drivers/pinctrl/sunxi/pinctrl-sun20i-d1.c
+index 40858b881..9cc94be10 100644
+--- a/drivers/pinctrl/sunxi/pinctrl-sun20i-d1.c
++++ b/drivers/pinctrl/sunxi/pinctrl-sun20i-d1.c
+@@ -47,6 +47,7 @@ static const struct sunxi_desc_pin d1_pins[] = {
+ 		SUNXI_FUNCTION(0x5, "i2s2_din"),	/* DIN2 */
+ 		SUNXI_FUNCTION(0x6, "lcd0"),		/* D18 */
+ 		SUNXI_FUNCTION(0x7, "uart4"),		/* TX */
++		SUNXI_FUNCTION(0x8, "can0"),		/* TX */
+ 		SUNXI_FUNCTION_IRQ_BANK(0xe, 0, 2)),
+ 	SUNXI_PIN(SUNXI_PINCTRL_PIN(B, 3),
+ 		SUNXI_FUNCTION(0x0, "gpio_in"),
+@@ -57,6 +58,7 @@ static const struct sunxi_desc_pin d1_pins[] = {
+ 		SUNXI_FUNCTION(0x5, "i2s2_din"),	/* DIN0 */
+ 		SUNXI_FUNCTION(0x6, "lcd0"),		/* D19 */
+ 		SUNXI_FUNCTION(0x7, "uart4"),		/* RX */
++		SUNXI_FUNCTION(0x8, "can0"),		/* RX */
+ 		SUNXI_FUNCTION_IRQ_BANK(0xe, 0, 3)),
+ 	SUNXI_PIN(SUNXI_PINCTRL_PIN(B, 4),
+ 		SUNXI_FUNCTION(0x0, "gpio_in"),
+@@ -67,6 +69,7 @@ static const struct sunxi_desc_pin d1_pins[] = {
+ 		SUNXI_FUNCTION(0x5, "i2s2_din"),	/* DIN1 */
+ 		SUNXI_FUNCTION(0x6, "lcd0"),		/* D20 */
+ 		SUNXI_FUNCTION(0x7, "uart5"),		/* TX */
++		SUNXI_FUNCTION(0x8, "can1"),		/* TX */
+ 		SUNXI_FUNCTION_IRQ_BANK(0xe, 0, 4)),
+ 	SUNXI_PIN(SUNXI_PINCTRL_PIN(B, 5),
+ 		SUNXI_FUNCTION(0x0, "gpio_in"),
+@@ -77,6 +80,7 @@ static const struct sunxi_desc_pin d1_pins[] = {
+ 		SUNXI_FUNCTION(0x5, "pwm0"),
+ 		SUNXI_FUNCTION(0x6, "lcd0"),		/* D21 */
+ 		SUNXI_FUNCTION(0x7, "uart5"),		/* RX */
++		SUNXI_FUNCTION(0x8, "can1"),		/* RX */
+ 		SUNXI_FUNCTION_IRQ_BANK(0xe, 0, 5)),
+ 	SUNXI_PIN(SUNXI_PINCTRL_PIN(B, 6),
+ 		SUNXI_FUNCTION(0x0, "gpio_in"),
+diff --git a/include/dt-bindings/clock/sun20i-d1-ccu.h b/include/dt-bindings/clock/sun20i-d1-ccu.h
+index e3ac53315..e143b9929 100644
+--- a/include/dt-bindings/clock/sun20i-d1-ccu.h
++++ b/include/dt-bindings/clock/sun20i-d1-ccu.h
+@@ -152,5 +152,7 @@
+ #define CLK_FANOUT0		142
+ #define CLK_FANOUT1		143
+ #define CLK_FANOUT2		144
++#define CLK_BUS_CAN0		145
++#define CLK_BUS_CAN1		146
+ 
+ #endif /* _DT_BINDINGS_CLK_SUN20I_D1_CCU_H_ */
+diff --git a/include/dt-bindings/reset/sun20i-d1-ccu.h b/include/dt-bindings/reset/sun20i-d1-ccu.h
+index de9ff5203..f8001cf50 100644
+--- a/include/dt-bindings/reset/sun20i-d1-ccu.h
++++ b/include/dt-bindings/reset/sun20i-d1-ccu.h
+@@ -73,5 +73,7 @@
+ #define RST_BUS_DSP_CFG		63
+ #define RST_BUS_DSP_DBG		64
+ #define RST_BUS_RISCV_CFG	65
++#define RST_BUS_CAN0		66
++#define RST_BUS_CAN1		67
+ 
+ #endif /* _DT_BINDINGS_RST_SUN20I_D1_CCU_H_ */
