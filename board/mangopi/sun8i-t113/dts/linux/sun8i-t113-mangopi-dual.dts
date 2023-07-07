@@ -287,10 +287,10 @@
 	status = "okay";
 
 	flash@0 {
-		//compatible = "spi-nand";
-		compatible = "rohm,dh2228fv";
+		compatible = "spi-nand";
+		//compatible = "rohm,dh2228fv";
 		reg = <0>;
-/*
+
 		partitions {
 			compatible = "fixed-partitions";
 			#address-cells = <1>;
@@ -316,7 +316,7 @@
 				reg = <0x00500000 0x0fb00000>;
 			};
 		};
-*/
+
 	};
 };
 
