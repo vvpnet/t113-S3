@@ -84,6 +84,21 @@ index e303176f0..b14da36e2 100644
 +#define CLK_NUMBER		(CLK_BUS_CAN1 + 1)
  
  #endif /* _CCU_SUN20I_D1_H_ */
+diff --git a/drivers/net/can/sun4i_can.c b/drivers/net/can/sun4i_can.c
+index 525309da1..c003bc22e 100644
+--- a/drivers/net/can/sun4i_can.c
++++ b/drivers/net/can/sun4i_can.c
+@@ -89,8 +89,8 @@
+ #define SUN4I_REG_BUF10_ADDR	0x0068	/* CAN Tx/Rx Buffer 10 */
+ #define SUN4I_REG_BUF11_ADDR	0x006c	/* CAN Tx/Rx Buffer 11 */
+ #define SUN4I_REG_BUF12_ADDR	0x0070	/* CAN Tx/Rx Buffer 12 */
+-#define SUN4I_REG_ACPC_ADDR	0x0040	/* CAN Acceptance Code 0 */
+-#define SUN4I_REG_ACPM_ADDR	0x0044	/* CAN Acceptance Mask 0 */
++#define SUN4I_REG_ACPC_ADDR	0x0028	/* CAN Acceptance Code 0 */
++#define SUN4I_REG_ACPM_ADDR	0x002C	/* CAN Acceptance Mask 0 */
+ #define SUN4I_REG_RBUF_RBACK_START_ADDR	0x0180	/* CAN transmit buffer start */
+ #define SUN4I_REG_RBUF_RBACK_END_ADDR	0x01b0	/* CAN transmit buffer end */
+ 
 diff --git a/drivers/pinctrl/sunxi/pinctrl-sun20i-d1.c b/drivers/pinctrl/sunxi/pinctrl-sun20i-d1.c
 index 40858b881..9cc94be10 100644
 --- a/drivers/pinctrl/sunxi/pinctrl-sun20i-d1.c
