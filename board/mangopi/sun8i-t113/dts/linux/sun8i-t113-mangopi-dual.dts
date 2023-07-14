@@ -325,19 +325,21 @@
 };
 
 &mdio {
-	ext_rgmii_phy: ethernet-phy@1 {
-		compatible = "ethernet-phy-ieee802.3-c22";
-		reg = <1>;
+	status = "okay";
+
+	lan8720a: ethernet-phy@0 {
+		compatible = "ethernet-phy-id0007.c0f0", "ethernet-phy-ieee802.3-c22";
+		reg = <0>;
 	};
 };
 
 &emac {
-	pinctrl-0 = <&rgmii_pe_pins>;
+	pinctrl-0 = <&rmii_pe_pins>;
 	pinctrl-names = "default";
-	phy-handle = <&ext_rgmii_phy>;
-	phy-mode = "rgmii-id";
+	phy-handle = <&lan8720a>;
+	phy-mode = "rmii";
 	phy-supply = <&reg_vcc_3v3>;
-	status = "disabled";
+	status = "okay";
 };
 
 &can0 {
