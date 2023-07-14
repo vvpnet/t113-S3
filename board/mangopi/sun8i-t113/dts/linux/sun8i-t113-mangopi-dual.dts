@@ -20,7 +20,7 @@
 
 	chosen {
 		stdout-path = "serial0:115200n8";
-		bootargs = "mem=128M cma=72M root=/dev/mmcblk0p2 init=/sbin/init rootwait console=tty0 console=ttyS0,115200 earlyprintk=sunxi-uart,0x2500000";
+		bootargs = "mem=128M cma=72M root=/dev/mmcblk0p2 init=/sbin/init rootwait console=tty0 console=ttyS0,115200 earlyprintk=sunxi-uart,2500400";
 	};
 
 	reg_vcc: vcc {
@@ -247,8 +247,7 @@
 };
 
 &uart1 {
-	uart-has-rtscts;
-	pinctrl-0 = <&uart1_pg6_pins>, <&uart1_pg8_rts_cts_pins>;
+	pinctrl-0 = <&uart1_pg6_pins>;
 	pinctrl-names = "default";
 	status = "okay";
 
@@ -269,11 +268,13 @@
 };
 */
 
+/*
 &uart0 {
 	pinctrl-0 = <&uart0_pe2_pins>;
 	pinctrl-names = "default";
 	status = "okay";
 };
+*/
 
 &i2c2 {
 	pinctrl-0 = <&i2c2_pe12_pins>;
