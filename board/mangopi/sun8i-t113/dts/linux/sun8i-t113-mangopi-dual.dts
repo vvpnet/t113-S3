@@ -427,3 +427,10 @@
 	pinctrl-0 = <&can1_pins>;
 	status = "okay";
 };
+
+&gpadc {
+	status = "okay";
+	channel@0 {
+		reg = <0>;
+	};
+};
