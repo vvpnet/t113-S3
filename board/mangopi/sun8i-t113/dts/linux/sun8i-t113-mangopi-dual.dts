@@ -121,6 +121,28 @@
 		pwm-off-delay-ms = <10>;
 	};
 
+
+	wm8782: stereo-adc {
+		compatible = "wlf,wm8782";
+		Vdda-supply = <&reg_vcc>;
+		Vdd-supply = <&reg_vcc>;
+		#sound-dai-cells = <0>;
+	};
+
+	sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,name = "Testcard In";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,bitclock-master = <&sound_cpu>;
+		simple-audio-card,frame-master = <&sound_cpu>;
+		simple-audio-card,mclk-fs = <192>;
+		sound_cpu: simple-audio-card,cpu {
+			sound-dai = <&i2s2>;
+		};
+		sound_wm8782: simple-audio-card,codec {
+			sound-dai = <&wm8782>;
+		};
+	};
 };
 
 &pwm {
@@ -166,6 +188,16 @@
 	clk_pg11_pin: clk-pg11-pin {
 		pins = "PG11";
 		function = "clk";
+	};
+
+	i2s2_pins: i2s-pins {
+		pins = "PB5", "PB6", "PB7";
+		function = "i2s2";
+	};
+
+	i2s2_din_pins: i2s-din-pins {
+		pins = "PB3";
+		function = "i2s2_din";
 	};
 };
 
@@ -342,11 +374,13 @@
 	status = "okay";
 };
 
+/*
 &can0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&can0_pins>;
 	status = "okay";
 };
+*/
 
 &can1 {
 	pinctrl-names = "default";
@@ -359,4 +393,10 @@
 	channel@0 {
 		reg = <0>;
 	};
+};
+
+&i2s2 {
+	pinctrl-0 = <&i2s2_pins>, <&i2s2_din_pins>;
+	pinctrl-names = "default";
+	status = "okay";
 };
