@@ -8,7 +8,7 @@
 #include "sun8i-t113.dtsi"
 
 / {
-	model = "MangoPi MQ-Dual";
+	model = "MangoPi MQ-Dual Vibration meter";
 	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
 
 	aliases {
@@ -88,7 +88,6 @@
 		};
 	};
 
-/*
 	leds {
 		compatible = "gpio-leds";
 		status_led {
@@ -97,7 +96,7 @@
 			gpios = <&pio 3 22 GPIO_ACTIVE_HIGH>;
 		};
 	};
-*/
+
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		clocks = <&ccu CLK_FANOUT1>;
@@ -109,23 +108,6 @@
 		pinctrl-names = "default";
 	};
 
-	backlight: backlight {
-		compatible = "pwm-backlight";
-		pwms = <&pwm 7 5000000>;
-		power-supply = <&reg_vcc>;
-		pinctrl-0 = <&pwm7_pd22_pin>;
-		pinctrl-names = "default";
-		brightness-levels = <0 4 8 16 32 64 128 254>;
-		default-brightness-level = <6>;
-		post-pwm-on-delay-ms = <10>;
-		pwm-off-delay-ms = <10>;
-	};
-
-};
-
-&pwm {
-	#pwm-cells = <2>;
-	status = "okay";
 };
 
 &reg_aldo {
@@ -175,12 +157,6 @@
 	status = "okay";
 
 	/* XR829/RTL8723bs/RTL8189fs bluetooth is connected here */
-//	rtl8723bs_bt: bluetooth {
-//		compatible = "realtek,rtl8723bs-bt";
-//		device-wake-gpios = <&pio 6 13 GPIO_ACTIVE_HIGH>;   /* PG13 */
-//		enable-gpios = <&pio 6 15 GPIO_ACTIVE_HIGH>;        /* PG15 */
-//		host-wake-gpios = <&pio 6 10 GPIO_ACTIVE_HIGH>;     /* PG10 */
-//	};
 };
 
 /*
@@ -212,7 +188,6 @@
 
 	flash@0 {
 		compatible = "spi-nand";
-		//compatible = "rohm,dh2228fv";
 		reg = <0>;
 
 		partitions {
@@ -342,6 +317,7 @@
 	status = "okay";
 };
 
+/*
 &can0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&can0_pins>;
@@ -353,10 +329,4 @@
 	pinctrl-0 = <&can1_pins>;
 	status = "okay";
 };
-
-&gpadc {
-	status = "okay";
-	channel@0 {
-		reg = <0>;
-	};
-};
+*/

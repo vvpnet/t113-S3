@@ -16,8 +16,8 @@ fi
 
 SKDEV=$BRD-$DEV
 rm $BINARIES_DIR/*.dtb
-cp -f $BUILD_DIR/linux-custom/arch/arm/boot/dts/$SKDEV.dtb $BINARIES_DIR/
-cp -f $BINARIES_DIR/$SKDEV.dtb $BINARIES_DIR/sun8i-t113-sk.dtb
+cp -f $BUILD_DIR/linux-monitor-vibration/arch/arm/boot/dts/$SKDEV.dtb $BINARIES_DIR/
+# cp -f $BINARIES_DIR/$SKDEV.dtb $BINARIES_DIR/sun8i-t113-sk.dtb
 
 AWBOOT=awboot-boot-$MEM
 rm $BINARIES_DIR/*.bin
@@ -25,7 +25,7 @@ cp -f $BOARD_DIR/$AWBOOT.bin $BINARIES_DIR/
 cp -f $BINARIES_DIR/$AWBOOT.bin $BINARIES_DIR/awboot-boot.bin
 
 # install -m 0644 $BOARD_DIR/profile.sh $1/etc/profile.d/
-# install -m 0644 $BOARD_DIR/interfaces $1/etc/network/
+# # install -m 0644 $BOARD_DIR/interfaces $1/etc/network/
 # install -m 0644 $BOARD_DIR/inittab $1/etc/
 # install -m 0644 $BOARD_DIR/vsftpd.conf $1/etc/
 # install -m 0644 $BOARD_DIR/asound.conf $1/etc/
@@ -33,7 +33,7 @@ cp -f $BINARIES_DIR/$AWBOOT.bin $BINARIES_DIR/awboot-boot.bin
 
 # install -m 0644 $BOARD_DIR/a2002011001-e02-8kHz.wav $1/root
 #test -d $1/etc/usbmount && install -m 0644 $BOARD_DIR/usbmount.conf $1/etc/usbmount/
-test -d $1/usr/lib/qt
+#test -d $1/usr/lib/qt
 #cp -r $BOARD_DIR/affine $1/root
 
 rm $1/etc/resolv.conf
