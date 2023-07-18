@@ -6,15 +6,16 @@ iface lo inet loopback
 
 # Wired or wireless interfaces
 #auto wlan0
+auto eth0
 # iface eth0 inet dhcp
-#iface eth0 inet static
-#	address 192.168.0.136
-#	netmask 255.255.255.0
-#	gateway 192.168.0.2
+iface eth0 inet static
+	address 192.168.2.2
+	netmask 255.255.255.0
+	gateway 192.168.2.1
 
-auto can0
-iface can0 inet manual
-	#pre-up ip link set $IFACE type can bitrate 125000 listen-only off
-	pre-up ip link set $IFACE type can bitrate 250000 triple-sampling on
-	up ifconfig $IFACE up
-	down ifconfig $IFACE down
+#auto can0
+#iface can0 inet manual
+#	#pre-up ip link set $IFACE type can bitrate 125000 listen-only off
+#	pre-up ip link set $IFACE type can bitrate 250000 triple-sampling on
+#	up ifconfig $IFACE up
+#	down ifconfig $IFACE down
