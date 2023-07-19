@@ -121,9 +121,9 @@
 		simple-audio-card,format = "i2s";
 		simple-audio-card,bitclock-master = <&sound_cpu>;
 		simple-audio-card,frame-master = <&sound_cpu>;
-		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,mclk-fs = <64>;
 		sound_cpu: simple-audio-card,cpu {
-			sound-dai = <&i2s2>;
+			sound-dai = <&i2s2 1>;
 		};
 
 		sound_wm8782: simple-audio-card,codec {
@@ -172,6 +172,11 @@
 		function = "clk";
 	};
 
+	uart1_pe10_pins: uart1-pe10-pins {
+		pins = "PE10", "PE11";
+		function = "uart1";
+	};
+
 	i2s2_pins: i2s-pins {
 		pins = "PB5", "PB6", "PB7";
 		function = "i2s2";
@@ -184,7 +189,7 @@
 };
 
 &uart1 {
-	pinctrl-0 = <&uart1_pg6_pins>;
+	pinctrl-0 = <&uart1_pe10_pins>;
 	pinctrl-names = "default";
 	status = "okay";
 
