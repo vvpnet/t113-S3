@@ -1,0 +1,25 @@
+#!/bin/sh
+modprobe libcomposite
+mount -t configfs none /sys/kernel/config
+cd /sys/kernel/config/usb_gadget
+mkdir mygadget
+cd mygadget
+echo 0x1209 > idVendor
+echo 0x0001 > idProduct
+mkdir strings/0x409
+echo 1234567890 > strings/0x409/serialnumber
+echo TestManufactuer > strings/0x409/manufacturer
+echo TestProduct > strings/0x409/product
+mkdir configs/myconfig.1
+mkdir configs/myconfig.1/strings/0x409
+echo TestConfiguration > configs/myconfig.1/strings/0x409/configuration
+mkdir functions/acm.1
+mkdir functions/ecm.1
+echo 4a:75:23:f9:b2:4c > functions/ecm.1/dev_addr
+ln -s functions/ecm.1 configs/myconfig.1
+ln -s functions/acm.1 configs/myconfig.1
+echo musb-hdrc.2.auto > UDC
+echo peripheral > /sys/devices/platform/soc/4100000.usb/musb-hdrc.2.auto/mode
+ip link set up usb0
+ip addr add 192.168.99.1/24 dev usb0
+#udhcpc -i usb0 2>/dev/null&
