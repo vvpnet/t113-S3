@@ -271,7 +271,18 @@
 &i2c2 {
 	pinctrl-0 = <&i2c2_pe12_pins>;
 	pinctrl-names = "default";
-	status = "disabled";
+	status = "okay";
+
+	gt911: touchscreen@14 {
+		compatible = "goodix,gt911";
+		reg = <0x14>;
+		interrupt-parent = <&pio>;
+		interrupts = <1 3 IRQ_TYPE_EDGE_FALLING>; /* PB-EINT3 */
+		irq-gpios = <&pio 1 3 GPIO_ACTIVE_HIGH>; /* PB3 CTP_INT */
+		reset-gpios = <&pio 1 2 GPIO_ACTIVE_HIGH>; /* PB2 CTP_RST */
+		touchscreen-inverted-y;
+		touchscreen-inverted-x;
+	};
 };
 
 &spi0 {
@@ -409,11 +420,13 @@
 	status = "disabled";
 };
 
+/*
 &can0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&can0_pins>;
 	status = "okay";
 };
+*/
 
 &can1 {
 	pinctrl-names = "default";
@@ -429,3 +442,6 @@
 		reg = <0>;
 	};
 };
+
+
+
