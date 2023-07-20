@@ -1,0 +1,2 @@
+# echo 2 > /sys/class/backlight/backlight/brightness
+ 

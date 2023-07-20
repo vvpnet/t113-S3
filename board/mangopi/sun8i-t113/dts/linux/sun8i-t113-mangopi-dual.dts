@@ -163,7 +163,6 @@
 		post-pwm-on-delay-ms = <10>;
 		pwm-off-delay-ms = <10>;
 	};
-
 };
 
 &pwm {
@@ -426,4 +425,11 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&can1_pins>;
 	status = "okay";
+};
+
+&gpadc {
+	status = "okay";
+	channel@0 {
+		reg = <0>;
+	};
 };
