@@ -1,0 +1,1 @@
+watch -n0.2 -d 'cat /sys/devices/platform/soc/2009000.adc/iio:device0/in_voltage0_raw'

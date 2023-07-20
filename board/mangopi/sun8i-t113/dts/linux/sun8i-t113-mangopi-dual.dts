@@ -98,16 +98,16 @@
 		};
 	};
 
-/*
 	leds {
 		compatible = "gpio-leds";
-		status_led {
-			linux,default-trigger = "heartbeat";
-			label = "blue:status";
-			gpios = <&pio 3 22 GPIO_ACTIVE_HIGH>;
+		status_led0 {
+			//linux,default-trigger = "heartbeat";
+			default-state = "on";
+			label = "red:status";
+			gpios = <&pio 4 10 GPIO_ACTIVE_HIGH>; /* PE10 */
 		};
 	};
-*/
+
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		clocks = <&ccu CLK_FANOUT1>;
@@ -252,12 +252,6 @@
 	status = "okay";
 
 	/* XR829/RTL8723bs/RTL8189fs bluetooth is connected here */
-//	rtl8723bs_bt: bluetooth {
-//		compatible = "realtek,rtl8723bs-bt";
-//		device-wake-gpios = <&pio 6 13 GPIO_ACTIVE_HIGH>;   /* PG13 */
-//		enable-gpios = <&pio 6 15 GPIO_ACTIVE_HIGH>;        /* PG15 */
-//		host-wake-gpios = <&pio 6 10 GPIO_ACTIVE_HIGH>;     /* PG10 */
-//	};
 };
 
 /*
@@ -429,6 +423,8 @@
 
 &gpadc {
 	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
 	channel@0 {
 		reg = <0>;
 	};
