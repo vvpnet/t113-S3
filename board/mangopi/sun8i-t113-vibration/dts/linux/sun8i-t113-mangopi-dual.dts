@@ -123,7 +123,7 @@
 		simple-audio-card,frame-master = <&sound_cpu>;
 		simple-audio-card,mclk-fs = <64>;
 		sound_cpu: simple-audio-card,cpu {
-			sound-dai = <&i2s2 1>;
+			sound-dai = <&i2s2>;
 		};
 
 		sound_wm8782: simple-audio-card,codec {
