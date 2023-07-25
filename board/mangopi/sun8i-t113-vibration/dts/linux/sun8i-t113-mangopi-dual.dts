@@ -121,7 +121,7 @@
 		simple-audio-card,format = "i2s";
 		simple-audio-card,bitclock-master = <&sound_cpu>;
 		simple-audio-card,frame-master = <&sound_cpu>;
-		simple-audio-card,mclk-fs = <64>;
+		simple-audio-card,mclk-fs = <256>;
 		sound_cpu: simple-audio-card,cpu {
 			sound-dai = <&i2s2>;
 		};
