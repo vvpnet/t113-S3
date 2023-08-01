@@ -126,14 +126,9 @@
 		Vdda-supply = <&reg_vcc>;
 		Vdd-supply = <&reg_vcc>;
 		#sound-dai-cells = <0>;
-		ports {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			port@0 {
-				reg = <0>;
-				wm8782_1_ep: endpoint {
-					remote-endpoint = <&card_ep_1>;
-				};
+		port {
+			wm8782_1_ep: endpoint {
+				remote-endpoint = <&card_ep_1>;
 			};
 		};
 	};
@@ -143,14 +138,9 @@
 		Vdda-supply = <&reg_vcc>;
 		Vdd-supply = <&reg_vcc>;
 		#sound-dai-cells = <0>;
-		ports {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			port@0 {
-				reg = <0>;
-				wm8782_2_ep: endpoint {
-					remote-endpoint = <&card_ep_2>;
-				};
+		port {
+			wm8782_2_ep: endpoint {
+				remote-endpoint = <&card_ep_2>;
 			};
 		};
 	};
@@ -160,14 +150,9 @@
 		Vdda-supply = <&reg_vcc>;
 		Vdd-supply = <&reg_vcc>;
 		#sound-dai-cells = <0>;
-		ports {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			port@0 {
-				reg = <0>;
-				wm8782_3_ep: endpoint {
-					remote-endpoint = <&card_ep_3>;
-				};
+		port {
+			wm8782_3_ep: endpoint {
+				remote-endpoint = <&card_ep_3>;
 			};
 		};
 	};
@@ -180,25 +165,21 @@
 				#address-cells = <1>;
 				#size-cells = <0>;
 				port@0 {
-					reg = <0>;
 					card_ep_0: endpoint {
 						remote-endpoint = <&i2s2_ep>;
 					};
 				};
 				port@1 {
-					reg = <1>;
 					card_ep_1: endpoint {
 						remote-endpoint = <&wm8782_1_ep>;
 					};
 				};
 				port@2 {
-					reg = <2>;
 					card_ep_2: endpoint {
 						remote-endpoint = <&wm8782_2_ep>;
 					};
 				};
 				port@3 {
-					reg = <3>;
 					card_ep_3: endpoint {
 						remote-endpoint = <&wm8782_3_ep>;
 					};
@@ -463,18 +444,13 @@
 	pinctrl-0 = <&i2s2_pins>, <&i2s2_din_pins>;
 	pinctrl-names = "default";
 	status = "okay";
-	ports {
-		#address-cells = <1>;
-		#size-cells = <0>;
+	i2s2_port: port {
 		format = "i2s";
 		mclk-fs = <128>;
-		i2s2_port: port@0 {
-			reg = <0>;
-			bitclock-master;
-			frame-master;
-			i2s2_ep: endpoint {
-				remote-endpoint = <&card_ep_0>;
-			};
+		bitclock-master;
+		frame-master;
+		i2s2_ep: endpoint {
+			remote-endpoint = <&card_ep_0>;
 		};
 	};
 };
