@@ -121,27 +121,91 @@
 		pwm-off-delay-ms = <10>;
 	};
 
-
-	wm8782: stereo-adc {
+	wm8782_1: stereo-adc-1 {
 		compatible = "wlf,wm8782";
 		Vdda-supply = <&reg_vcc>;
 		Vdd-supply = <&reg_vcc>;
 		#sound-dai-cells = <0>;
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				wm8782_1_ep: endpoint {
+					remote-endpoint = <&card_ep_1>;
+				};
+			};
+		};
+	};
+
+	wm8782_2: stereo-adc-2 {
+		compatible = "wlf,wm8782";
+		Vdda-supply = <&reg_vcc>;
+		Vdd-supply = <&reg_vcc>;
+		#sound-dai-cells = <0>;
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				wm8782_2_ep: endpoint {
+					remote-endpoint = <&card_ep_2>;
+				};
+			};
+		};
+	};
+
+	wm8782_3: stereo-adc-3 {
+		compatible = "wlf,wm8782";
+		Vdda-supply = <&reg_vcc>;
+		Vdd-supply = <&reg_vcc>;
+		#sound-dai-cells = <0>;
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				wm8782_3_ep: endpoint {
+					remote-endpoint = <&card_ep_3>;
+				};
+			};
+		};
 	};
 
 	sound {
-		compatible = "simple-audio-card";
-		simple-audio-card,name = "Testcard In";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,bitclock-master = <&sound_cpu>;
-		simple-audio-card,frame-master = <&sound_cpu>;
-		simple-audio-card,mclk-fs = <192>;
-		sound_cpu: simple-audio-card,cpu {
-			sound-dai = <&i2s2>;
+		compatible = "audio-graph-card2";
+		links = <&i2s2_port>;
+		multi {
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				port@0 {
+					reg = <0>;
+					card_ep_0: endpoint {
+						remote-endpoint = <&i2s2_ep>;
+					};
+				};
+				port@1 {
+					reg = <1>;
+					card_ep_1: endpoint {
+						remote-endpoint = <&wm8782_1_ep>;
+					};
+				};
+				port@2 {
+					reg = <2>;
+					card_ep_2: endpoint {
+						remote-endpoint = <&wm8782_2_ep>;
+					};
+				};
+				port@3 {
+					reg = <3>;
+					card_ep_3: endpoint {
+						remote-endpoint = <&wm8782_3_ep>;
+					};
+				};
+			};
 		};
-		sound_wm8782: simple-audio-card,codec {
-			sound-dai = <&wm8782>;
-		};
+
 	};
 };
 
@@ -196,7 +260,7 @@
 	};
 
 	i2s2_din_pins: i2s-din-pins {
-		pins = "PB3";
+		pins = "PB2", "PB3", "PB4";
 		function = "i2s2_din";
 	};
 };
@@ -380,13 +444,13 @@
 	pinctrl-0 = <&can0_pins>;
 	status = "okay";
 };
-*/
 
 &can1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&can1_pins>;
 	status = "okay";
 };
+*/
 
 &gpadc {
 	status = "okay";
@@ -399,4 +463,18 @@
 	pinctrl-0 = <&i2s2_pins>, <&i2s2_din_pins>;
 	pinctrl-names = "default";
 	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		format = "i2s";
+		mclk-fs = <128>;
+		i2s2_port: port@0 {
+			reg = <0>;
+			bitclock-master;
+			frame-master;
+			i2s2_ep: endpoint {
+				remote-endpoint = <&card_ep_0>;
+			};
+		};
+	};
 };

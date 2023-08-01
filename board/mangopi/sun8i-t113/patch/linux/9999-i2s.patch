@@ -1,0 +1,71 @@
+diff --git a/sound/soc/codecs/wm8782.c b/sound/soc/codecs/wm8782.c
+index 95ff4339d..6ff57a0f1 100644
+--- a/sound/soc/codecs/wm8782.c
++++ b/sound/soc/codecs/wm8782.c
+@@ -40,7 +40,7 @@ static struct snd_soc_dai_driver wm8782_dai = {
+ 		.channels_min = 2,
+ 		.channels_max = 2,
+ 		/* For configurations with FSAMPEN=0 */
+-		.rates = SNDRV_PCM_RATE_8000_48000,
++		.rates = SNDRV_PCM_RATE_8000_192000,
+ 		.formats = SNDRV_PCM_FMTBIT_S16_LE |
+ 			   SNDRV_PCM_FMTBIT_S20_3LE |
+ 			   SNDRV_PCM_FMTBIT_S24_LE,
+diff --git a/sound/soc/sunxi/sun4i-i2s.c b/sound/soc/sunxi/sun4i-i2s.c
+index 602887182..68637875f 100644
+--- a/sound/soc/sunxi/sun4i-i2s.c
++++ b/sound/soc/sunxi/sun4i-i2s.c
+@@ -401,6 +401,15 @@ static int sun4i_i2s_set_clk_rate(struct snd_soc_dai *dai,
+ 
+ 	regmap_field_write(i2s->field_clkdiv_mclk_en, 1);
+ 
++	printk("__ rate %i slots %i slot_width %i oversample_rate %i bclk_parent_rate %i bclk_div %i mclk_div %i\n",
++		rate,
++		slots,
++		slot_width,
++		oversample_rate,
++		bclk_parent_rate,
++		bclk_div,
++		mclk_div);
++
+ 	return 0;
+ }
+ 
+@@ -539,8 +548,8 @@ static int sun50i_h6_i2s_set_chan_cfg(const struct sun4i_i2s *i2s,
+ 	if (i2s->variant->num_din_pins > 1) {
+ 		regmap_write(i2s->regmap, SUN50I_R329_I2S_RX_CHAN_MAP0_REG, 0x0F0E0D0C);
+ 		regmap_write(i2s->regmap, SUN50I_R329_I2S_RX_CHAN_MAP1_REG, 0x0B0A0908);
+-		regmap_write(i2s->regmap, SUN50I_R329_I2S_RX_CHAN_MAP2_REG, 0x07060504);
+-		regmap_write(i2s->regmap, SUN50I_R329_I2S_RX_CHAN_MAP3_REG, 0x03020100);
++		regmap_write(i2s->regmap, SUN50I_R329_I2S_RX_CHAN_MAP2_REG, 0x31302120);
++		regmap_write(i2s->regmap, SUN50I_R329_I2S_RX_CHAN_MAP3_REG, 0x11100100);
+ 	} else {
+ 		regmap_write(i2s->regmap, SUN50I_H6_I2S_RX_CHAN_MAP0_REG, 0xFEDCBA98);
+ 		regmap_write(i2s->regmap, SUN50I_H6_I2S_RX_CHAN_MAP1_REG, 0x76543210);
+@@ -585,6 +594,8 @@ static int sun50i_h6_i2s_set_chan_cfg(const struct sun4i_i2s *i2s,
+ 			   SUN50I_H6_I2S_TX_CHAN_EN_MASK,
+ 			   SUN50I_H6_I2S_TX_CHAN_EN(channels));
+ 
++	printk("__ lrck period %i\n", lrck_period);
++
+ 	return 0;
+ }
+ 
+@@ -597,7 +608,7 @@ static int sun4i_i2s_hw_params(struct snd_pcm_substream *substream,
+ 	unsigned int slot_width = params_physical_width(params);
+ 	unsigned int channels = params_channels(params);
+ 
+-	unsigned int slots = channels;
++	unsigned int slots = 2;
+ 
+ 	int ret, sr, wss;
+ 	u32 width;
+@@ -646,6 +657,8 @@ static int sun4i_i2s_hw_params(struct snd_pcm_substream *substream,
+ 	regmap_field_write(i2s->field_fmt_wss, wss);
+ 	regmap_field_write(i2s->field_fmt_sr, sr);
+ 
++	printk("__ sr %i wss %i\n", sr, wss);
++
+ 	return sun4i_i2s_set_clk_rate(dai, params_rate(params),
+ 				      slots, slot_width);
+ }
