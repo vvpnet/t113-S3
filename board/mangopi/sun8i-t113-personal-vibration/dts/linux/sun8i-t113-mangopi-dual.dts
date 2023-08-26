@@ -278,7 +278,7 @@
 &i2c2 {
 	pinctrl-0 = <&i2c2_pe12_pins>;
 	pinctrl-names = "default";
-	status = "disable";
+	status = "okay";
 
 	focaltech: touchscreen@14 {
 		compatible = "edt,edt-ft5406";
