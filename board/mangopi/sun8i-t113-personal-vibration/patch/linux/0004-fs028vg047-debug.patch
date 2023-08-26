@@ -1,0 +1,204 @@
+From d5d32c6bc138c4ace0a52fffc47b513db56e0120 Mon Sep 17 00:00:00 2001
+From: Jookia <contact@jookia.org>
+Date: Sat, 26 Aug 2023 18:46:44 +1000
+Subject: [PATCH] test
+
+---
+ drivers/gpu/drm/panel/panel-sitronix-st7701.c | 52 ++++++++++++++-----
+ 1 file changed, 38 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/gpu/drm/panel/panel-sitronix-st7701.c b/drivers/gpu/drm/panel/panel-sitronix-st7701.c
+index 320a2a8fd..ce54ec21f 100644
+--- a/drivers/gpu/drm/panel/panel-sitronix-st7701.c
++++ b/drivers/gpu/drm/panel/panel-sitronix-st7701.c
+@@ -126,9 +126,11 @@ static inline int st7701_dsi_write(struct st7701 *st7701, const void *seq,
+ static void st7701_init_sequence(struct st7701 *st7701)
+ {
+ 	const struct drm_display_mode *mode = st7701->desc->mode;
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 
+ 	ST7701_DSI(st7701, MIPI_DCS_SOFT_RESET, 0x00);
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	/* We need to wait 5ms before sending new commands */
+ 	msleep(5);
+ 
+@@ -136,6 +138,7 @@ static void st7701_init_sequence(struct st7701 *st7701)
+ 
+ 	msleep(st7701->sleep_delay);
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	/* Command2, BK0 */
+ 	ST7701_DSI(st7701, DSI_CMD2BKX_SEL,
+ 		   0x77, 0x01, 0x00, 0x00, DSI_CMD2BK0_SEL);
+@@ -153,6 +156,7 @@ static void st7701_init_sequence(struct st7701 *st7701)
+ 	ST7701_DSI(st7701, DSI_CMD2_BK0_INVSEL,
+ 		   DSI_CMD2_BK0_INVSEL_B0, DSI_CMD2_BK0_INVSEL_B1);
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	/* Command2, BK1 */
+ 	ST7701_DSI(st7701, DSI_CMD2BKX_SEL,
+ 			0x77, 0x01, 0x00, 0x00, DSI_CMD2BK1_SEL);
+@@ -188,30 +192,37 @@ static void st7701_init_sequence(struct st7701 *st7701)
+ 	ST7701_DSI(st7701, 0xEC, 0x00, 0x00);
+ 	ST7701_DSI(st7701, 0xED, 0xFF, 0xF1, 0x04, 0x56, 0x72, 0x3F, 0xFF,
+ 		   0xFF, 0xFF, 0xFF, 0xF3, 0x27, 0x65, 0x40, 0x1F, 0xFF);
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 
+ 	/* disable Command2 */
+ 	ST7701_DSI(st7701, DSI_CMD2BKX_SEL,
+ 		   0x77, 0x01, 0x00, 0x00, DSI_CMD2BKX_SEL_NONE);
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ }
+ 
+ static int st7701_prepare(struct drm_panel *panel)
+ {
+ 	struct st7701 *st7701 = panel_to_st7701(panel);
+ 	int ret;
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 
+ 	gpiod_set_value(st7701->reset, 0);
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	ret = regulator_bulk_enable(st7701->desc->num_supplies,
+ 				    st7701->supplies);
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	if (ret < 0)
+ 		return ret;
+ 	msleep(20);
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	gpiod_set_value(st7701->reset, 1);
+ 	msleep(150);
+ 
+ 	st7701_init_sequence(st7701);
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	return 0;
+ }
+ 
+@@ -268,7 +279,7 @@ static int st7701_get_modes(struct drm_panel *panel,
+ 
+ 	mode = drm_mode_duplicate(connector->dev, desc_mode);
+ 	if (!mode) {
+-		dev_err(&st7701->dsi->dev, "failed to add mode %ux%u@%u\n",
++		dev_err(&st7701->dsi->dev, "failed to add mode %ux%u@%u",
+ 			desc_mode->hdisplay, desc_mode->vdisplay,
+ 			drm_mode_vrefresh(desc_mode));
+ 		return -ENOMEM;
+@@ -292,20 +303,20 @@ static const struct drm_panel_funcs st7701_funcs = {
+ };
+ 
+ static const struct drm_display_mode ts8550b_mode = {
+-	.clock		= 27500,
++	.clock		= 20000,
+ 
+-	.hdisplay	= 480,
+-	.hsync_start	= 480 + 38,
+-	.hsync_end	= 480 + 38 + 12,
+-	.htotal		= 480 + 38 + 12 + 12,
++	.hdisplay	= 640,
++	.hsync_start	= 640 + 16,
++	.hsync_end	= 640 + 16 + 8,
++	.htotal		= 640 + 16 + 8,
+ 
+-	.vdisplay	= 854,
+-	.vsync_start	= 854 + 18,
+-	.vsync_end	= 854 + 18 + 8,
+-	.vtotal		= 854 + 18 + 8 + 4,
++	.vdisplay	= 480,
++	.vsync_start	= 480 + 14,
++	.vsync_end	= 480 + 14 + 8,
++	.vtotal		= 480 + 14 + 8,
+ 
+-	.width_mm	= 69,
+-	.height_mm	= 139,
++	.width_mm	= 57,
++	.height_mm	= 43,
+ 
+ 	.type = DRM_MODE_TYPE_DRIVER | DRM_MODE_TYPE_PREFERRED,
+ };
+@@ -330,39 +341,48 @@ static int st7701_dsi_probe(struct mipi_dsi_device *dsi)
+ 	const struct st7701_panel_desc *desc;
+ 	struct st7701 *st7701;
+ 	int ret, i;
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 
+ 	st7701 = devm_kzalloc(&dsi->dev, sizeof(*st7701), GFP_KERNEL);
+ 	if (!st7701)
+ 		return -ENOMEM;
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	desc = of_device_get_match_data(&dsi->dev);
+ 	dsi->mode_flags = desc->flags;
+ 	dsi->format = desc->format;
+ 	dsi->lanes = desc->lanes;
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	st7701->supplies = devm_kcalloc(&dsi->dev, desc->num_supplies,
+ 					sizeof(*st7701->supplies),
+ 					GFP_KERNEL);
+ 	if (!st7701->supplies)
+ 		return -ENOMEM;
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	for (i = 0; i < desc->num_supplies; i++)
+ 		st7701->supplies[i].supply = desc->supply_names[i];
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	ret = devm_regulator_bulk_get(&dsi->dev, desc->num_supplies,
+ 				      st7701->supplies);
+ 	if (ret < 0)
+ 		return ret;
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	st7701->reset = devm_gpiod_get(&dsi->dev, "reset", GPIOD_OUT_LOW);
+ 	if (IS_ERR(st7701->reset)) {
+-		dev_err(&dsi->dev, "Couldn't get our reset GPIO\n");
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
++		dev_err(&dsi->dev, "Couldn't get our reset GPIO");
+ 		return PTR_ERR(st7701->reset);
+ 	}
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	drm_panel_init(&st7701->panel, &dsi->dev, &st7701_funcs,
+ 		       DRM_MODE_CONNECTOR_DSI);
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	/**
+ 	 * Once sleep out has been issued, ST7701 IC required to wait 120ms
+ 	 * before initiating new commands.
+@@ -373,17 +393,21 @@ static int st7701_dsi_probe(struct mipi_dsi_device *dsi)
+ 	 * ts8550b and there is no valid documentation for that.
+ 	 */
+ 	st7701->sleep_delay = 120 + desc->panel_sleep_delay;
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 
+ 	ret = drm_panel_of_backlight(&st7701->panel);
+ 	if (ret)
+ 		return ret;
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	drm_panel_add(&st7701->panel);
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	mipi_dsi_set_drvdata(dsi, st7701);
+ 	st7701->dsi = dsi;
+ 	st7701->desc = desc;
+ 
++	printk("REACHED at %s:%d!", __FILE__, __LINE__);
+ 	return mipi_dsi_attach(dsi);
+ }
+ 
+@@ -398,7 +422,7 @@ static int st7701_dsi_remove(struct mipi_dsi_device *dsi)
+ }
+ 
+ static const struct of_device_id st7701_of_match[] = {
+-	{ .compatible = "techstar,ts8550b", .data = &ts8550b_desc },
++	{ .compatible = "fascontek,fs028vg047", .data = &ts8550b_desc },
+ 	{ }
+ };
+ MODULE_DEVICE_TABLE(of, st7701_of_match);
+-- 
+2.41.0
+
