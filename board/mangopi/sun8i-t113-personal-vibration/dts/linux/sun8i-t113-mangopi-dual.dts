@@ -280,14 +280,14 @@
 	pinctrl-names = "default";
 	status = "disable";
 
-//	gt911: touchscreen@14 {
-//		compatible = "goodix,gt911";
-//		reg = <0x14>;
-//		interrupt-parent = <&pio>;
-//		interrupts = <1 3 IRQ_TYPE_EDGE_FALLING>; /* PB-EINT3 */
-//		irq-gpios = <&pio 1 3 GPIO_ACTIVE_HIGH>; /* PB3 CTP_INT */
-//		reset-gpios = <&pio 1 2 GPIO_ACTIVE_HIGH>; /* PB2 CTP_RST */
-//	};
+	focaltech: touchscreen@14 {
+		compatible = "edt,edt-ft5406";
+		reg = <0x14>;
+		interrupt-parent = <&pio>;
+		interrupts = <1 3 IRQ_TYPE_EDGE_FALLING>;  /* PB-EINT3    */
+		irq-gpios = <&pio 1 3 GPIO_ACTIVE_HIGH>;   /* PB3 CTP_INT */
+		reset-gpios = <&pio 1 2 GPIO_ACTIVE_HIGH>; /* PB2 CTP_RST */
+	};
 };
 
 &spi0 {
