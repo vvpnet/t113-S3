@@ -213,7 +213,7 @@
 &spi_panel {
 	status = "okay";
 	panel@0 {
-		compatible = "leadtek,ltk035c5444t";
+		compatible = "fascontek,fs035vg158";
 		spi-3wire;
 		reg = <0>;
 		backlight = <&backlight>;
@@ -269,8 +269,8 @@
 };
 */
 
-&uart0 {
-	pinctrl-0 = <&uart0_pe2_pins>;
+&uart1 {
+	pinctrl-0 = <&uart1_pg6_pins>;
 	pinctrl-names = "default";
 	status = "okay";
 };
