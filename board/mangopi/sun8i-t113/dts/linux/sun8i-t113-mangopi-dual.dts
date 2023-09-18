@@ -213,7 +213,7 @@
 &spi_panel {
 	status = "okay";
 	panel@0 {
-		compatible = "fascontek,fs035vg158";
+		compatible = "fascontek,fs028vg047";
 		spi-3wire;
 		reg = <0>;
 		backlight = <&backlight>;
