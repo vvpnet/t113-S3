@@ -1,12 +1,6 @@
-commit e76ebed6469b9c17cbb27450050a2b0430421253
-Author: Jookia <contact@jookia.org>
-Date:   2023-09-19 03:25:03 +1000
-
-    Initial FS028VG047 LCD driver
-
 diff --git a/Documentation/devicetree/bindings/display/panel/fascontek,fs028vg047.yaml b/Documentation/devicetree/bindings/display/panel/fascontek,fs028vg047.yaml
 new file mode 100644
-index 000000000..456576105
+index 000000000000..456576105645
 --- /dev/null
 +++ b/Documentation/devicetree/bindings/display/panel/fascontek,fs028vg047.yaml
 @@ -0,0 +1,56 @@
@@ -66,11 +60,73 @@ index 000000000..456576105
 +            };
 +        };
 +    };
+diff --git a/Documentation/devicetree/bindings/display/panel/fascontek,fs035vg158.yaml b/Documentation/devicetree/bindings/display/panel/fascontek,fs035vg158.yaml
+new file mode 100644
+index 000000000000..d13c4bd26de4
+--- /dev/null
++++ b/Documentation/devicetree/bindings/display/panel/fascontek,fs035vg158.yaml
+@@ -0,0 +1,56 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/display/panel/fascontek,fs035vg158.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Fascontek FS035VG158 3.5" (640x480 pixels) 24-bit IPS LCD panel
++
++maintainers:
++  - John Watts <contact@jookia.org>
++
++allOf:
++  - $ref: panel-common.yaml#
++  - $ref: /schemas/spi/spi-peripheral-props.yaml#
++
++properties:
++  compatible:
++    const: fascontek,fs035vg158
++
++  spi-3wire: true
++
++required:
++  - compatible
++  - reg
++  - port
++  - power-supply
++  - reset-gpios
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/gpio/gpio.h>
++
++    spi {
++        #address-cells = <1>;
++        #size-cells = <0>;
++        panel@0 {
++            compatible = "fascontek,fs035vg158";
++            reg = <0>;
++
++            spi-3wire;
++            spi-max-frequency = <3125000>;
++
++            reset-gpios = <&gpe 2 GPIO_ACTIVE_LOW>;
++
++            backlight = <&backlight>;
++            power-supply = <&vcc>;
++
++            port {
++                panel_input: endpoint {
++                    remote-endpoint = <&panel_output>;
++                };
++            };
++        };
++    };
 diff --git a/drivers/gpu/drm/panel/Kconfig b/drivers/gpu/drm/panel/Kconfig
-index a9043eacc..e7b8830e8 100644
+index 2d6d96ee3547..e141cfb00cde 100644
 --- a/drivers/gpu/drm/panel/Kconfig
 +++ b/drivers/gpu/drm/panel/Kconfig
-@@ -136,6 +136,15 @@ config DRM_PANEL_ELIDA_KD35T133
+@@ -144,6 +144,15 @@ config DRM_PANEL_ELIDA_KD35T133
  	  KD35T133 controller for 320x480 LCD panels with MIPI-DSI
  	  system interfaces.
  
@@ -87,29 +143,34 @@ index a9043eacc..e7b8830e8 100644
  	tristate "Feixin K101 IM2BA02 panel"
  	depends on OF
 diff --git a/drivers/gpu/drm/panel/Makefile b/drivers/gpu/drm/panel/Makefile
-index 34e717382..ef2b5c818 100644
+index 157c77ff157f..c6ba6f647f68 100644
 --- a/drivers/gpu/drm/panel/Makefile
 +++ b/drivers/gpu/drm/panel/Makefile
-@@ -11,6 +11,7 @@ obj-$(CONFIG_DRM_PANEL_SIMPLE) += panel-simple.o
+@@ -12,6 +12,7 @@ obj-$(CONFIG_DRM_PANEL_SIMPLE) += panel-simple.o
  obj-$(CONFIG_DRM_PANEL_EDP) += panel-edp.o
  obj-$(CONFIG_DRM_PANEL_EBBG_FT8719) += panel-ebbg-ft8719.o
  obj-$(CONFIG_DRM_PANEL_ELIDA_KD35T133) += panel-elida-kd35t133.o
 +obj-$(CONFIG_DRM_PANEL_FASCONTEK_FS028VG047) += panel-fascontek-fs028vg047.o
  obj-$(CONFIG_DRM_PANEL_FEIXIN_K101_IM2BA02) += panel-feixin-k101-im2ba02.o
  obj-$(CONFIG_DRM_PANEL_FEIYANG_FY07024DI26A30D) += panel-feiyang-fy07024di26a30d.o
- obj-$(CONFIG_DRM_PANEL_ILITEK_IL9322) += panel-ilitek-ili9322.o
+ obj-$(CONFIG_DRM_PANEL_HIMAX_HX8394) += panel-himax-hx8394.o
 diff --git a/drivers/gpu/drm/panel/panel-fascontek-fs028vg047.c b/drivers/gpu/drm/panel/panel-fascontek-fs028vg047.c
 new file mode 100644
-index 000000000..25b385cbd
+index 000000000000..86898855a121
 --- /dev/null
 +++ b/drivers/gpu/drm/panel/panel-fascontek-fs028vg047.c
-@@ -0,0 +1,318 @@
+@@ -0,0 +1,325 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Fascontek FS028VG047 panel driver
 + *
 + * Copyright (C) 2023 John Watts <contact@jookia.org>
 + */
++
++// possible issues:
++// - 18-bit not selected
++// - cs needed
++// - 4 wires
 +
 +#include <drm/drm_mipi_dbi.h>
 +#include <drm/drm_modes.h>
@@ -208,7 +269,7 @@ index 000000000..25b385cbd
 +	mipi_dbi_command(dbi, 0xE8, 0x00, 0x00);
 +	mipi_dbi_command(dbi, 0xFF, 0x77, 0x01, 0x00, 0x00, 0x00);
 +	// 0x70 = 24 bit
-+	mipi_dbi_command(dbi, 0x3A, 0x70);
++	mipi_dbi_command(dbi, 0x3A, 0x60);
 +	mipi_dbi_command(dbi, 0x29);
 +	msleep(25);
 +	return 0;
@@ -269,6 +330,8 @@ index 000000000..25b385cbd
 +		dev_err(priv->dev, "Failed to exit sleep mode: %d\n", err);
 +		goto err_disable_reg;
 +	}
++
++	msleep(150);
 +
 +	return 0;
 +
