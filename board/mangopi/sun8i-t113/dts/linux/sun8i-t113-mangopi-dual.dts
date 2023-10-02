@@ -245,6 +245,17 @@
 		pins = "PG11";
 		function = "clk";
 	};
+/*
+	ft54x6_int_pins: touchscreen-ft54x36-int {
+		pins = "PB3";
+		function = "gpio_in";
+	};
+
+	ft54x6_rst_pins: touchscreen-ft54x36-rst {
+		pins = "PB2";
+		function = "gpio_out";
+	};
+*/
 };
 
 &uart1 {
@@ -281,13 +292,16 @@
 	pinctrl-names = "default";
 	status = "okay";
 
-	focaltech: touchscreen@14 {
+	edt_ft5x06: edt_ft5x06@38 {
 		compatible = "edt,edt-ft5406";
-		reg = <0x14>;
+		reg = <0x38>;
+		//pinctrl-names = "default";
+		//pinctrl-0 = <&ft54x6_int_pins>;
 		interrupt-parent = <&pio>;
 		interrupts = <1 3 IRQ_TYPE_EDGE_FALLING>;  /* PB-EINT3    */
-		irq-gpios = <&pio 1 3 GPIO_ACTIVE_HIGH>;   /* PB3 CTP_INT */
-		reset-gpios = <&pio 1 2 GPIO_ACTIVE_HIGH>; /* PB2 CTP_RST */
+		reset-gpios = <&pio 1 2 GPIO_ACTIVE_LOW>; /* PB2 CTP_RST */
+		touchscreen-size-x = <480>;
+		touchscreen-size-y = <640>;
 	};
 };
 
