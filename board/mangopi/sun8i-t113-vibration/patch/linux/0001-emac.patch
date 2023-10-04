@@ -1,0 +1,38 @@
+From bd06b49cfd6b2b92927c796600726bc5625f3932 Mon Sep 17 00:00:00 2001
+From: Jookia <contact@jookia.org>
+Date: Sat, 15 Jul 2023 01:03:46 +1000
+Subject: [PATCH] sunxi_sram: Backport D1 emac support
+
+---
+ drivers/soc/sunxi/sunxi_sram.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/soc/sunxi/sunxi_sram.c b/drivers/soc/sunxi/sunxi_sram.c
+index 09754cd1d..52c841632 100644
+--- a/drivers/soc/sunxi/sunxi_sram.c
++++ b/drivers/soc/sunxi/sunxi_sram.c
+@@ -295,6 +295,10 @@ static const struct sunxi_sramc_variant sun8i_h3_sramc_variant = {
+ 	.num_emac_clocks = 1,
+ };
+ 
++static const struct sunxi_sramc_variant sun20i_d1_sramc_variant = {
++	.num_emac_clocks = 1,
++};
++
+ static const struct sunxi_sramc_variant sun50i_a64_sramc_variant = {
+ 	.num_emac_clocks = 1,
+ };
+@@ -382,6 +386,10 @@ static const struct of_device_id sunxi_sram_dt_match[] = {
+ 		.compatible = "allwinner,sun8i-h3-system-control",
+ 		.data = &sun8i_h3_sramc_variant,
+ 	},
++	{
++		.compatible = "allwinner,sun20i-d1-system-control",
++		.data = &sun20i_d1_sramc_variant,
++	},
+ 	{
+ 		.compatible = "allwinner,sun50i-a64-sram-controller",
+ 		.data = &sun50i_a64_sramc_variant,
+-- 
+2.41.0
+

@@ -2,7 +2,7 @@ BOARD_DIR="$(dirname $0)"
 
 if grep -Eq "^BR2_TARGET_AWBOOT_T113=y$" ${BR2_CONFIG}; then
 	BRD="sun8i-t113"
-	install -m 0755 $BOARD_DIR/S04gpio $1/etc/init.d/
+	#install -m 0755 $BOARD_DIR/S04gpio $1/etc/init.d/
 else
 	BRD="unknown"
 fi
@@ -32,8 +32,9 @@ cp -f $BINARIES_DIR/$AWBOOT.bin $BINARIES_DIR/awboot-boot.bin
 # install -m 0755 $BOARD_DIR/S03sound $1/etc/init.d/
 
 # install -m 0644 $BOARD_DIR/a2002011001-e02-8kHz.wav $1/root
-test -d $1/etc/usbmount && install -m 0644 $BOARD_DIR/usbmount.conf $1/etc/usbmount/
-test -d $1/usr/lib/qt && cp -r $BOARD_DIR/affine $1/root
+#test -d $1/etc/usbmount && install -m 0644 $BOARD_DIR/usbmount.conf $1/etc/usbmount/
+test -d $1/usr/lib/qt
+#cp -r $BOARD_DIR/affine $1/root
 
 rm $1/etc/resolv.conf
 echo "nameserver 8.8.8.8" > $1/etc/resolv.conf

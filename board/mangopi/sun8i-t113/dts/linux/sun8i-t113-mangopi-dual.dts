@@ -20,7 +20,7 @@
 
 	chosen {
 		stdout-path = "serial0:115200n8";
-		bootargs = "mem=128M cma=72M root=/dev/mmcblk0p2 init=/sbin/init rootwait console=tty0 console=ttyS0,115200 earlyprintk=sunxi-uart,0x2500000";
+		bootargs = "mem=128M cma=72M root=/dev/mmcblk0p2 init=/sbin/init rootwait console=tty0 console=ttyS0,115200 earlyprintk=sunxi-uart,2500400";
 	};
 
 	reg_vcc: vcc {
@@ -60,16 +60,6 @@
 		regulator-min-microvolt = <900000>;
 		regulator-max-microvolt = <900000>;
 		vin-supply = <&reg_vcc>;
-	};
-
-	spi_panel: spi {
-		compatible = "spi-gpio";
-		#address-cells = <0x1>;
-		#size-cells = <0x0>;
-
-		sck-gpios = <&pio 4 0 GPIO_ACTIVE_HIGH>; /* PE0 */
-		mosi-gpios = <&pio 4 1 GPIO_ACTIVE_HIGH>; /* PE1 */
-		num-chipselects = <0>;
 	};
 
 	dmic_codec: dmic-codec {
@@ -119,39 +109,6 @@
 		pinctrl-names = "default";
 	};
 
-	rotary@0 {
-		compatible = "rotary-encoder";
-		pinctrl-names = "default";
-		gpios = <&pio 4 5 GPIO_ACTIVE_LOW>, <&pio 4 6 GPIO_ACTIVE_LOW>; /* PE5, PE6 */
-		linux,axis = <8>; /* REL_WHEEL */
-		rotary-encoder,encoding = "gray";
-		rotary-encoder,relative-axis;
-	};
-
-	rotary@1 {
-		compatible = "rotary-encoder";
-		pinctrl-names = "default";
-		gpios = <&pio 4 7 GPIO_ACTIVE_LOW>, <&pio 4 8 GPIO_ACTIVE_LOW>; /* PE7, PE8 */
-		linux,axis = <6>; /* REL_HWHEEL */
-		rotary-encoder,encoding = "gray";
-		rotary-encoder,relative-axis;
-	};
-
-	rotary@1_button {
-		compatible = "gpio-keys";
-		pinctrl-names = "default";
-		#address-cells = <1>;
-		#size-cells = <0>;
-		autorepeat;
-		bias-pull-up;
-
-		rotary1_button@0 {
-			label = "rotary1_button0";
-			linux,code = <28>; /* KEY_POWER */
-			gpios = <&pio 4 9 GPIO_ACTIVE_LOW>; /* PE9 */
-		};
-	};
-
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm 7 5000000>;
@@ -193,40 +150,6 @@
 	status = "disabled";
 };
 
-&de {
- 	status = "okay";
-};
-
-&tcon_lcd0 {
-	pinctrl-0 = <&lcd_rgb666_pins>;
-	pinctrl-names = "default";
-	status = "okay";
-};
-
-&tcon_lcd0_out {
-	tcon_lcd0_out_rgb: endpoint@0 {
-		reg = <0>;
-		remote-endpoint = <&rgb_panel_in>;
-	};
-};
-
-&spi_panel {
-	status = "okay";
-	panel@0 {
-		compatible = "leadtek,ltk035c5444t";
-		spi-3wire;
-		reg = <0>;
-		backlight = <&backlight>;
-		power-supply = <&reg_vcc>;
-		reset-gpios = <&pio 4 4 GPIO_ACTIVE_LOW>; /* PE4 */
-		port {
-			rgb_panel_in: endpoint {
-			remote-endpoint = <&tcon_lcd0_out_rgb>;
-			};
-		};
-	};
-};
-
 &pio {
 	vcc-pb-supply = <&reg_vcc_3v3>;
 	vcc-pc-supply = <&reg_vcc_3v3>;
@@ -247,8 +170,7 @@
 };
 
 &uart1 {
-	uart-has-rtscts;
-	pinctrl-0 = <&uart1_pg6_pins>, <&uart1_pg8_rts_cts_pins>;
+	pinctrl-0 = <&uart1_pg6_pins>;
 	pinctrl-names = "default";
 	status = "okay";
 
@@ -269,11 +191,13 @@
 };
 */
 
+/*
 &uart0 {
 	pinctrl-0 = <&uart0_pe2_pins>;
 	pinctrl-names = "default";
 	status = "okay";
 };
+*/
 
 &i2c2 {
 	pinctrl-0 = <&i2c2_pe12_pins>;
@@ -288,6 +212,7 @@
 
 	flash@0 {
 		compatible = "spi-nand";
+		//compatible = "rohm,dh2228fv";
 		reg = <0>;
 
 		partitions {
@@ -315,6 +240,7 @@
 				reg = <0x00500000 0x0fb00000>;
 			};
 		};
+
 	};
 };
 
@@ -399,19 +325,21 @@
 };
 
 &mdio {
-	ext_rgmii_phy: ethernet-phy@1 {
-		compatible = "ethernet-phy-ieee802.3-c22";
-		reg = <1>;
+	status = "okay";
+
+	lan8720a: ethernet-phy@0 {
+		compatible = "ethernet-phy-id0007.c0f0", "ethernet-phy-ieee802.3-c22";
+		reg = <0>;
 	};
 };
 
 &emac {
-	pinctrl-0 = <&rgmii_pe_pins>;
+	pinctrl-0 = <&rmii_pe_pins>;
 	pinctrl-names = "default";
-	phy-handle = <&ext_rgmii_phy>;
-	phy-mode = "rgmii-id";
+	phy-handle = <&lan8720a>;
+	phy-mode = "rmii";
 	phy-supply = <&reg_vcc_3v3>;
-	status = "disabled";
+	status = "okay";
 };
 
 &can0 {
@@ -420,12 +348,15 @@
 	status = "okay";
 };
 
-/*
 &can1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&can1_pins>;
-	status = "disabled";
+	status = "okay";
 };
-*/
 
-
+&gpadc {
+	status = "okay";
+	channel@0 {
+		reg = <0>;
+	};
+};
