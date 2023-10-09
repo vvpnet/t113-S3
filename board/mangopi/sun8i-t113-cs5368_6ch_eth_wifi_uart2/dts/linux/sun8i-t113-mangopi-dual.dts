@@ -15,13 +15,13 @@
 		ethernet0 = &rtl8189fs;
 		mmc0 = &mmc0;
 //		serial1 = &uart1;
-//		serial2 = &uart2;
+		serial0 = &uart2;
 //		serial5 = &uart5;
 	};
 
 	chosen {
 		stdout-path = "serial0:115200n8";
-		bootargs = "mem=128M cma=72M root=/dev/mmcblk0p2 init=/sbin/init rootwait console=tty0 console=ttyS0,115200 earlyprintk=sunxi-uart,2500800";
+		bootargs = "mem=128M cma=72M root=/dev/mmcblk0p2 init=/sbin/init rootwait console=tty1 console=ttyS1,115200 earlyprintk=sunxi-uart,2500800";
 	};
 
 	reg_vcc: vcc {
@@ -263,7 +263,7 @@
 &uart0 {
 	pinctrl-0 = <&uart0_pe2_pins>;
 	pinctrl-names = "default";
-	status = "okay";
+	status = "disabled";
 };
 */
 
