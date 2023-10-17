@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# Start/stop nginx
+#
+
+FCGIWRAP=/usr/sbin/fcgiwrap
+PIDFILE=/var/run/fcgiwrap.pid
+SOCKET=/var/run/fcgiwrap.socket
+USER=www-data
+GROUP=www-data
+
+case "$1" in
+  start)
+	echo "Starting fcgiwrap..."
+	"$FCGIWRAP" -s "unix:$SOCKET" 2>/dev/null &
+	sleep 1
+	chown "$USER:$GROUP" "$SOCKET"
+	echo "OK"
+	;;
+  stop)
+	echo "Stopping fcgiwrap..."
+	killall "fcgiwrap"
+	echo "OK"
+	;;
+  restart)
+	"$0" stop
+	sleep 1 # Prevent race condition: ensure fcgiwrap stops before start.
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
