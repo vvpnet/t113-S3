@@ -1,0 +1,33 @@
+Boot the target using MMC with SSH enabled.
+Change 't113' to its hostname in the following commands.
+
+First, copy the files to the target:
+
+scp output/images/kernel.itb t113:~/kernel.itb
+scp output/images/u-boot.img t113:~/u-boot.img
+scp output/images/sunxi-spl.bin t113:~/sunxi-spl.bin
+scp output/images/rootfs.ubifs t113:~/rootfs.ubifs
+
+Then run these commands on the target to initialize the flash:
+
+echo Y > /sys/module/ubi/parameters/fm_autoconvert
+ubiformat /dev/mtd1 --yes
+ubiattach -p /dev/mtd1
+ubimkvol /dev/ubi0 --vol_id 0 -t static --name uboot --size 4MiB
+ubimkvol /dev/ubi0 --vol_id 1 -t static --name kernel --size 16MiB
+ubimkvol /dev/ubi0 --vol_id 2 --name root --size 128MiB
+
+Next run these to update the flash data:
+
+ubiupdatevol /dev/ubi0_0 u-boot.img
+ubiupdatevol /dev/ubi0_1 kernel.itb
+ubiupdatevol /dev/ubi0_2 rootfs.ubifs
+ubidetach -p /dev/mtd1
+flash_erase /dev/mtd0 0 0
+nandwrite -s 0x00000 -N -m /dev/mtd0 sunxi-spl.bin
+nandwrite -s 0x20000 -N -m /dev/mtd0 sunxi-spl.bin
+nandwrite -s 0x40000 -N -m /dev/mtd0 sunxi-spl.bin
+nandwrite -s 0x60000 -N -m /dev/mtd0 sunxi-spl.bin
+sync
+
+Now remove the card and reboot.
