@@ -3,10 +3,10 @@ Change 't113' to its hostname in the following commands.
 
 First, copy the files to the target:
 
-scp output/images/kernel.itb t113:~/kernel.itb
-scp output/images/u-boot.img t113:~/u-boot.img
-scp output/images/sunxi-spl.bin t113:~/sunxi-spl.bin
-scp output/images/rootfs.ubifs t113:~/rootfs.ubifs
+scp output/images/sunxi-spl.bin root@192.168.99.1:~/sunxi-spl.bin
+scp output/images/u-boot.img root@192.168.99.1:~/u-boot.img
+scp output/images/kernel.itb root@192.168.99.1:~/kernel.itb
+scp output/images/rootfs.ubifs root@192.168.99.1:~/rootfs.ubifs
 
 Then run these commands on the target to initialize the flash:
 
@@ -17,11 +17,11 @@ ubimkvol /dev/ubi0 --vol_id 0 -t static --name uboot --size 4MiB
 ubimkvol /dev/ubi0 --vol_id 1 -t static --name kernel --size 16MiB
 ubimkvol /dev/ubi0 --vol_id 2 --name root --size 128MiB
 
-Next run these to update the flash data:
-
+Next run these to update the flash data
 ubiupdatevol /dev/ubi0_0 u-boot.img
 ubiupdatevol /dev/ubi0_1 kernel.itb
 ubiupdatevol /dev/ubi0_2 rootfs.ubifs
+sync
 ubidetach -p /dev/mtd1
 flash_erase /dev/mtd0 0 0
 nandwrite -s 0x00000 -N -m /dev/mtd0 sunxi-spl.bin
@@ -31,3 +31,12 @@ nandwrite -s 0x60000 -N -m /dev/mtd0 sunxi-spl.bin
 sync
 
 Now remove the card and reboot.
+
+Update 
+ubiattach -p /dev/mtd1
+ubiupdatevol /dev/ubi0_1 kernel.itb
+ubiupdatevol /dev/ubi0_2 rootfs.ubifs
+sync
+ubidetach -p /dev/mtd1
+
+e5cf602ad53a11a8e6d472e0c2062052a7473570
