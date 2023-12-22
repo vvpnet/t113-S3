@@ -198,3 +198,7 @@
 	/delete-node/ pinctrl-0;
 	/delete-node/ pinctrl-names;
 };
+
+&wdt {
+	status = "okay";
+};
