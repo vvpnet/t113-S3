@@ -8,14 +8,20 @@
 #include "allwinner/sunxi-d1s-t113-mangopi-mq-r.dtsi"
 
 / {
-	model = "MangoPi MQ-Dual Vibration meter";
+	model = "MangoPi MQ-Dual MCD_2310";
 	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
 
 	aliases {
 		ethernet0 = &rtl8189ftv;
 	};
 
-	/delete-node/ leds;
+	leds {
+		led-0 {
+			linux,default-trigger = "heartbeat";
+			function = LED_FUNCTION_HEARTBEAT;
+			gpios = <&pio 3 22 GPIO_ACTIVE_HIGH>; /* PD22 */
+		};
+	};
 
 	wm8782_1: stereo-adc-1 {
 		compatible = "wlf,wm8782";
@@ -85,25 +91,28 @@
 				};
 			};
 		};
-
 	};
 };
 
 &cpu0 {
-        cpu-supply = <&reg_vcc_core>;
+	cpu-supply = <&reg_vcc_core>;
 };
 
 &cpu1 {
-        cpu-supply = <&reg_vcc_core>;
+	cpu-supply = <&reg_vcc_core>;
+};
+
+&wdt {
+	status = "okay";
 };
 
 &mmc1 {
-        rtl8189ftv: wifi@1 {
-                reg = <1>;
-                interrupt-parent = <&pio>;
-                interrupts = <6 10 IRQ_TYPE_LEVEL_LOW>; /* PG10 = WL_WAKE_AP */
-                interrupt-names = "host-wake";
-        };
+	rtl8189ftv: wifi@1 {
+		reg = <1>;
+		interrupt-parent = <&pio>;
+		interrupts = <6 10 IRQ_TYPE_LEVEL_LOW>; /* PG10 = WL_WAKE_AP */
+		interrupt-names = "host-wake";
+	};
 };
 
 &pio {
@@ -197,8 +206,4 @@
 	status = "disabled";
 	/delete-node/ pinctrl-0;
 	/delete-node/ pinctrl-names;
-};
-
-&wdt {
-	status = "okay";
 };
