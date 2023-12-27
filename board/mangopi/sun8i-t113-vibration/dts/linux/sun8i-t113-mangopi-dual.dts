@@ -125,6 +125,11 @@
 		pins = "PB2", "PB3", "PB4";
 		function = "i2s2_din";
 	};
+
+	i2c2_pe12_pins: i2c2-pe12-pins {
+		pins = "PE12", "PE13";
+		function = "i2c2";
+	};
 };
 
 &uart1 {
@@ -183,6 +188,12 @@
 	channel@0 {
 		reg = <0>;
 	};
+};
+
+&i2c2 {
+	pinctrl-0 = <&i2c2_pe12_pins>;
+	pinctrl-names = "default";
+	status = "okay";
 };
 
 &i2s2 {
