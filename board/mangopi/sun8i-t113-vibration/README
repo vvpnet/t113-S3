@@ -1,0 +1,11 @@
+It is a simple measuring device. The external audio codec used.
+
+The device is planned to support the following components:
+1) NAND
+2) ADC_CS5368
+3) MODE_AUDIO_DATA_I2S_6_CHANNELS
+4) MODE_AUDIO_DATA_TDM_8_CHANNELS
+5) LAN8720
+6) RTL8189FS
+7) RTCDS3231
+8) USBFLASH_exFAT
