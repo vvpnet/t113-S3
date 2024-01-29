@@ -1,0 +1,26 @@
+ssh root@192.168.99.1 "arecord -c 6 -r 192000 -f s32_le -d 10" >! test.wav 
+
+
+arecord -c 6 -r 192000 -f s16_le -d 1 -twav test.wav 
+
+TDM 
+i2cset -y 0 0x4f 0x1 0x8b && i2cset -y 0 0x4f 0x4 0xff && i2cset -y 0 0x4f 0xa 0xfe
+
+
+#!/bin/sh
+
+for i in $(seq 2 214); do
+        RATE="${i}000";
+        arecord -D hw:0,0 -c 8 -r $RATE -f s32_le -s1 2>&1 >/dev/zero | grep -q 'Unable to install hw params' && echo "rate $RATE failed";
+done
+for i in 8192 10240 16384 20480 32768 65536 131072; do
+        RATE="$i";
+        arecord -D hw:0,0 -c 8 -r $RATE -f s32_le -s1 2>&1 >/dev/zero | grep -q 'Unable to install hw params' && echo "rate $RATE failed";
+done
+
+mount -t debugfs none /sys/kernel/debug
+cat /sys/kernel/debug/clk/i2s2/clk_rate
+
+ arecord -D hw:0,0 -c 8 -r 8000 -f s32_le  > /dev/zero
+ 
+ [ 3424.087257] sun4i-i2s 2034000.i2s: Found new MCLK 90427392 rate 513368 diff 424 div 14 [ 3424.095353] sun4i-i2s 2034000.i2s: Settled for MCLK 90427392
