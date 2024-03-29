@@ -991,7 +991,7 @@ index 000000000000..d5771fa543cb
 +#define MAX_REG REG_SDEN
 +
 +static const struct reg_sequence cs5368_reg_init[] = {
-+	{ REG_GCTL, 0x8B }, /* CP-EN, TDM format, slave audio clocking */
++	{ REG_GCTL, 0xBB }, /* CP-EN, TDM format, slave audio clocking */
 +	{ REG_OVFM, 0x00 }, /* Mask all overflows */
 +	{ REG_SDEN, 0x0A }, /* Only enable TDM and _TDM pins */
 +};
