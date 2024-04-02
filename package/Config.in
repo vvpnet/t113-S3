@@ -2674,4 +2674,8 @@ menu "Text editors and viewers"
 	source "package/vim/Config.in"
 endmenu
 
+menu "Nova Software Company Packages"
+    source "package/nova-wi/Config.in"
+endmenu
+
 endmenu

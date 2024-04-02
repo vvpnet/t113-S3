@@ -1,0 +1,6 @@
+config BR2_PACKAGE_NOVAWI
+	bool "nowawi"
+	help
+	  Web interface for t113ADC
+
+	  https://github.com/Coxwain1987/t113_web_interface
