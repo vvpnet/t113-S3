@@ -1,6 +1,15 @@
-config BR2_PACKAGE_NOVAWI
-	bool "nowawi"
+config BR2_PACKAGE_NOVA_WI
+	bool "nova-wi"
+	depends on BR2_PACKAGE_NGINX
+	select BR2_PACKAGE_NGINX_HTTP
+	select BR2_PACKAGE_NGINX_HTTP_SSL_MODULE
+	select BR2_PACKAGE_NGINX_HTTP_AUTH_REQUEST_MODULE
+	select BR2_PACKAGE_NGINX_HTTP_ACCESS_MODULE
+	select BR2_PACKAGE_NGINX_HTTP_AUTH_BASIC_MODULE
+	select BR2_PACKAGE_NGINX_HTTP_FASTCGI_MODULE
+	depends on BR2_PACKAGE_FCGIWRAP
+	select BR2_PACKAGE_LIBFCGI
 	help
-	  Web interface for t113ADC
+	  Web interface for T113ADC
 
 	  https://github.com/Coxwain1987/t113_web_interface
