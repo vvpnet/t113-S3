@@ -59,6 +59,21 @@
 			};
 		};
 	};
+
+	buttons {
+		compatible = "gpio-keys";
+		pinctrl-names = "default";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		autorepeat;
+		bias-pull-up;
+
+		reset_settings_button@0 {
+			label = "reset_settings_button0";
+			linux,code = <28>; /* KEY_POWER */
+			gpios = <&pio 4 10 GPIO_ACTIVE_LOW>; /* PE10 */
+		};
+	};
 };
 
 &cpu0 {
@@ -97,9 +112,22 @@
 		pins = "PE12", "PE13";
 		function = "i2c2";
 	};
+
+	uart2_pd1_pins: uart2-pd1-pins {
+		pins = "PD1", "PD2";
+		function = "uart2";
+    };
+};
+
+&uart2 {
+	/* The default UART for Linux I/O */
+	pinctrl-0 = <&uart2_pd1_pins>;
+	pinctrl-names = "default";
+	status = "okay";
 };
 
 &uart1 {
+	/* XR829/RTL8723bs/RTL8189fs bluetooth is connected here */
 	pinctrl-0 = <&uart1_pg6_pins>;
 	pinctrl-names = "default";
 	status = "okay";
@@ -166,7 +194,7 @@
 		compatible = "cirrus,cs5368";
 		vdd-supply = <&reg_vcc5v>;
 		vdda-supply = <&reg_3v3>;
-		reset-gpios = <&pio 1 4 GPIO_ACTIVE_LOW>; /* PB4 */
+		reset-gpios = <&pio 4 11 GPIO_ACTIVE_LOW>; /* PE11 */
 		port {
 			cs5368_ep: endpoint {
 				dai-tdm-slot-num = <8>;
@@ -197,6 +225,7 @@
 };
 
 &uart3 {
+	/* It interferes with the work of i2s2 */
 	status = "disabled";
 	/delete-node/ pinctrl-0;
 	/delete-node/ pinctrl-names;
