@@ -2675,7 +2675,7 @@ menu "Text editors and viewers"
 endmenu
 
 menu "Nova Software Company Packages"
-    source "package/nova-wi/Config.in"
+	source "package/nova-wi/Config.in"
 endmenu
 
 endmenu
