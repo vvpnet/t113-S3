@@ -12,6 +12,10 @@
 	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
 
 	aliases {
+		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &uart2;
+		serial3 = &uart3;
 		ethernet0 = &rtl8189ftv;
 	};
 
@@ -19,6 +23,8 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
+
+		/delete-property/ stdout-path;
 
 		framebuffer-lcd0 {
 			compatible = "allwinner,simple-framebuffer",
@@ -129,12 +135,35 @@
 		pins = "PD22";
 		function = "pwm7";
 	};
+
+	uart2_pd1_pins: uart2-pd1-pins {
+		pins = "PD1", "PD2";
+		function = "uart2";
+	};
+};
+
+&uart0 {
+	status = "disabled";
+	/delete-node/ pinctrl-0;
+	/delete-node/ pinctrl-names;
 };
 
 &uart1 {
 	pinctrl-0 = <&uart1_pg6_pins>;
 	pinctrl-names = "default";
 	status = "okay";
+};
+
+&uart2 {
+	pinctrl-0 = <&uart2_pd1_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&uart3 {
+	status = "disabled";
+	/delete-node/ pinctrl-0;
+	/delete-node/ pinctrl-names;
 };
 
 &i2c2 {
@@ -207,12 +236,6 @@
 	channel@0 {
 		reg = <0>;
 	};
-};
-
-&uart3 {
-	status = "disabled";
-	/delete-node/ pinctrl-0;
-	/delete-node/ pinctrl-names;
 };
 
 &wdt {
