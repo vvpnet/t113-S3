@@ -15,6 +15,27 @@
 		ethernet0 = &rtl8189ftv;
 	};
 
+	chosen {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		framebuffer-lcd0 {
+			compatible = "allwinner,simple-framebuffer",
+				     "simple-framebuffer";
+			allwinner,pipeline = "mixer0-lcd0";
+			clocks = <&ccu CLK_PLL_VIDEO1_4X>,
+				 <&ccu CLK_PLL_VIDEO0_4X>,
+				 <&ccu CLK_BUS_DE>,
+				 <&ccu CLK_DE>,
+				 <&ccu CLK_BUS_TCON_LCD0>,
+				 <&ccu CLK_TCON_LCD0>,
+				 <&display_clocks CLK_BUS_MIXER0>,
+				 <&display_clocks CLK_MIXER0>;
+			status = "disabled";
+		};
+	};
+
 	/delete-node/ leds;
 
 	spi_panel: spi {
