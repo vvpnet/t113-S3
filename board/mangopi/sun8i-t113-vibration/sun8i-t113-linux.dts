@@ -62,13 +62,6 @@
 	};
 };
 
-&gpadc {
-	status = "okay";
-	channel@0 {
-		reg = <0>;
-	};
-};
-
 &i2c2 {
 	pinctrl-0 = <&i2c2_pe12_pins>;
 	pinctrl-names = "default";
