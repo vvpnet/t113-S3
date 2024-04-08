@@ -45,7 +45,16 @@
 };
 
 &pio {
-	pinctrl-0 = <&i2c2_pe12_pins>;
+	i2s2_pins: i2s-pins {
+		pins = "PB5", "PB6", "PB7";
+		function = "i2s2";
+	};
+
+	i2s2_din_pins: i2s-din-pins {
+		pins = "PB2", "PB3";
+		function = "i2s2_din";
+	};
+
 	i2c2_pe12_pins: i2c2-pe12-pins {
 		pins = "PE12", "PE13";
 		function = "i2c2";
@@ -69,18 +78,21 @@
 };
 
 &uart1 {
+	/* XR829/RTL8723bs/RTL8189fs bluetooth is connected here */
 	status = "okay";
 	pinctrl-0 = <&uart1_pg6_pins>;
 	pinctrl-names = "default";
 };
 
 &uart2 {
+	/* The default UART for Linux I/O */
 	status = "disabled";
 	pinctrl-0 = <&uart2_pd1_pins>;
 	pinctrl-names = "default";
 };
 
 &uart3 {
+	/* It interferes with the work of i2s2 */
 	status = "disabled";
 	/delete-node/ pinctrl-0;
 	/delete-node/ pinctrl-names;
