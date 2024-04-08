@@ -1,0 +1,136 @@
+// SPDX-License-Identifier: (GPL-2.0+ or MIT)
+// Copyright (C) 2022 Samuel Holland <samuel@sholland.org>
+
+/dts-v1/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include "allwinner/sun8i-t113s.dtsi"
+#include "allwinner/sunxi-d1s-t113-mangopi-mq-r.dtsi"
+
+/ {
+	model = "MangoPi MQ-Dual";
+	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
+
+	aliases {
+		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &uart2;
+		serial3 = &uart3;
+		ethernet0 = &rtl8189ftv;
+	};
+
+	chosen {
+		/delete-property/ stdout-path;
+	};
+
+	/delete-node/ leds;
+
+};
+
+&cpu0 {
+        cpu-supply = <&reg_vcc_core>;
+};
+
+&cpu1 {
+        cpu-supply = <&reg_vcc_core>;
+};
+
+&mmc1 {
+        rtl8189ftv: wifi@1 {
+                reg = <1>;
+                interrupt-parent = <&pio>;
+                interrupts = <6 10 IRQ_TYPE_LEVEL_LOW>; /* PG10 = WL_WAKE_AP */
+                interrupt-names = "host-wake";
+        };
+};
+
+&pio {
+	pinctrl-0 = <&i2c2_pe12_pins>;
+	i2c2_pe12_pins: i2c2-pe12-pins {
+		pins = "PE12", "PE13";
+		function = "i2c2";
+	};
+
+	pwm7_pd22_pin: pwm7-pd22-pin {
+		pins = "PD22";
+		function = "pwm7";
+	};
+
+	uart2_pd1_pins: uart2-pd1-pins {
+		pins = "PD1", "PD2";
+		function = "uart2";
+	};
+};
+
+&uart0 {
+	status = "disabled";
+	/delete-node/ pinctrl-0;
+	/delete-node/ pinctrl-names;
+};
+
+&uart1 {
+	status = "okay";
+	pinctrl-0 = <&uart1_pg6_pins>;
+	pinctrl-names = "default";
+};
+
+&uart2 {
+	status = "disabled";
+	pinctrl-0 = <&uart2_pd1_pins>;
+	pinctrl-names = "default";
+};
+
+&uart3 {
+	status = "disabled";
+	/delete-node/ pinctrl-0;
+	/delete-node/ pinctrl-names;
+};
+
+&spi0 {
+	pinctrl-0 = <&spi0_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	flash@0 {
+		compatible = "spi-nand";
+		reg = <0>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "spl";
+				reg = <0x00000000 0x00080000>;
+			};
+
+			partition@100000 {
+				label = "ubi";
+				reg = <0x00080000 0x0fb00000>;
+			};
+		};
+
+	};
+};
+
+&mdio {
+	status = "okay";
+	lan8720a: ethernet-phy@0 {
+		compatible = "ethernet-phy-id0007.c0f0", "ethernet-phy-ieee802.3-c22";
+		reg = <0>;
+	};
+};
+
+&emac {
+	pinctrl-0 = <&rmii_pe_pins>;
+	pinctrl-names = "default";
+	phy-handle = <&lan8720a>;
+	phy-mode = "rmii";
+	phy-supply = <&reg_3v3>;
+	status = "okay";
+};
+
+&wdt {
+	status = "okay";
+};

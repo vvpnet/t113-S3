@@ -7,7 +7,7 @@
     images {
         fdt {
             description = "Device tree";
-            data = /incbin/("./sun8i-t113-mangopi-dual.dtb");
+            data = /incbin/("./sun8i-t113-linux.dtb");
             type = "flat_dt";
             compression = "none";
             arch = "arm";
