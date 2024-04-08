@@ -1,0 +1,60 @@
+commit ccc2072fea0eec8e837d02120968bf8516e0da0f
+Author: John Watts <contact@jookia.org>
+Date:   2024-03-31 23:28:15 +1100
+
+    Set MDIV for cs5368
+
+diff --git a/sound/soc/codecs/cs5368.c b/sound/soc/codecs/cs5368.c
+index d5771fa543cb..b08cdf93700a 100644
+--- a/sound/soc/codecs/cs5368.c
++++ b/sound/soc/codecs/cs5368.c
+@@ -23,6 +23,8 @@
+ #define REG_SDEN 0x0A
+ #define MAX_REG REG_SDEN
+ 
++#define REG_GCTL_MDIV_MASK 0x30
++
+ static const struct reg_sequence cs5368_reg_init[] = {
+ 	{ REG_GCTL, 0x8B }, /* CP-EN, TDM format, slave audio clocking */
+ 	{ REG_OVFM, 0x00 }, /* Mask all overflows */
+@@ -192,13 +194,36 @@ static int cs5368_dai_hw_params(struct snd_pcm_substream *substream,
+ 	struct device *dev = dai->dev;
+ 
+ 	int rate = params_rate(params);
+-	int fs = priv->mclk / rate;
+-
+-	if(fs && fs != 256) {
+-		dev_err(dev, "mclk-fs must be 256\n");
++	int lrck_speed = 0;
++	int rc = 0;
++
++	if(rate < 54000)
++		lrck_speed = 256;
++	else if(rate < 108000)
++		lrck_speed = 128;
++	else
++		lrck_speed = 64;
++
++	int mclk_div = priv->mclk / rate / lrck_speed;
++	int mdiv = 0;
++
++	if (mclk_div == 4)
++		mdiv = 3;
++	else if (mclk_div == 2)
++		mdiv = 1;
++	else if (mclk_div == 1)
++		mdiv = 0;
++	else {
++		dev_err(dev, "unknown mclk divider\n");
+ 		return -EINVAL;
+ 	}
+ 
++	rc = regmap_update_bits(priv->regmap, REG_GCTL, REG_GCTL_MDIV_MASK, mdiv << 4);
++	if (rc != 0) {
++		dev_err(dev, "failed to set mclk divider\n");
++		return rc;
++	}
++
+ 	return 0;
+ }
+ 
