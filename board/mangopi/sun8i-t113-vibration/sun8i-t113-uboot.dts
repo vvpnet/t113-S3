@@ -7,12 +7,10 @@
 
 / {
 	chosen {
-		stdout-path = "serial1:115200n8";
+		stdout-path = "serial2:115200n8";
 	};
 };
 
-&uart1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart1_pg6_pins>;
+&uart2 {
 	status = "okay";
 };

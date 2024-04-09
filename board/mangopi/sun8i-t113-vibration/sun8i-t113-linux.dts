@@ -10,7 +10,7 @@
 	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
 
 	chosen {
-		stdout-path = "serial1:115200n8";
+		stdout-path = "serial2:115200n8";
 	};
 
 	test_codec {

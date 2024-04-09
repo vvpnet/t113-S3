@@ -15,6 +15,7 @@
 	aliases {
 		ethernet0 = &rtl8189ftv;
 		serial1 = &uart1;
+		serial2 = &uart2;
 	};
 };
 
@@ -86,4 +87,25 @@
 
 &ehci1 {
 	status = "okay";
+};
+
+&pio {
+	uart2_pd1_pins: uart2-pd1-pins {
+		pins = "PD1", "PD2";
+		function = "uart2";
+	};
+};
+
+&uart1 {
+	/* XR829/RTL8723bs/RTL8189fs bluetooth is connected here */
+	status = "okay";
+	pinctrl-0 = <&uart1_pg6_pins>;
+	pinctrl-names = "default";
+};
+
+&uart2 {
+	/* The default UART for Linux I/O */
+	status = "disabled";
+	pinctrl-0 = <&uart2_pd1_pins>;
+	pinctrl-names = "default";
 };
