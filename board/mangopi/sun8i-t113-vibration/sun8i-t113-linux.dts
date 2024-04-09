@@ -108,3 +108,21 @@
 &uart2 {
 	status = "okay";
 };
+
+&mdio {
+	status = "okay";
+	lan8720a: ethernet-phy@0 {
+		compatible = "ethernet-phy-id0007.c0f0", "ethernet-phy-ieee802.3-c22";
+		reg = <0>;
+	};
+};
+
+&emac {
+	pinctrl-0 = <&rmii_pe_pins>;
+	pinctrl-names = "default";
+	phy-handle = <&lan8720a>;
+	phy-mode = "rmii";
+	phy-supply = <&reg_3v3>;
+	status = "okay";
+};
+
