@@ -1,0 +1,50 @@
+#!/bin/sh
+
+#
+# alsa        Init audio codec.
+#
+
+has_card() {
+	arecord -l | grep -q 'card 0'
+}
+
+start() {
+	if has_card; then
+		printf "Initializing the audio codec: "
+		amixer sset -q 'AIN1 High-Pass Filter' off
+		amixer sset -q 'AIN2 High-Pass Filter' off
+		amixer sset -q 'AIN3 High-Pass Filter' off
+		amixer sset -q 'AIN4 High-Pass Filter' off
+		amixer sset -q 'AIN5 High-Pass Filter' off
+		amixer sset -q 'AIN6 High-Pass Filter' off
+		amixer sset -q 'AIN7 High-Pass Filter' off
+		amixer sset -q 'AIN8 High-Pass Filter' off
+	fi
+        echo "OK"
+}
+stop() {
+        echo "OK"
+}
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        restart
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
+
+
