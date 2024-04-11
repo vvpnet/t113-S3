@@ -5,7 +5,7 @@
 #
 
 has_card() {
-	arecord -l | grep -q 'card 0'
+	arecord -l 2>/dev/null | grep -q 'card 0'
 }
 
 start() {
@@ -19,11 +19,11 @@ start() {
 		amixer sset -q 'AIN6 High-Pass Filter' off
 		amixer sset -q 'AIN7 High-Pass Filter' off
 		amixer sset -q 'AIN8 High-Pass Filter' off
+		echo "OK"
 	fi
-        echo "OK"
 }
 stop() {
-        echo "OK"
+	true
 }
 restart() {
         stop
