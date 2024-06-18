@@ -5,7 +5,7 @@
 #
 
 start() {
-	sleep 1 # Wait for display to init
+	cat /dev/zero 2>/dev/null >/dev/fb0 # Clear framebuffer
 	psplash&
 }
 stop() {
