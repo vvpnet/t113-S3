@@ -3,7 +3,7 @@
 
 /dts-v1/;
 
-#include "mangopi-common-linux.dtsi"
+#include "mangopi-common.dtsi"
 
 / {
 	model = "MangoPi MQ-Dual MCD_2310";

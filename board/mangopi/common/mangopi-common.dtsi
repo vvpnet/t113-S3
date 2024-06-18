@@ -113,7 +113,7 @@
 			#size-cells = <1>;
 
 			partition@0 {
-				label = "spl";
+				label = "uboot";
 				reg = <0x00000000 0x00080000>;
 			};
 
@@ -122,8 +122,33 @@
 				reg = <0x00080000 0x0fb00000>;
 			};
 		};
-
 	};
+};
+
+&usb_otg {
+	status = "okay";
+	dr_mode = "peripheral";
+};
+
+&usbphy {
+	usb1_vbus-supply = <&reg_vcc5v>;
+	status = "okay";
+};
+
+&ohci0 {
+	status = "okay";
+};
+
+&ohci1 {
+	status = "okay";
+};
+
+&ehci0 {
+	status = "okay";
+};
+
+&ehci1 {
+	status = "okay";
 };
 
 &wdt {
