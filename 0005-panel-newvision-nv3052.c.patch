@@ -1,0 +1,12 @@
+diff --git a/drivers/gpu/drm/panel/panel-newvision-nv3052c.c b/drivers/gpu/drm/panel/panel-newvision-nv3052c.c
+index 0994060a74bc..6330e8f2448c 100644
+--- a/drivers/gpu/drm/panel/panel-newvision-nv3052c.c
++++ b/drivers/gpu/drm/panel/panel-newvision-nv3052c.c
+@@ -431,6 +431,7 @@ static const struct nv3052c_reg fs035vg158_panel_regs[] = {
+ 	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x00 },
+ 	// Display Access Control
+ 	{ 0x36, 0x0a }, // bgr = 1, ss = 1, gs = 0
++	{ 0x3a, 0x60 },
+ };
+ 
+ static inline struct nv3052c *to_nv3052c(struct drm_panel *panel)
