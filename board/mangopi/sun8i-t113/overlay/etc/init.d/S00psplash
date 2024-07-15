@@ -5,6 +5,7 @@
 #
 
 start() {
+	dmesg -n1 # Disable dmesg
 	cat /dev/zero 2>/dev/null >/dev/fb0 # Clear framebuffer
 	psplash&
 }
