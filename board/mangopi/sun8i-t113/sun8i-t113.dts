@@ -39,7 +39,7 @@
 
 		sck-gpios = <&pio 4 0 GPIO_ACTIVE_HIGH>; /* PE0 */
 		mosi-gpios = <&pio 4 1 GPIO_ACTIVE_HIGH>; /* PE1 */
-		cs-gpios = <&pio 4 5 GPIO_ACTIVE_HIGH>; /* PE5 */
+		//cs-gpios = <&pio 4 5 GPIO_ACTIVE_HIGH>; /* PE5 */
 		num-chipselects = <0>;
 	};
 
