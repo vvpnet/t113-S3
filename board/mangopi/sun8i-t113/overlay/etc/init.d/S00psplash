@@ -1,0 +1,37 @@
+#!/bin/sh
+
+#
+# psplash-start Runs at startup and shutdown
+#
+
+start() {
+	dmesg -n1 # Disable dmesg
+	cat /dev/zero 2>/dev/null >/dev/fb0 # Clear framebuffer
+	psplash&
+}
+stop() {
+        psplash-write "QUIT"
+}
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        restart
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
+
+

@@ -1,0 +1,128 @@
+// SPDX-License-Identifier: (GPL-2.0+ or MIT)
+// Copyright (C) 2022 Samuel Holland <samuel@sholland.org>
+
+/dts-v1/;
+
+#include "mangopi-common.dtsi"
+
+/ {
+	model = "MangoPi MQ-Dual MCD_2310";
+	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
+
+	chosen {
+		stdout-path = "serial2:115200n8";
+	};
+
+	test_codec {
+		compatible = "test-codec";
+		port {
+			test_ep: endpoint {
+				remote-endpoint = <&card_ep_2>;
+			};
+		};
+	};
+
+	sound {
+		compatible = "audio-graph-card2";
+		label = "CS5368";
+		links = <&i2s2_port>;
+		multi {
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				convert-channels = <16>;
+				port@0 {
+					card_ep_0: endpoint {
+						remote-endpoint = <&i2s2_ep>;
+					};
+				};
+				port@1 {
+					card_ep_1: endpoint {
+						remote-endpoint = <&cs5368_ep>;
+					};
+				};
+				port@2 {
+					card_ep_2: endpoint {
+						remote-endpoint = <&test_ep>;
+					};
+				};
+			};
+		};
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+		pinctrl-names = "default";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		autorepeat;
+		bias-pull-up;
+
+		reset_settings_button@0 {
+			label = "reset_settings_button0";
+			linux,code = <28>; /* KEY_POWER */
+			gpios = <&pio 4 10 GPIO_ACTIVE_LOW>; /* PE10 */
+		};
+	};
+};
+
+&i2c2 {
+	pinctrl-0 = <&i2c2_pe12_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+	cs5368: tdm-adc-1@0x4c {
+		reg = <0x4c>;
+		compatible = "cirrus,cs5368";
+		vdd-supply = <&reg_vcc5v>;
+		vdda-supply = <&reg_3v3>;
+		reset-gpios = <&pio 4 11 GPIO_ACTIVE_LOW>; /* PE11 */
+		port {
+			cs5368_ep: endpoint {
+				dai-tdm-slot-num = <8>;
+				dai-tdm-slot-width = <32>;
+				remote-endpoint = <&card_ep_1>;
+			};
+		};
+	};
+};
+
+&i2s2 {
+	pinctrl-0 = <&i2s2_pins>, <&i2s2_din_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+	channel-slots = /bits/ 8 <0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7>;
+	channel-dins = /bits/ 8 <0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2>;
+	i2s2_port: port {
+		i2s2_ep: endpoint {
+			format = "i2s";
+			bitclock-master;
+			frame-master;
+			mclk-fs = <256>;
+			dai-tdm-slot-num = <8>;
+			dai-tdm-slot-width = <32>;
+			remote-endpoint = <&card_ep_0>;
+		};
+	};
+};
+
+&uart2 {
+	status = "okay";
+};
+
+&mdio {
+	status = "okay";
+	lan8720a: ethernet-phy@0 {
+		compatible = "ethernet-phy-id0007.c0f0", "ethernet-phy-ieee802.3-c22";
+		reg = <0>;
+	};
+};
+
+&emac {
+	pinctrl-0 = <&rmii_pe_pins>;
+	pinctrl-names = "default";
+	phy-handle = <&lan8720a>;
+	phy-mode = "rmii";
+	phy-supply = <&reg_3v3>;
+	status = "okay";
+};
+
