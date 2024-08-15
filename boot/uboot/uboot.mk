@@ -315,12 +315,11 @@ UBOOT_BOOT_IMAGE = $(call qstrip,$(BR2_TARGET_UBOOT_BOOT_IMAGE))
 
 ifneq ($(UBOOT_BOOT_IMAGE),)
 define UBOOT_COPY_IMAGE
-	cp $(UBOOT_BOOT_IMAGE) $(@D)/bootimage.bmp
+	cp $(UBOOT_BOOT_IMAGE) $(@D)/drivers/video/u_boot_logo.bmp
 endef
 
 UBOOT_POST_EXTRACT_HOOKS += UBOOT_COPY_IMAGE
 UBOOT_POST_RSYNC_HOOKS += UBOOT_COPY_IMAGE
-UBOOT_MAKE_OPTS += LOGO_BMP=bootimage.bmp
 endif
 
 ifeq ($(BR2_TARGET_UBOOT_BUILD_SYSTEM_LEGACY),y)
