@@ -41,6 +41,10 @@ config BR2_PACKAGE_PSPLASH_COLORS
 	  Custom copy of psplash-colors.h for build use.
 	  Let it empty if you want to keep the default colors.
 
+config BR2_PACKAGE_PSPLASH_PROGRESS_BAR
+	bool "enable progress bar"
+	default y
+
 endif
 
 comment "psplash needs a toolchain w/ wchar"

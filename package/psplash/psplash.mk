@@ -40,6 +40,10 @@ endef
 PSPLASH_POST_EXTRACT_HOOKS += PSPLASH_COPY_COLORS
 endif
 
+ifeq ($(BR2_PACKAGE_PSPLASH_PROGRESS_BAR),n)
+PSPLASH_CONF_OPTS += --disable-progress-bar
+endif
+
 define PSPLASH_INSTALL_INIT_SYSTEMD
 	$(INSTALL) -D -m 644 package/psplash/psplash-start.service \
 		$(TARGET_DIR)/usr/lib/systemd/system/psplash-start.service
