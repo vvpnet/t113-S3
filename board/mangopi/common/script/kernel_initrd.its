@@ -32,7 +32,7 @@
 
         initrd {
             description = "Kernel initrd";
-            data = /incbin/("./rootfs.cpio.xz");
+            data = /incbin/("./rootfs.cpio");
             type = "ramdisk";
             compression = "none";
             os = "linux";
