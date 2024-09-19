@@ -17,7 +17,10 @@ ubimkvol /dev/ubi0 --vol_id 0 -t static --name uboot --size 4MiB
 ubimkvol /dev/ubi0 --vol_id 1 -t static --name kernel --size 16MiB
 ubimkvol /dev/ubi0 --vol_id 2 --name root --size 128MiB
 
-Next run these to update the flash data
+#For 256MiB
+ubimkvol /dev/ubi0 --vol_id 2 --name root --size 200MiB
+
+#Next run these to update the flash data
 ubiupdatevol /dev/ubi0_0 u-boot.img
 ubiupdatevol /dev/ubi0_1 kernel.itb
 ubiupdatevol /dev/ubi0_2 rootfs.ubifs
