@@ -1,0 +1,29 @@
+On a device with no installed bootloader you can load U-Boot this way:
+
+$ sunxi-fel uboot output/build/uboot-*/u-boot-sunxi-with-spl.bin
+
+When booting U-Boot whether over USB or not, pull PE9 low to enter fastboot
+mode. This will also enable serial output from U-Boot and the kernel for
+development purposes.
+
+You can now load a kernel image (that may include an initrd) like this:
+
+$ fastboot stage output/images/kernel.itb
+
+The image must not exceed 32MiB or include a compressed initrd, as the
+target has 128MiB of RAM and copying around large data takes a lot of memory.
+
+To boot the kernel you will need to provide bootargs. For NAND it looks like
+this:
+
+$ fastboot oem run:'env set bootargs "rootwait ubi.mtd=ubi,0,0,0,1 ubi.fm_autoconvert=1 root=ubi:root rootfstype=ubifs"'
+
+For a recovery initrd no bootargs are provided.
+
+$ fastboot oem run:'env set bootargs ""'
+
+Next, boot the image:
+
+$ fastboot oem run:'bootm ${loadaddr}'
+
+Continue on by running commands over SSH.
