@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+(cd $BINARIES_DIR; $HOST_DIR/bin/mkimage -f kernel.its kernel.itb; rm kernel.its)
+
 BOARD_DIR="$(dirname $0)"
 
 if grep -Eq "^BR2_TARGET_AWBOOT_T113=y$" ${BR2_CONFIG}; then
