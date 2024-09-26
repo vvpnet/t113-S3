@@ -12,6 +12,4 @@ else
 	cp $BOARD_DIR/kernel.its $BINARIES_DIR/kernel.its
 fi
 
-(cd $BINARIES_DIR; $HOST_DIR/bin/mkimage -f kernel.its kernel.itb; rm kernel.its)
-
 echo "$BRD end"
