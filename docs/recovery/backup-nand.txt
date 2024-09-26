@@ -1,0 +1,21 @@
+Dumping bootloader:
+
+$ ssh root@192.168.99.1 "nanddump /dev/mtd0" > mtd0.bak
+
+Restoring bootloader:
+
+$ ssh root@192.168.99.1 "flash_erase /dev/mtd0 0 0"
+$ ssh root@192.168.99.1 "nandwrite /dev/mtd0 -" < mtd0.bak
+
+Dumping the UBI FS:
+
+$ ubiattach -p /dev/mtd1
+$ ssh root@192.168.99.1 "cat /dev/ubi0_0" > uboot.img.bak
+$ ssh root@192.168.99.1 "cat /dev/ubi0_1" > kernel.itb.bak
+$ ssh root@192.168.99.1 "cat /dev/ubi0_2" > rootfs.ubifs.bak
+
+Restoring the UBI FS:
+
+$ cat uboot.img.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_0 -s $(stat -c%s uboot.img.bak) -"
+$ cat kernel.itb.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_1 -s $(stat -c%s kernel.itb.bak) -"
+$ cat rootfs.ubifs.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_1 -s $(stat -c%s rootfs.ubifs.bak) -"
