@@ -32,9 +32,9 @@
 
         initrd {
             description = "Kernel initrd";
-            data = /incbin/("./rootfs.cpio.bz2");
+            data = /incbin/("./rootfs.cpio");
             type = "ramdisk";
-            compression = "bzip2";
+            compression = "none";
             os = "linux";
             arch = "arm";
             hash {
