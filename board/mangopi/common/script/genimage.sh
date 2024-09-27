@@ -2,7 +2,7 @@
 
 BOARD_DIR="$(dirname $0)"
 
-if test -e $BINARIES_DIR/rootfs.cpio.bz2 ; then
+if test -e $BINARIES_DIR/rootfs.cpio ; then
 	cp $BOARD_DIR/kernel_initrd.its $BINARIES_DIR/kernel.its
 else 
 	cp $BOARD_DIR/kernel.its $BINARIES_DIR/kernel.its
