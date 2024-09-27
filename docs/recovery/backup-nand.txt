@@ -18,4 +18,4 @@ Restoring the UBI FS:
 
 $ cat uboot.img.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_0 -s $(stat -c%s uboot.img.bak) -"
 $ cat kernel.itb.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_1 -s $(stat -c%s kernel.itb.bak) -"
-$ cat rootfs.ubifs.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_1 -s $(stat -c%s rootfs.ubifs.bak) -"
+$ cat rootfs.ubifs.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_2 -s $(stat -c%s rootfs.ubifs.bak) -"
