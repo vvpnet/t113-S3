@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
-(cd $BINARIES_DIR; $HOST_DIR/bin/mkimage -f kernel.its kernel.itb; rm kernel.its)
-
 BOARD_DIR="$(dirname $0)"
+
+if test -e $BINARIES_DIR/rootfs.cpio.xz ; then
+	cp $BOARD_DIR/kernel_initrd.its $BINARIES_DIR/kernel.its
+else 
+	cp $BOARD_DIR/kernel.its $BINARIES_DIR/kernel.its
+fi
+
+(cd $BINARIES_DIR; $HOST_DIR/bin/mkimage -f kernel.its kernel.itb; rm kernel.its)
 
 if grep -Eq "^BR2_TARGET_AWBOOT_T113=y$" ${BR2_CONFIG}; then
 	BRD="sun8i-t113"
