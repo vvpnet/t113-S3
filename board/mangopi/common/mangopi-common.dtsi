@@ -11,6 +11,8 @@
 	model = "MangoPi MQ-Dual";
 	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
 
+	uboot,fastboot-led = "PD22";
+
 	aliases {
 		serial0 = &uart0;
 		serial1 = &uart1;
