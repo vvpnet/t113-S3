@@ -9,6 +9,8 @@
 	model = "MangoPi MQ-Dual MCD_2310";
 	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
 
+	uboot,fastboot-pin = "always";
+
 	chosen {
 		stdout-path = "serial1:115200n8";
 	};
