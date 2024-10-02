@@ -40,7 +40,7 @@ define ROOTFS_CPIO_CMD
 	cd $(TARGET_DIR) && \
 	find . \
 	| LC_ALL=C sort \
-	| cpio $(ROOTFS_CPIO_OPTS) --quiet -o -H newc \
+	| cpio $(ROOTFS_CPIO_OPTS) --quiet -o -H crc \
 	> $@
 endef
 
