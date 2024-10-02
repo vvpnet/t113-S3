@@ -22,7 +22,26 @@
 	};
 
 	chosen {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
 		/delete-property/ stdout-path;
+
+		framebuffer-lcd0 {
+			compatible = "allwinner,simple-framebuffer","simple-framebuffer";
+			allwinner,pipeline = "mixer0-lcd0";
+			clocks = <&ccu CLK_BUS_DE>,<&ccu CLK_DE>,
+				<&display_clocks CLK_BUS_MIXER0>,
+				<&display_clocks CLK_MIXER0>,
+				<&ccu CLK_BUS_DPSS_TOP>,
+				<&ccu CLK_TCON_TV>,
+				<&ccu CLK_TVE>,
+				<&ccu CLK_TCON_LCD0>,
+				<&ccu CLK_BUS_TCON_LCD0>,
+				<&ccu CLK_TCON_LCD0>;
+			status = "disabled";
+		};
 	};
 
 	/delete-node/ leds;
