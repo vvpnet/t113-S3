@@ -1,21 +1,46 @@
 Dumping bootloader:
 
-$ ssh root@192.168.99.1 "nanddump /dev/mtd0" > mtd0.bak
+(There may be bad blocks, try each of these in sequence until it succeeds)
+$ ssh root@192.168.99.1 "dd if=/dev/mtd0 of=/root/spl.bak bs=1024 skip=0 count=32"
+$ ssh root@192.168.99.1 "dd if=/dev/mtd0 of=/root/spl.bak bs=1024 skip=128 count=32"
+$ ssh root@192.168.99.1 "dd if=/dev/mtd0 of=/root/spl.bak bs=1024 skip=256 count=32"
+$ ssh root@192.168.99.1 "dd if=/dev/mtd0 of=/root/spl.bak bs=1024 skip=384 count=32"
+
+$ scp root@192.168.99.1:/root/spl.bak spl.bak
 
 Restoring bootloader:
 
+$ scp spl.bak root@192.168.99.1:/root/spl.bak
 $ ssh root@192.168.99.1 "flash_erase /dev/mtd0 0 0"
-$ ssh root@192.168.99.1 "nandwrite /dev/mtd0 -" < mtd0.bak
+$ ssh root@192.168.99.1 "nandwrite -s 0x00000 -N -m /dev/mtd0 spl.bak"
+$ ssh root@192.168.99.1 "nandwrite -s 0x20000 -N -m /dev/mtd0 spl.bak"
+$ ssh root@192.168.99.1 "nandwrite -s 0x40000 -N -m /dev/mtd0 spl.bak"
+$ ssh root@192.168.99.1 "nandwrite -s 0x60000 -N -m /dev/mtd0 spl.bak"
 
-Dumping the UBI FS:
+Dumping U-Boot, the kernel and root filesystem UBIFS:
 
-$ ubiattach -p /dev/mtd1
+$ ssh root@192.168.99.1 "ubiattach -p /dev/mtd1"
 $ ssh root@192.168.99.1 "cat /dev/ubi0_0" > uboot.img.bak
 $ ssh root@192.168.99.1 "cat /dev/ubi0_1" > kernel.itb.bak
 $ ssh root@192.168.99.1 "cat /dev/ubi0_2" > rootfs.ubifs.bak
 
-Restoring the UBI FS:
+Restoring U-Boot, the kernel and root filesystem UBIFS:
 
 $ cat uboot.img.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_0 -s $(stat -c%s uboot.img.bak) -"
 $ cat kernel.itb.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_1 -s $(stat -c%s kernel.itb.bak) -"
 $ cat rootfs.ubifs.bak | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_2 -s $(stat -c%s rootfs.ubifs.bak) -"
+
+Dumping the root filesystem (for transfer to an SD card):
+
+$ ssh root@192.168.99.1 "ubiattach -p /dev/mtd1"
+$ ssh root@192.168.99.1 "mount -t ubifs /dev/ubi0_2 /mnt"
+$ ssh root@192.168.99.1 "tar c -C /mnt/ -f - ." > rootfs.tar.bak
+$ ssh root@192.168.99.1 "umount /mnt"
+
+Restoring the root filesystem (for transfer from an SD card):
+
+$ ssh root@192.168.99.1 "ubiattach -p /dev/mtd1"
+$ ssh root@192.168.99.1 "mount -t ubifs /dev/ubi0_2 /mnt"
+$ ssh root@192.168.99.1 "rm -rf /mnt/"
+$ ssh root@192.168.99.1 "tar x -C /mnt/ -f - ." < rootfs.tar.bak
+$ ssh root@192.168.99.1 "umount /mnt"
