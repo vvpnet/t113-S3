@@ -4,23 +4,23 @@ $ ssh root@192.168.99.1 "dd of=/dev/mmcblk0 bs=8M" < output/images/sdcard.img
 
 Dumping bootloader:
 
-$ ssh root@192.168.99.1 "dd if=/dev/mmcblk0 of=/root/spl.bak bs=1024 skip=8 count=32"
+$ ssh root@192.168.99.1 "dd if=/dev/mmcblk0 of=/root/spl.bak bs=1024 skip=8 count=128"
 $ scp root@192.168.99.1:/root/spl.bak spl.bak
 
 Restoring bootloader:
 
 $ scp spl.bak root@192.168.99.1:/root/spl.bak
-$ ssh root@192.168.99.1 "dd if=/root/spl.bak of=/dev/mmcblk0 bs=1024 seek=8 count=32"
+$ ssh root@192.168.99.1 "dd if=/root/spl.bak of=/dev/mmcblk0 bs=1024 seek=8 count=128"
 
 Dumping U-Boot:
 
-$ ssh root@192.168.99.1 "dd if=/dev/mmcblk0 of=/root/uboot.img.bak bs=1024 skip=40 count=4096"
+$ ssh root@192.168.99.1 "dd if=/dev/mmcblk0 of=/root/uboot.img.bak bs=1024 skip=136 count=4096"
 $ scp root@192.168.99.1:/root/uboot.img.bak uboot.img.bak
 
 Restoring U-Boot:
 
 $ scp uboot.img.bak root@192.168.99.1:/root/uboot.img.bak
-$ ssh root@192.168.99.1 "dd if=/root/uboot.img.bak of=/dev/mmcblk0 bs=1024 seek=40 count=4096"
+$ ssh root@192.168.99.1 "dd if=/root/uboot.img.bak of=/dev/mmcblk0 bs=1024 seek=136 count=4096"
 
 Dumping the kernel:
 
