@@ -20,7 +20,7 @@ $ scp root@192.168.99.1:/root/uboot.img.bak uboot.img.bak
 Restoring U-Boot:
 
 $ scp uboot.img.bak root@192.168.99.1:/root/uboot.img.bak
-$ ssh root@192.168.99.1 "dd if=/root/uboot.img.bak of=/dev/mmcblk0 bs=1024 seek=8 count=32"
+$ ssh root@192.168.99.1 "dd if=/root/uboot.img.bak of=/dev/mmcblk0 bs=1024 seek=40 count=4096"
 
 Dumping the kernel:
 
