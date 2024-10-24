@@ -1,10 +1,10 @@
-From 7c07cc5f5ec82bfcf365c6616f1836c32529c26d Mon Sep 17 00:00:00 2001
+From 14cbad3c5cd7815cf8a082012aaed08afdfdd863 Mon Sep 17 00:00:00 2001
 From: John Watts <contact@jookia.org>
 Date: Wed, 13 Mar 2024 06:17:18 +1100
-Subject: [PATCH] Variable clocking CS5368
+Subject: [PATCH 3/3] Variable clocking sunxi
 
 ---
- drivers/clk/sunxi-ng/ccu-sun20i-d1.c   |  23 +-
+ drivers/clk/sunxi-ng/ccu-sun20i-d1.c   |  23 ++-
  drivers/clk/sunxi-ng/ccu-sun4i-a10.c   |   8 +-
  drivers/clk/sunxi-ng/ccu-sun50i-a100.c |  17 +-
  drivers/clk/sunxi-ng/ccu-sun50i-a64.c  |   7 +-
@@ -18,19 +18,15 @@ Subject: [PATCH] Variable clocking CS5368
  drivers/clk/sunxi-ng/ccu-sun8i-r40.c   |   7 +-
  drivers/clk/sunxi-ng/ccu-sun8i-v3s.c   |   7 +-
  drivers/clk/sunxi-ng/ccu_common.h      |   6 +
- drivers/clk/sunxi-ng/ccu_nm.c          |  57 ++--
+ drivers/clk/sunxi-ng/ccu_nm.c          |  57 +++----
  drivers/clk/sunxi-ng/ccu_nm.h          |   6 +-
- drivers/clk/sunxi-ng/ccu_sdm.c         | 224 +++++++-------
- drivers/clk/sunxi-ng/ccu_sdm.h         |  56 +---
- sound/soc/codecs/Kconfig               |   6 +
- sound/soc/codecs/Makefile              |   2 +
- sound/soc/codecs/cs5368.c              | 407 +++++++++++++++++++++++++
- sound/soc/sunxi/sun4i-i2s.c            | 144 ++-------
- 22 files changed, 613 insertions(+), 420 deletions(-)
- create mode 100644 sound/soc/codecs/cs5368.c
+ drivers/clk/sunxi-ng/ccu_sdm.c         | 224 ++++++++++++-------------
+ drivers/clk/sunxi-ng/ccu_sdm.h         |  56 ++-----
+ sound/soc/sunxi/sun4i-i2s.c            | 141 ++--------------
+ 19 files changed, 196 insertions(+), 419 deletions(-)
 
 diff --git a/drivers/clk/sunxi-ng/ccu-sun20i-d1.c b/drivers/clk/sunxi-ng/ccu-sun20i-d1.c
-index 48a8fb2c43b7..4820610b5169 100644
+index 9b5cfac2ee70..3b6fbd711842 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun20i-d1.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun20i-d1.c
 @@ -168,17 +168,12 @@ static struct ccu_nkmp pll_ve_clk = {
@@ -103,7 +99,7 @@ index 48a8fb2c43b7..4820610b5169 100644
  static const struct clk_hw *i2s2_asrc_parents[] = {
  	&pll_audio0_4x_clk.common.hw,
 diff --git a/drivers/clk/sunxi-ng/ccu-sun4i-a10.c b/drivers/clk/sunxi-ng/ccu-sun4i-a10.c
-index 451ebb7c99a3..fa2fe28d2f4a 100644
+index d1a1683baff4..44482893a546 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun4i-a10.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun4i-a10.c
 @@ -56,17 +56,11 @@ static struct ccu_nkmp pll_core_clk = {
@@ -126,7 +122,7 @@ index 451ebb7c99a3..fa2fe28d2f4a 100644
  		.reg		= 0x008,
  		.features	= CCU_FEATURE_SIGMA_DELTA_MOD,
 diff --git a/drivers/clk/sunxi-ng/ccu-sun50i-a100.c b/drivers/clk/sunxi-ng/ccu-sun50i-a100.c
-index 5f93b5526e13..4d74949d20dd 100644
+index bbaa82978716..f501a04d7225 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun50i-a100.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun50i-a100.c
 @@ -193,17 +193,12 @@ static struct ccu_nkmp pll_ve_clk = {
@@ -172,7 +168,7 @@ index 5f93b5526e13..4d74949d20dd 100644
  		.reg		= 0x078,
  		.features	= CCU_FEATURE_FIXED_POSTDIV |
 diff --git a/drivers/clk/sunxi-ng/ccu-sun50i-a64.c b/drivers/clk/sunxi-ng/ccu-sun50i-a64.c
-index 8951ffc14ff5..163853ab2e36 100644
+index c255dba2c96d..96c4131acff8 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun50i-a64.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun50i-a64.c
 @@ -53,16 +53,11 @@ static struct ccu_nkmp pll_cpux_clk = {
@@ -194,7 +190,7 @@ index 8951ffc14ff5..163853ab2e36 100644
  				       BIT(31),	/* gate */
  				       BIT(28),	/* lock */
 diff --git a/drivers/clk/sunxi-ng/ccu-sun50i-h6.c b/drivers/clk/sunxi-ng/ccu-sun50i-h6.c
-index 42568c616181..6f3ee776edcc 100644
+index a20b621ad8f1..467e8f6285a2 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun50i-h6.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun50i-h6.c
 @@ -203,19 +203,12 @@ static struct ccu_nkmp pll_hsic_clk = {
@@ -246,7 +242,7 @@ index 1f4bc0e773a7..cd48faacfd21 100644
  		.reg		= 0x008,
  		.features	= CCU_FEATURE_SIGMA_DELTA_MOD,
 diff --git a/drivers/clk/sunxi-ng/ccu-sun6i-a31.c b/drivers/clk/sunxi-ng/ccu-sun6i-a31.c
-index 0762deffb33c..fecbfe973f87 100644
+index e8b8d2dd7f2c..1de856eaa89b 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun6i-a31.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun6i-a31.c
 @@ -52,16 +52,11 @@ static SUNXI_CCU_NKM_WITH_GATE_LOCK(pll_cpu_clk, "pll-cpu",
@@ -268,7 +264,7 @@ index 0762deffb33c..fecbfe973f87 100644
  				       BIT(31),	/* gate */
  				       BIT(28),	/* lock */
 diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-a23.c b/drivers/clk/sunxi-ng/ccu-sun8i-a23.c
-index e80cc3864e44..0cf19999e373 100644
+index 6c2a08f722a8..59b34a9dca3a 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun8i-a23.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun8i-a23.c
 @@ -56,16 +56,11 @@ static struct ccu_nkmp pll_cpux_clk = {
@@ -290,7 +286,7 @@ index e80cc3864e44..0cf19999e373 100644
  				       BIT(31),	/* gate */
  				       BIT(28),	/* lock */
 diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-a33.c b/drivers/clk/sunxi-ng/ccu-sun8i-a33.c
-index d12878a1ba9e..dc660f4ff4ec 100644
+index 5e0bc08a9ce3..41f9b79935bf 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun8i-a33.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun8i-a33.c
 @@ -54,16 +54,11 @@ static struct ccu_nkmp pll_cpux_clk = {
@@ -312,7 +308,7 @@ index d12878a1ba9e..dc660f4ff4ec 100644
  				       BIT(31),	/* gate */
  				       BIT(28),	/* lock */
 diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c b/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
-index 76cbd9e9e89f..72d65475e343 100644
+index cb4c6b16c467..a9a530d0f87b 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
 @@ -68,21 +68,13 @@ static struct ccu_mult pll_c1cpux_clk = {
@@ -339,7 +335,7 @@ index 76cbd9e9e89f..72d65475e343 100644
  		.reg		= SUN8I_A83T_PLL_AUDIO_REG,
  		.lock_reg	= CCU_SUN8I_A83T_LOCK_REG,
 diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-h3.c b/drivers/clk/sunxi-ng/ccu-sun8i-h3.c
-index 74274c17efb3..a48fa5c2a9b3 100644
+index 13e57db2f8d5..1e8ef53c0475 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun8i-h3.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun8i-h3.c
 @@ -49,16 +49,11 @@ static SUNXI_CCU_NKMP_WITH_GATE_LOCK(pll_cpux_clk, "pll-cpux",
@@ -361,7 +357,7 @@ index 74274c17efb3..a48fa5c2a9b3 100644
  				       BIT(31),	/* gate */
  				       BIT(28),	/* lock */
 diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-r40.c b/drivers/clk/sunxi-ng/ccu-sun8i-r40.c
-index 31eca0d3bc1e..f8020ea8ca41 100644
+index 2f51ceab8016..6dc7701a50d6 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun8i-r40.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun8i-r40.c
 @@ -55,16 +55,11 @@ static struct ccu_nkmp pll_cpu_clk = {
@@ -383,7 +379,7 @@ index 31eca0d3bc1e..f8020ea8ca41 100644
  				       BIT(31),	/* gate */
  				       BIT(28),	/* lock */
 diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-v3s.c b/drivers/clk/sunxi-ng/ccu-sun8i-v3s.c
-index f3ce8664b288..249d41115676 100644
+index d24c0d8dfee4..a100febc4e67 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun8i-v3s.c
 +++ b/drivers/clk/sunxi-ng/ccu-sun8i-v3s.c
 @@ -51,16 +51,11 @@ static SUNXI_CCU_NKMP_WITH_GATE_LOCK(pll_cpu_clk, "pll-cpu",
@@ -405,10 +401,10 @@ index f3ce8664b288..249d41115676 100644
  				       BIT(31),	/* gate */
  				       BIT(28),	/* lock */
 diff --git a/drivers/clk/sunxi-ng/ccu_common.h b/drivers/clk/sunxi-ng/ccu_common.h
-index 942a72c09437..4cd611643ca4 100644
+index 329734f8cf42..4a06068cdec0 100644
 --- a/drivers/clk/sunxi-ng/ccu_common.h
 +++ b/drivers/clk/sunxi-ng/ccu_common.h
-@@ -75,4 +75,10 @@ int devm_sunxi_ccu_probe(struct device *dev, void __iomem *reg,
+@@ -78,4 +78,10 @@ int devm_sunxi_ccu_probe(struct device *dev, void __iomem *reg,
  void of_sunxi_ccu_probe(struct device_node *node, void __iomem *reg,
  			const struct sunxi_ccu_desc *desc);
  
@@ -915,468 +911,11 @@ index c1a7159b89c3..2fc25bca49e4 100644
 +			   struct ccu_nm_params *params);
  
  #endif
-diff --git a/sound/soc/codecs/Kconfig b/sound/soc/codecs/Kconfig
-index 59f9742e9ff4..b4cb23ee8375 100644
---- a/sound/soc/codecs/Kconfig
-+++ b/sound/soc/codecs/Kconfig
-@@ -98,6 +98,7 @@ config SND_SOC_ALL_CODECS
- 	imply SND_SOC_CS47L85
- 	imply SND_SOC_CS47L90
- 	imply SND_SOC_CS47L92
-+	imply SND_SOC_CS5368
- 	imply SND_SOC_CS53L30
- 	imply SND_SOC_CX20442
- 	imply SND_SOC_CX2072X
-@@ -971,6 +972,11 @@ config SND_SOC_CS47L92
- 	tristate
- 	depends on MFD_CS47L92
- 
-+config SND_SOC_CS5368
-+	tristate "Cirrus Logic CS5368 CODEC"
-+	depends on I2C
-+	depends on OF
-+
- # Cirrus Logic Quad-Channel ADC
- config SND_SOC_CS53L30
- 	tristate "Cirrus Logic CS53L30 CODEC"
-diff --git a/sound/soc/codecs/Makefile b/sound/soc/codecs/Makefile
-index f53baa2b9565..5ec9004ec91b 100644
---- a/sound/soc/codecs/Makefile
-+++ b/sound/soc/codecs/Makefile
-@@ -104,6 +104,7 @@ snd-soc-cs47l35-objs := cs47l35.o
- snd-soc-cs47l85-objs := cs47l85.o
- snd-soc-cs47l90-objs := cs47l90.o
- snd-soc-cs47l92-objs := cs47l92.o
-+snd-soc-cs5368-objs := cs5368.o
- snd-soc-cs53l30-objs := cs53l30.o
- snd-soc-cx20442-objs := cx20442.o
- snd-soc-cx2072x-objs := cx2072x.o
-@@ -494,6 +495,7 @@ obj-$(CONFIG_SND_SOC_CS47L35)	+= snd-soc-cs47l35.o
- obj-$(CONFIG_SND_SOC_CS47L85)	+= snd-soc-cs47l85.o
- obj-$(CONFIG_SND_SOC_CS47L90)	+= snd-soc-cs47l90.o
- obj-$(CONFIG_SND_SOC_CS47L92)	+= snd-soc-cs47l92.o
-+obj-$(CONFIG_SND_SOC_CS5368)	+= snd-soc-cs5368.o
- obj-$(CONFIG_SND_SOC_CS53L30)	+= snd-soc-cs53l30.o
- obj-$(CONFIG_SND_SOC_CX20442)	+= snd-soc-cx20442.o
- obj-$(CONFIG_SND_SOC_CX2072X)	+= snd-soc-cx2072x.o
-diff --git a/sound/soc/codecs/cs5368.c b/sound/soc/codecs/cs5368.c
-new file mode 100644
-index 000000000000..d5771fa543cb
---- /dev/null
-+++ b/sound/soc/codecs/cs5368.c
-@@ -0,0 +1,407 @@
-+// SPDX-License-Identifier: GPL-2.0-or-later
-+// Copyright 2024 John Watts <contact@jookia.org>
-+
-+#include <linux/gpio/consumer.h>
-+#include <linux/i2c.h>
-+#include <linux/module.h>
-+#include <linux/of.h>
-+#include <linux/pm_runtime.h>
-+#include <linux/regmap.h>
-+#include <linux/regulator/consumer.h>
-+#include <sound/soc.h>
-+
-+#define REG_REVI 0x00
-+#define REG_GCTL 0x01
-+#define REG_OVFL 0x02
-+#define REG_OVFM 0x03
-+#define REG_HPF 0x04
-+#define REG_RSVD1 0x05
-+#define REG_PDN 0x06
-+#define REG_RSVD2 0x07
-+#define REG_MUTE 0x08
-+#define REG_RSVD3 0x09
-+#define REG_SDEN 0x0A
-+#define MAX_REG REG_SDEN
-+
-+static const struct reg_sequence cs5368_reg_init[] = {
-+	{ REG_GCTL, 0x8B }, /* CP-EN, TDM format, slave audio clocking */
-+	{ REG_OVFM, 0x00 }, /* Mask all overflows */
-+	{ REG_SDEN, 0x0A }, /* Only enable TDM and _TDM pins */
-+};
-+
-+static const struct reg_default cs5368_reg_defaults[] = {
-+	{ REG_REVI, 0x80 }, /* Assume revision A by default */
-+	{ REG_GCTL, 0x00 },
-+	{ REG_OVFL, 0xFF },
-+	{ REG_OVFM, 0xFF },
-+	{ REG_HPF,  0x00 },
-+	{ REG_PDN,  0x00 },
-+	{ REG_MUTE, 0x00 },
-+	{ REG_SDEN, 0x00 },
-+};
-+
-+static const struct regmap_range cs5368_rd_no_ranges[] = {
-+	regmap_reg_range(REG_RSVD1, REG_RSVD1),
-+	regmap_reg_range(REG_RSVD2, REG_RSVD2),
-+	regmap_reg_range(REG_RSVD3, REG_RSVD3),
-+};
-+
-+static const struct regmap_range cs5368_wr_no_ranges[] = {
-+	regmap_reg_range(REG_REVI,  REG_REVI),
-+	regmap_reg_range(REG_RSVD1, REG_RSVD1),
-+	regmap_reg_range(REG_RSVD2, REG_RSVD2),
-+	regmap_reg_range(REG_RSVD3, REG_RSVD3),
-+};
-+
-+static const struct regmap_range cs5368_volatile_yes_ranges[] = {
-+	regmap_reg_range(REG_OVFL, REG_OVFL),
-+};
-+
-+static const struct regmap_access_table cs5368_rd_table = {
-+	.no_ranges = cs5368_rd_no_ranges,
-+	.n_no_ranges = ARRAY_SIZE(cs5368_rd_no_ranges),
-+};
-+
-+static const struct regmap_access_table cs5368_wr_table = {
-+	.no_ranges = cs5368_wr_no_ranges,
-+	.n_no_ranges = ARRAY_SIZE(cs5368_wr_no_ranges),
-+};
-+
-+static const struct regmap_access_table cs5368_volatile_table = {
-+	.yes_ranges = cs5368_volatile_yes_ranges,
-+	.n_yes_ranges = ARRAY_SIZE(cs5368_volatile_yes_ranges),
-+};
-+
-+static const struct regmap_config cs5368_regmap_config = {
-+	.reg_bits = 8,
-+	.val_bits = 8,
-+	.cache_type = REGCACHE_RBTREE,
-+	.reg_defaults = cs5368_reg_defaults,
-+	.num_reg_defaults = ARRAY_SIZE(cs5368_reg_defaults),
-+	.max_register = MAX_REG,
-+	.rd_table = &cs5368_rd_table,
-+	.wr_table = &cs5368_wr_table,
-+	.volatile_table = &cs5368_volatile_table,
-+	.read_flag_mask = 0x80, /* Set INCR bit so batch reads work */
-+	.write_flag_mask = 0x80, /* Set INCR bit so batch writes work */
-+};
-+
-+static const char *supply_names[] = {
-+	"vdd", /* Usually 3.3V logic */
-+	"vdda", /* Usually 5V logic */
-+};
-+
-+struct cs5368_priv {
-+	struct regulator_bulk_data regulators[ARRAY_SIZE(supply_names)];
-+	struct gpio_desc *reset_gpio;
-+	struct regmap *regmap;
-+	int mclk;
-+};
-+
-+static const struct snd_kcontrol_new cs5368_snd_controls[] = {
-+	SOC_SINGLE("AIN1 High-Pass Filter Switch", 0x4, 0, 1, 1),
-+	SOC_SINGLE("AIN2 High-Pass Filter Switch", 0x4, 1, 1, 1),
-+	SOC_SINGLE("AIN3 High-Pass Filter Switch", 0x4, 2, 1, 1),
-+	SOC_SINGLE("AIN4 High-Pass Filter Switch", 0x4, 3, 1, 1),
-+	SOC_SINGLE("AIN5 High-Pass Filter Switch", 0x4, 4, 1, 1),
-+	SOC_SINGLE("AIN6 High-Pass Filter Switch", 0x4, 5, 1, 1),
-+	SOC_SINGLE("AIN7 High-Pass Filter Switch", 0x4, 6, 1, 1),
-+	SOC_SINGLE("AIN8 High-Pass Filter Switch", 0x4, 7, 1, 1),
-+};
-+
-+static const struct snd_kcontrol_new cs5368_snd_controls_mute_ain1 =
-+	SOC_DAPM_SINGLE("Switch", 0x8, 0, 1, 1);
-+static const struct snd_kcontrol_new cs5368_snd_controls_mute_ain2 =
-+	SOC_DAPM_SINGLE("Switch", 0x8, 1, 1, 1);
-+static const struct snd_kcontrol_new cs5368_snd_controls_mute_ain3 =
-+	SOC_DAPM_SINGLE("Switch", 0x8, 2, 1, 1);
-+static const struct snd_kcontrol_new cs5368_snd_controls_mute_ain4 =
-+	SOC_DAPM_SINGLE("Switch", 0x8, 3, 1, 1);
-+static const struct snd_kcontrol_new cs5368_snd_controls_mute_ain5 =
-+	SOC_DAPM_SINGLE("Switch", 0x8, 4, 1, 1);
-+static const struct snd_kcontrol_new cs5368_snd_controls_mute_ain6 =
-+	SOC_DAPM_SINGLE("Switch", 0x8, 5, 1, 1);
-+static const struct snd_kcontrol_new cs5368_snd_controls_mute_ain7 =
-+	SOC_DAPM_SINGLE("Switch", 0x8, 6, 1, 1);
-+static const struct snd_kcontrol_new cs5368_snd_controls_mute_ain8 =
-+	SOC_DAPM_SINGLE("Switch", 0x8, 7, 1, 1);
-+
-+static const struct snd_soc_dapm_widget cs5368_dapm_widgets[] = {
-+	SND_SOC_DAPM_INPUT("AIN1"),
-+	SND_SOC_DAPM_INPUT("AIN2"),
-+	SND_SOC_DAPM_INPUT("AIN3"),
-+	SND_SOC_DAPM_INPUT("AIN4"),
-+	SND_SOC_DAPM_INPUT("AIN5"),
-+	SND_SOC_DAPM_INPUT("AIN6"),
-+	SND_SOC_DAPM_INPUT("AIN7"),
-+	SND_SOC_DAPM_INPUT("AIN8"),
-+	SND_SOC_DAPM_ADC("AIN12", NULL, 0x6, 0, 1),
-+	SND_SOC_DAPM_ADC("AIN34", NULL, 0x6, 1, 1),
-+	SND_SOC_DAPM_ADC("AIN56", NULL, 0x6, 2, 1),
-+	SND_SOC_DAPM_ADC("AIN78", NULL, 0x6, 3, 1),
-+	SND_SOC_DAPM_SWITCH("AIN1 Capture", SND_SOC_NOPM, 0, 0, &cs5368_snd_controls_mute_ain1),
-+	SND_SOC_DAPM_SWITCH("AIN2 Capture", SND_SOC_NOPM, 0, 0, &cs5368_snd_controls_mute_ain2),
-+	SND_SOC_DAPM_SWITCH("AIN3 Capture", SND_SOC_NOPM, 0, 0, &cs5368_snd_controls_mute_ain3),
-+	SND_SOC_DAPM_SWITCH("AIN4 Capture", SND_SOC_NOPM, 0, 0, &cs5368_snd_controls_mute_ain4),
-+	SND_SOC_DAPM_SWITCH("AIN5 Capture", SND_SOC_NOPM, 0, 0, &cs5368_snd_controls_mute_ain5),
-+	SND_SOC_DAPM_SWITCH("AIN6 Capture", SND_SOC_NOPM, 0, 0, &cs5368_snd_controls_mute_ain6),
-+	SND_SOC_DAPM_SWITCH("AIN7 Capture", SND_SOC_NOPM, 0, 0, &cs5368_snd_controls_mute_ain7),
-+	SND_SOC_DAPM_SWITCH("AIN8 Capture", SND_SOC_NOPM, 0, 0, &cs5368_snd_controls_mute_ain8),
-+	SND_SOC_DAPM_AIF_OUT("TDM1", "Capture", 0, SND_SOC_NOPM, 0, 0),
-+	SND_SOC_DAPM_AIF_OUT("TDM2", "Capture", 2, SND_SOC_NOPM, 0, 0),
-+	SND_SOC_DAPM_AIF_OUT("TDM3", "Capture", 4, SND_SOC_NOPM, 0, 0),
-+	SND_SOC_DAPM_AIF_OUT("TDM4", "Capture", 6, SND_SOC_NOPM, 0, 0),
-+	SND_SOC_DAPM_AIF_OUT("TDM5", "Capture", 1, SND_SOC_NOPM, 0, 0),
-+	SND_SOC_DAPM_AIF_OUT("TDM6", "Capture", 3, SND_SOC_NOPM, 0, 0),
-+	SND_SOC_DAPM_AIF_OUT("TDM7", "Capture", 5, SND_SOC_NOPM, 0, 0),
-+	SND_SOC_DAPM_AIF_OUT("TDM8", "Capture", 7, SND_SOC_NOPM, 0, 0),
-+};
-+
-+static const struct snd_soc_dapm_route cs5368_dapm_routes[] = {
-+	{ "AIN12", NULL, "AIN1" },
-+	{ "AIN12", NULL, "AIN2" },
-+	{ "AIN34", NULL, "AIN3" },
-+	{ "AIN34", NULL, "AIN4" },
-+	{ "AIN56", NULL, "AIN5" },
-+	{ "AIN56", NULL, "AIN6" },
-+	{ "AIN78", NULL, "AIN7" },
-+	{ "AIN78", NULL, "AIN8" },
-+	{ "AIN1 Capture", "Switch", "AIN12" },
-+	{ "AIN2 Capture", "Switch", "AIN12" },
-+	{ "AIN3 Capture", "Switch", "AIN34" },
-+	{ "AIN4 Capture", "Switch", "AIN34" },
-+	{ "AIN5 Capture", "Switch", "AIN56" },
-+	{ "AIN6 Capture", "Switch", "AIN56" },
-+	{ "AIN7 Capture", "Switch", "AIN78" },
-+	{ "AIN8 Capture", "Switch", "AIN78" },
-+	{ "TDM1", NULL, "AIN1 Capture" },
-+	{ "TDM2", NULL, "AIN2 Capture" },
-+	{ "TDM3", NULL, "AIN3 Capture" },
-+	{ "TDM4", NULL, "AIN4 Capture" },
-+	{ "TDM5", NULL, "AIN5 Capture" },
-+	{ "TDM6", NULL, "AIN6 Capture" },
-+	{ "TDM7", NULL, "AIN7 Capture" },
-+	{ "TDM8", NULL, "AIN8 Capture" },
-+};
-+
-+static int cs5368_dai_hw_params(struct snd_pcm_substream *substream,
-+	struct snd_pcm_hw_params *params,
-+	struct snd_soc_dai *dai)
-+{
-+	struct cs5368_priv *priv = snd_soc_dai_get_drvdata(dai);
-+	struct device *dev = dai->dev;
-+
-+	int rate = params_rate(params);
-+	int fs = priv->mclk / rate;
-+
-+	if(fs && fs != 256) {
-+		dev_err(dev, "mclk-fs must be 256\n");
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
-+static int cs5368_dai_set_sysclk(struct snd_soc_dai *dai, int clk_id,
-+	unsigned int freq, int dir)
-+{
-+	struct cs5368_priv *priv = snd_soc_dai_get_drvdata(dai);
-+	priv->mclk = freq;
-+
-+	return 0;
-+}
-+
-+static int cs5368_dai_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
-+{
-+	int mode = fmt & SND_SOC_DAIFMT_FORMAT_MASK;
-+	struct device *dev = dai->dev;
-+
-+	/*
-+	 * The data sheet says the TDM format is 'left justified',
-+	 * but it is actually standard I2S format.
-+	 * The diagram (figure 12) seems to confirm this.
-+	*/
-+	if(mode != SND_SOC_DAIFMT_I2S) {
-+		dev_err(dev, "codec only supports i2s format\n");
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
-+static int cs5368_dai_set_tdm_slot(struct snd_soc_dai *dai,
-+	unsigned int tx_mask,
-+	unsigned int rx_mask,
-+	int slots, int slot_width)
-+{
-+	struct device *dev = dai->dev;
-+
-+	if(slots != 8) {
-+		dev_err(dev, "codec requires 8 TDM slots\n");
-+		return -EINVAL;
-+	}
-+
-+	if(slot_width != 32) {
-+		dev_err(dev, "codec requires 32-bit TDM slot width\n");
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
-+static const struct snd_soc_dai_ops snd_soc_dai_ops_cs5368 = {
-+	.hw_params = cs5368_dai_hw_params,
-+	.set_fmt = cs5368_dai_set_fmt,
-+	.set_sysclk = cs5368_dai_set_sysclk,
-+	.set_tdm_slot = cs5368_dai_set_tdm_slot,
-+};
-+
-+struct snd_soc_dai_driver soc_dai_cs5368 = {
-+	.capture = {
-+		.channels_max = 8,
-+		.channels_min = 8,
-+		.formats = SNDRV_PCM_FMTBIT_S32_LE,
-+		.rate_max = 216000,
-+		.rate_min = 2000,
-+		.rates = SNDRV_PCM_RATE_CONTINUOUS,
-+		.sig_bits = 24,
-+		.stream_name = "Capture",
-+	},
-+	.name = "cs5368",
-+	.ops = &snd_soc_dai_ops_cs5368,
-+};
-+
-+static const struct snd_soc_component_driver soc_component_dev_cs5368 = {
-+	.controls = cs5368_snd_controls,
-+	.dapm_routes = cs5368_dapm_routes,
-+	.dapm_widgets = cs5368_dapm_widgets,
-+	.endianness = 1,
-+	.num_controls = ARRAY_SIZE(cs5368_snd_controls),
-+	.num_dapm_routes = ARRAY_SIZE(cs5368_dapm_routes),
-+	.num_dapm_widgets = ARRAY_SIZE(cs5368_dapm_widgets),
-+};
-+
-+static int cs5368_i2c_probe(struct i2c_client *client)
-+{
-+	struct device *dev = &client->dev;
-+	struct cs5368_priv *priv;
-+	int err;
-+
-+	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
-+	if (!priv)
-+		return -ENOMEM;
-+
-+	dev_set_drvdata(dev, priv);
-+
-+	priv->regmap = devm_regmap_init_i2c(client, &cs5368_regmap_config);
-+	if (IS_ERR(priv->regmap)) {
-+		err = PTR_ERR(priv->regmap);
-+		dev_err(dev, "regmap init failed: %d\n", err);
-+		return err;
-+	}
-+	regcache_cache_only(priv->regmap, true);
-+	err = regmap_multi_reg_write(priv->regmap, cs5368_reg_init, ARRAY_SIZE(cs5368_reg_init));
-+	if (err) {
-+		dev_err(dev, "regmap_multi_reg_write failed: %d\n", err);
-+		return err;
-+	}
-+
-+	regulator_bulk_set_supply_names(priv->regulators, supply_names, ARRAY_SIZE(priv->regulators));
-+	err = devm_regulator_bulk_get(dev, ARRAY_SIZE(priv->regulators), priv->regulators);
-+	if (err) {
-+		dev_err(dev, "regulator_bulk_get failed: %d\n", err);
-+		return err;
-+	}
-+
-+	priv->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_HIGH);
-+	if (IS_ERR(priv->reset_gpio)) {
-+		err = PTR_ERR(priv->reset_gpio);
-+		dev_err(dev, "failed to get reset gpio: %d\n", err);
-+		return err;
-+	}
-+
-+	err = devm_pm_runtime_enable(dev);
-+	if (err) {
-+		dev_err(dev, "devm_pm_runtime_enable failed: %d\n", err);
-+		return err;
-+	}
-+
-+	return devm_snd_soc_register_component(&client->dev,
-+			&soc_component_dev_cs5368, &soc_dai_cs5368, 1);
-+}
-+
-+static int cs5368_pm_runtime_suspend(struct device *dev)
-+{
-+	struct cs5368_priv* priv = dev_get_drvdata(dev);
-+	int err;
-+
-+	err = regcache_sync(priv->regmap);
-+	regcache_cache_only(priv->regmap, true);
-+	if (err) {
-+		dev_err(dev, "regcache_sync failed: %d\n", err);
-+		return err;
-+	}
-+
-+	gpiod_set_value_cansleep(priv->reset_gpio, 1);
-+
-+	err = regulator_bulk_disable(ARRAY_SIZE(priv->regulators), priv->regulators);
-+	if (err) {
-+		dev_err(dev, "regulator_bulk_disable failed: %d\n", err);
-+		return err;
-+	}
-+
-+	return 0;
-+}
-+
-+static int cs5368_pm_runtime_resume(struct device *dev)
-+{
-+	struct cs5368_priv* priv = dev_get_drvdata(dev);
-+	int err;
-+
-+	err = regulator_bulk_enable(ARRAY_SIZE(priv->regulators), priv->regulators);
-+	if (err) {
-+		dev_err(dev, "regulator_bulk_enable failed: %d\n", err);
-+		return err;
-+	}
-+
-+	gpiod_set_value_cansleep(priv->reset_gpio, 0);
-+
-+	regcache_cache_only(priv->regmap, false);
-+	regcache_mark_dirty(priv->regmap);
-+	err = regcache_sync(priv->regmap);
-+	if (err) {
-+		dev_err(dev, "regcache_sync failed: %d\n", err);
-+		return err;
-+	}
-+
-+	return 0;
-+}
-+
-+static const struct of_device_id cs5368_of_match[] = {
-+	{ .compatible = "cirrus,cs5368" },
-+	{}
-+};
-+MODULE_DEVICE_TABLE(of, cs5368_of_match);
-+
-+static const struct i2c_device_id cs5368_i2c_id[] = {
-+	{ "cs5368", 0 },
-+	{}
-+};
-+MODULE_DEVICE_TABLE(i2c, cs5368_i2c_id);
-+
-+DEFINE_RUNTIME_DEV_PM_OPS(cs5368_pm_ops, cs5368_pm_runtime_suspend, cs5368_pm_runtime_resume, NULL);
-+
-+static struct i2c_driver cs5368_codec_driver = {
-+	.driver = {
-+		.name = "cs5368",
-+		.of_match_table = cs5368_of_match,
-+		.pm = pm_ptr(&cs5368_pm_ops),
-+	},
-+	.id_table = cs5368_i2c_id,
-+	.probe = cs5368_i2c_probe,
-+};
-+module_i2c_driver(cs5368_codec_driver);
-+
-+MODULE_DESCRIPTION("ASoC CS5368 driver");
-+MODULE_AUTHOR("John Watts <contact@jookia.org>");
-+MODULE_LICENSE("GPL");
 diff --git a/sound/soc/sunxi/sun4i-i2s.c b/sound/soc/sunxi/sun4i-i2s.c
-index 598b263f27f7..f9328c43fbac 100644
+index c71f73b4e913..20310115ec08 100644
 --- a/sound/soc/sunxi/sun4i-i2s.c
 +++ b/sound/soc/sunxi/sun4i-i2s.c
-@@ -167,7 +167,6 @@ struct sun4i_i2s;
+@@ -168,7 +168,6 @@ struct sun4i_i2s;
   * @num_bclk_dividers: number of bit clock dividers
   * @mclk_dividers: mclk dividers array
   * @num_mclk_dividers: number of mclk dividers
@@ -1384,7 +923,7 @@ index 598b263f27f7..f9328c43fbac 100644
   * @get_sr: callback to get sample resolution
   * @get_wss: callback to get word select size
   * @set_chan_cfg: callback to set channel configuration
-@@ -191,7 +190,6 @@ struct sun4i_i2s_quirks {
+@@ -193,7 +192,6 @@ struct sun4i_i2s_quirks {
  	const struct sun4i_i2s_clk_div	*mclk_dividers;
  	unsigned int			num_mclk_dividers;
  
@@ -1392,7 +931,7 @@ index 598b263f27f7..f9328c43fbac 100644
  	int	(*get_sr)(unsigned int width);
  	int	(*get_wss)(unsigned int width);
  
-@@ -344,126 +342,22 @@ static const struct sun4i_i2s_clk_div sun8i_i2s_clk_div[] = {
+@@ -346,126 +344,22 @@ static const struct sun4i_i2s_clk_div sun8i_i2s_clk_div[] = {
  	{ .div = 192, .val = 15 },
  };
  
@@ -1526,7 +1065,7 @@ index 598b263f27f7..f9328c43fbac 100644
  	}
  
  	regmap_write(i2s->regmap, SUN4I_I2S_CLK_DIV_REG,
-@@ -580,7 +474,7 @@ static int sun8i_i2s_set_chan_cfg(const struct sun4i_i2s *i2s,
+@@ -582,7 +476,7 @@ static int sun8i_i2s_set_chan_cfg(const struct sun4i_i2s *i2s,
  	case SND_SOC_DAIFMT_LEFT_J:
  	case SND_SOC_DAIFMT_RIGHT_J:
  	case SND_SOC_DAIFMT_I2S:
@@ -1535,7 +1074,7 @@ index 598b263f27f7..f9328c43fbac 100644
  		break;
  
  	default:
-@@ -660,7 +554,7 @@ static int sun50i_h6_i2s_set_chan_cfg(const struct sun4i_i2s *i2s,
+@@ -662,7 +556,7 @@ static int sun50i_h6_i2s_set_chan_cfg(const struct sun4i_i2s *i2s,
  	case SND_SOC_DAIFMT_LEFT_J:
  	case SND_SOC_DAIFMT_RIGHT_J:
  	case SND_SOC_DAIFMT_I2S:
@@ -1544,15 +1083,7 @@ index 598b263f27f7..f9328c43fbac 100644
  		break;
  
  	default:
-@@ -1193,21 +1087,26 @@ static const struct snd_soc_dai_ops sun4i_i2s_dai_ops = {
- 
- #define SUN4I_FORMATS	(SNDRV_PCM_FMTBIT_S16_LE | \
- 			 SNDRV_PCM_FMTBIT_S20_LE | \
--			 SNDRV_PCM_FMTBIT_S24_LE)
-+			 SNDRV_PCM_FMTBIT_S24_LE | \
-+			 SNDRV_PCM_FMTBIT_S32_LE)
- 
- static struct snd_soc_dai_driver sun4i_i2s_dai = {
+@@ -1215,15 +1109,19 @@ static struct snd_soc_dai_driver sun4i_i2s_dai = {
  	.capture = {
  		.stream_name = "Capture",
  		.channels_min = 1,
@@ -1562,7 +1093,7 @@ index 598b263f27f7..f9328c43fbac 100644
 +		.rates = SNDRV_PCM_RATE_CONTINUOUS | SNDRV_PCM_RATE_KNOT,
 +		.rate_min = 1000,
 +		.rate_max = 384000,
- 		.formats = SUN4I_FORMATS,
+ 		.formats = SUN4I_FORMATS_ALL,
  	},
  	.playback = {
  		.stream_name = "Playback",
@@ -1572,10 +1103,10 @@ index 598b263f27f7..f9328c43fbac 100644
 +		.rates = SNDRV_PCM_RATE_CONTINUOUS | SNDRV_PCM_RATE_KNOT,
 +		.rate_min = 1000,
 +		.rate_max = 384000,
- 		.formats = SUN4I_FORMATS,
+ 		.formats = SUN4I_FORMATS_ALL,
  	},
  	.ops = &sun4i_i2s_dai_ops,
-@@ -1441,7 +1340,6 @@ static const struct sun4i_i2s_quirks sun4i_a10_i2s_quirks = {
+@@ -1461,7 +1359,6 @@ static const struct sun4i_i2s_quirks sun4i_a10_i2s_quirks = {
  	.num_bclk_dividers	= ARRAY_SIZE(sun4i_i2s_bclk_div),
  	.mclk_dividers		= sun4i_i2s_mclk_div,
  	.num_mclk_dividers	= ARRAY_SIZE(sun4i_i2s_mclk_div),
@@ -1583,7 +1114,7 @@ index 598b263f27f7..f9328c43fbac 100644
  	.get_sr			= sun4i_i2s_get_sr,
  	.get_wss		= sun4i_i2s_get_wss,
  	.set_chan_cfg		= sun4i_i2s_set_chan_cfg,
-@@ -1459,7 +1357,6 @@ static const struct sun4i_i2s_quirks sun6i_a31_i2s_quirks = {
+@@ -1480,7 +1377,6 @@ static const struct sun4i_i2s_quirks sun6i_a31_i2s_quirks = {
  	.num_bclk_dividers	= ARRAY_SIZE(sun4i_i2s_bclk_div),
  	.mclk_dividers		= sun4i_i2s_mclk_div,
  	.num_mclk_dividers	= ARRAY_SIZE(sun4i_i2s_mclk_div),
@@ -1591,7 +1122,7 @@ index 598b263f27f7..f9328c43fbac 100644
  	.get_sr			= sun4i_i2s_get_sr,
  	.get_wss		= sun4i_i2s_get_wss,
  	.set_chan_cfg		= sun4i_i2s_set_chan_cfg,
-@@ -1482,7 +1379,6 @@ static const struct sun4i_i2s_quirks sun8i_a83t_i2s_quirks = {
+@@ -1504,7 +1400,6 @@ static const struct sun4i_i2s_quirks sun8i_a83t_i2s_quirks = {
  	.num_bclk_dividers	= ARRAY_SIZE(sun4i_i2s_bclk_div),
  	.mclk_dividers		= sun4i_i2s_mclk_div,
  	.num_mclk_dividers	= ARRAY_SIZE(sun4i_i2s_mclk_div),
@@ -1599,7 +1130,7 @@ index 598b263f27f7..f9328c43fbac 100644
  	.get_sr			= sun4i_i2s_get_sr,
  	.get_wss		= sun4i_i2s_get_wss,
  	.set_chan_cfg		= sun4i_i2s_set_chan_cfg,
-@@ -1500,7 +1396,6 @@ static const struct sun4i_i2s_quirks sun8i_h3_i2s_quirks = {
+@@ -1523,7 +1418,6 @@ static const struct sun4i_i2s_quirks sun8i_h3_i2s_quirks = {
  	.num_bclk_dividers	= ARRAY_SIZE(sun8i_i2s_clk_div),
  	.mclk_dividers		= sun8i_i2s_clk_div,
  	.num_mclk_dividers	= ARRAY_SIZE(sun8i_i2s_clk_div),
@@ -1607,7 +1138,7 @@ index 598b263f27f7..f9328c43fbac 100644
  	.get_sr			= sun8i_i2s_get_sr_wss,
  	.get_wss		= sun8i_i2s_get_sr_wss,
  	.set_chan_cfg		= sun8i_i2s_set_chan_cfg,
-@@ -1518,7 +1413,6 @@ static const struct sun4i_i2s_quirks sun50i_a64_codec_i2s_quirks = {
+@@ -1542,7 +1436,6 @@ static const struct sun4i_i2s_quirks sun50i_a64_codec_i2s_quirks = {
  	.num_bclk_dividers	= ARRAY_SIZE(sun4i_i2s_bclk_div),
  	.mclk_dividers		= sun4i_i2s_mclk_div,
  	.num_mclk_dividers	= ARRAY_SIZE(sun4i_i2s_mclk_div),
@@ -1615,7 +1146,7 @@ index 598b263f27f7..f9328c43fbac 100644
  	.get_sr			= sun4i_i2s_get_sr,
  	.get_wss		= sun4i_i2s_get_wss,
  	.set_chan_cfg		= sun4i_i2s_set_chan_cfg,
-@@ -1536,7 +1430,6 @@ static const struct sun4i_i2s_quirks sun50i_h6_i2s_quirks = {
+@@ -1561,7 +1454,6 @@ static const struct sun4i_i2s_quirks sun50i_h6_i2s_quirks = {
  	.num_bclk_dividers	= ARRAY_SIZE(sun8i_i2s_clk_div),
  	.mclk_dividers		= sun8i_i2s_clk_div,
  	.num_mclk_dividers	= ARRAY_SIZE(sun8i_i2s_clk_div),
@@ -1623,7 +1154,7 @@ index 598b263f27f7..f9328c43fbac 100644
  	.get_sr			= sun8i_i2s_get_sr_wss,
  	.get_wss		= sun8i_i2s_get_sr_wss,
  	.set_chan_cfg		= sun50i_h6_i2s_set_chan_cfg,
-@@ -1556,7 +1449,6 @@ static const struct sun4i_i2s_quirks sun50i_r329_i2s_quirks = {
+@@ -1582,7 +1474,6 @@ static const struct sun4i_i2s_quirks sun50i_r329_i2s_quirks = {
  	.num_bclk_dividers	= ARRAY_SIZE(sun8i_i2s_clk_div),
  	.mclk_dividers		= sun8i_i2s_clk_div,
  	.num_mclk_dividers	= ARRAY_SIZE(sun8i_i2s_clk_div),
@@ -1632,5 +1163,5 @@ index 598b263f27f7..f9328c43fbac 100644
  	.get_wss		= sun8i_i2s_get_sr_wss,
  	.set_chan_cfg		= sun50i_h6_i2s_set_chan_cfg,
 -- 
-2.44.0
+2.47.0
 
