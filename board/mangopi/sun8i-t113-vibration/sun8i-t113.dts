@@ -15,15 +15,6 @@
 		stdout-path = "serial2:115200n8";
 	};
 
-	test_codec {
-		compatible = "test-codec";
-		port {
-			test_ep: endpoint {
-				remote-endpoint = <&card_ep_2>;
-			};
-		};
-	};
-
 	sound {
 		compatible = "audio-graph-card2";
 		label = "CS5368";
@@ -32,7 +23,7 @@
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
-				convert-channels = <16>;
+				convert-channels = <8>;
 				port@0 {
 					card_ep_0: endpoint {
 						remote-endpoint = <&i2s2_ep>;
@@ -41,11 +32,6 @@
 				port@1 {
 					card_ep_1: endpoint {
 						remote-endpoint = <&cs5368_ep>;
-					};
-				};
-				port@2 {
-					card_ep_2: endpoint {
-						remote-endpoint = <&test_ep>;
 					};
 				};
 			};
