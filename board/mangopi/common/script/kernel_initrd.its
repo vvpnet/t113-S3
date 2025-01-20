@@ -1,0 +1,56 @@
+/dts-v1/;
+
+/ {
+    description = "Mango Pi kernel";
+    #address-cells = <0x1>;
+
+    images {
+        fdt {
+            description = "Device tree";
+            data = /incbin/("./sun8i-t113.dtb");
+            type = "flat_dt";
+            compression = "none";
+            arch = "arm";
+            hash {
+            	algo = "crc32";
+            };
+        };
+
+        kernel {
+            description = "Kernel zImage";
+            data = /incbin/("./zImage");
+            type = "kernel";
+            compression = "none";
+            os = "linux";
+            arch = "arm";
+            load = <0x46000000>;
+            entry = <0x46000000>;
+            hash {
+            	algo = "crc32";
+            };
+        };
+
+        initrd {
+            description = "Kernel initrd";
+            data = /incbin/("./rootfs.cpio.gz");
+            type = "ramdisk";
+            compression = "none";
+            os = "linux";
+            arch = "arm";
+            hash {
+            	algo = "crc32";
+            };
+        };
+    };
+
+    configurations {
+        default = "config-1";
+
+        config-1 {
+            description = "Mango Pi dual kernel";
+            kernel = "kernel";
+            fdt = "fdt";
+            ramdisk = "initrd";
+        };
+    };
+};

@@ -1,0 +1,87 @@
+#!/bin/sh
+
+WPA_SUPPLICANT=/usr/sbin/wpa_supplicant
+CTRL_IFACE=/var/run/wpa_supplicant
+PID=$CTRL_IFACE.pid
+UDHCP=/sbin/udhcpc
+NOVAWI_SHARE=/usr/share/novawi
+NOVAWI_CTRL_WIFI=${NOVAWI_SHARE}/ctrl_wifi
+
+case $1 in
+"set")
+    cat > /etc/wpa_supplicant.conf << EOF
+    ctrl_interface=$CTRL_IFACE
+    update_config=1
+    
+network={
+    ssid="$2"
+    psk="$3"
+}
+EOF
+;;
+"setopen")
+    cat > /etc/wpa_supplicant.conf << EOF
+    ctrl_interface=$CTRL_IFACE
+    update_config=1
+    
+network={
+    ssid="$2"
+    key_mgmt=NONE
+}
+EOF
+;;
+"show")
+    if [ -f /etc/wpa_supplicant.conf ]; then
+        cat /etc/wpa_supplicant.conf
+    else
+        echo 'no configuration found.'
+    fi
+;;
+"disable")
+    echo 'disable' > $NOVAWI_CTRL_WIFI
+    "$0" stop
+;;
+"enable")
+    echo 'enable' > $NOVAWI_CTRL_WIFI
+    "$0" start
+;;
+"start")
+    if [ ! -d $NOVAWI_SHARE ]; then
+	mkdir -p $NOVAWI_SHARE
+    fi
+
+    if [ ! -f $NOVAWI_CTRL_WIFI ]; then
+	touch $NOVAWI_CTRL_WIFI
+	echo 'disable' > $NOVAWI_CTRL_WIFI
+    fi
+    
+    CTRL_WIFI=$(cat $NOVAWI_CTRL_WIFI)
+    echo $CTRL_WIFI
+    if [ $CTRL_WIFI = "disable" ]; then
+	echo "WIFI disabled by configuration"
+    else
+        printf "start wpa_supplicant: "
+
+	start-stop-daemon -S -x "$WPA_SUPPLICANT" -p "$PID" \
+	-- -i wlan0 -s -c /etc/wpa_supplicant.conf -B -D nl80211 -P "$PID" > /dev/null
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+
+        printf "start udhcpc: "
+	udhcpc -S -i wlan0 2>/dev/null& 
+        [ $? = 0 ] && echo "OK" || echo "FAIL"
+	
+    fi
+
+    ;;
+"stop")
+     printf "stop udhcpc: "
+     killall udhcpc 2>/dev/null
+     [ $? = 0 ] && echo "OK" || echo "FAIL"
+
+     printf "stop wpa_supplicant: "
+     start-stop-daemon -K -x "$WPA_SUPPLICANT" -p "$PID" -o >/dev/null
+     [ $? = 0 ] && echo "OK" || echo "FAIL"
+    ;;
+   *)
+    echo "usage $0 <list|set <ssid> <psk>|setopen <ssid>|show|stop|start>"
+esac

@@ -43,3 +43,8 @@ sync
 ubidetach -p /dev/mtd1
 
 e5cf602ad53a11a8e6d472e0c2062052a7473570
+
+You can update over SSH without copying an image to the target using this command:
+
+cat output/images/kernel.itb | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_1 -s $(stat -c%s output/images/kernel.itb) -"
+cat output/images/rootfs.ubifs | ssh root@192.168.99.1 "ubiupdatevol /dev/ubi0_2 -s $(stat -c%s output/images/rootfs.ubifs) -"

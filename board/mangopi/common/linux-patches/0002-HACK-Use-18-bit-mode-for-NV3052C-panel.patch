@@ -1,0 +1,24 @@
+From f448522d1dc8b29f5b408b77e8a6cae16f624ff9 Mon Sep 17 00:00:00 2001
+From: John Watts <contact@jookia.org>
+Date: Thu, 27 Jun 2024 09:37:28 +1000
+Subject: [PATCH 2/3] HACK: Use 18-bit mode for NV3052C panel
+
+---
+ drivers/gpu/drm/panel/panel-newvision-nv3052c.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpu/drm/panel/panel-newvision-nv3052c.c b/drivers/gpu/drm/panel/panel-newvision-nv3052c.c
+index d3baccfe6286..f8aeedc22f8c 100644
+--- a/drivers/gpu/drm/panel/panel-newvision-nv3052c.c
++++ b/drivers/gpu/drm/panel/panel-newvision-nv3052c.c
+@@ -431,6 +431,7 @@ static const struct nv3052c_reg fs035vg158_panel_regs[] = {
+ 	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x00 },
+ 	// Display Access Control
+ 	{ 0x36, 0x0a }, // bgr = 1, ss = 1, gs = 0
++	{ 0x3a, 0x60 },
+ };
+ 
+ 
+-- 
+2.47.0
+

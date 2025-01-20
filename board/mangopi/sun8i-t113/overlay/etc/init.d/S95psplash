@@ -1,0 +1,36 @@
+#!/bin/sh
+
+#
+# psplash-stop Runs at startup and shutdown
+#
+
+start() {
+	psplash-write "QUIT"
+	sleep 1
+}
+stop() {
+	psplash&
+}
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        restart
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
+
+

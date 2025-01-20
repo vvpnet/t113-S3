@@ -1,0 +1,43 @@
+#!/bin/sh
+
+#
+# app Example application
+#
+
+start() {
+	#sleep 8
+	export LANG=ru_RU.UTF-8
+	export PATH=/root:$PATH
+	export GST_INSPECT_NO_COLORS=1
+	export QT_QPA_FB_DRM=0
+	export QT_QPA_PLATFORM=linuxfb:fb=/dev/fb0:size=640x480:mmsize=120x120
+	demo.exe 2>/dev/null&
+	echo "OK"
+}
+stop() {
+	killall demo.exe
+	true # Do nothing
+}
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        restart
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
+
+

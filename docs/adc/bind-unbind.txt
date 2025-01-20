@@ -1,0 +1,7 @@
+echo 'sound' > /sys/bus/platform/drivers/asoc-audio-graph-card2/unbind
+echo 'sound' > /sys/bus/platform/drivers/asoc-audio-graph-card2/bind
+
+arecord -c 8 -r 192000 -f s32_le -d 1 -twav 192kHz.wav
+
+echo '0-004c' > /sys/bus/i2c/drivers/cs5368/unbind
+echo '0-004c' > /sys/bus/i2c/drivers/cs5368/bind

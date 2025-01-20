@@ -35,6 +35,16 @@ config BR2_PACKAGE_PSPLASH_IMAGE
 	  Use a personalized png image as boot splash.
 	  Let it empty if you want to keep the psplash default image.
 
+config BR2_PACKAGE_PSPLASH_COLORS
+	string "psplash colors"
+	help
+	  Custom copy of psplash-colors.h for build use.
+	  Let it empty if you want to keep the default colors.
+
+config BR2_PACKAGE_PSPLASH_PROGRESS_BAR
+	bool "enable progress bar"
+	default y
+
 endif
 
 comment "psplash needs a toolchain w/ wchar"

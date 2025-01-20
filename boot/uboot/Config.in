@@ -573,4 +573,10 @@ config BR2_TARGET_UBOOT_CUSTOM_MAKEOPTS
 	  List of custom make options passed at build time. Can be
 	  used for example to pass a DEVICE_TREE= value.
 
+config BR2_TARGET_UBOOT_BOOT_IMAGE
+	string "boot image"
+	help
+	  Use a personalized bmp image as boot splash.
+	  Let it empty if you want to keep the default image.
+
 endif # BR2_TARGET_UBOOT

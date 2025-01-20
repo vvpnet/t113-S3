@@ -27,6 +27,21 @@ define PSPLASH_COPY_IMAGE
 endef
 
 PSPLASH_POST_EXTRACT_HOOKS += PSPLASH_COPY_IMAGE
+PSPLASH_CONF_OPTS += --enable-img-fullscreen
+endif
+
+PSPLASH_COLORS = $(call qstrip,$(BR2_PACKAGE_PSPLASH_COLORS))
+
+ifneq ($(PSPLASH_COLORS),)
+define PSPLASH_COPY_COLORS
+	cp $(PSPLASH_COLORS) $(@D)/psplash-colors.h
+endef
+
+PSPLASH_POST_EXTRACT_HOOKS += PSPLASH_COPY_COLORS
+endif
+
+ifeq ($(BR2_PACKAGE_PSPLASH_PROGRESS_BAR),n)
+PSPLASH_CONF_OPTS += --disable-progress-bar
 endif
 
 define PSPLASH_INSTALL_INIT_SYSTEMD
