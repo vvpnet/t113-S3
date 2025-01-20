@@ -39,7 +39,7 @@ index 59f937d..9fca8ec 100644
  	assert(err >= 0);
  
  	command = argv[0];
-+    printf("Force switched to arecord mode\n");
++    //printf("Force switched to arecord mode\n");
 +    command = "arecord";
  	file_type = FORMAT_DEFAULT;
 -	if (strstr(argv[0], "arecord")) {

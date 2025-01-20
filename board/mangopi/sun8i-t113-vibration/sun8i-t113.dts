@@ -52,6 +52,14 @@
 			gpios = <&pio 4 10 GPIO_ACTIVE_LOW>; /* PE10 */
 		};
 	};
+
+	leds {
+		led-0 {
+			linux,default-trigger = "heartbeat";
+			function = LED_FUNCTION_HEARTBEAT;
+			gpios = <&pio 3 22 GPIO_ACTIVE_HIGH>; /* PD22 */
+		};
+	};
 };
 
 &i2c2 {
