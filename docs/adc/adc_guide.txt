@@ -1,6 +1,6 @@
 ssh root@192.168.99.1 "arecord -c 6 -r 192000 -f s32_le -d 10" >! test.wav 
 
-
+-D sysdefault:CARD=CS5368
 arecord -d hw:0,0 -c 8 -r 192000 -f s32_le -d 1 -twav 192kHz.wav 
 
 TDM 

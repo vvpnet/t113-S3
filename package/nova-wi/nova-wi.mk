@@ -7,7 +7,7 @@
 NOVA_WI_SITE = ssh://git@github.com/Coxwain1987/t113_web_interface.git
 NOVA_WI_SITE_METHOD = git
 # device_01_app_v2.x
-NOVA_WI_VERSION = b074d02d00ba08abf66917233ef8e24db075bbb4
+NOVA_WI_VERSION = 4ee3f0d2e7a6127cc8e3b7fa1d952bcf1f7f0645
 
 # install
 define NOVA_WI_INSTALL_TARGET_CMDS
@@ -15,8 +15,8 @@ define NOVA_WI_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -m 0644 $(@D)/etc/nginx/fastcgi.conf $(TARGET_DIR)/etc/nginx/fastcgi.conf
 	$(INSTALL) -D -m 0644 $(@D)/etc/nginx/.htpasswd $(TARGET_DIR)/etc/nginx/.htpasswd
 	$(INSTALL) -D -m 0644 $(@D)/etc/nginx/fastcgi_params $(TARGET_DIR)/etc/nginx/fastcgi_params
-	$(Q)cp -f -r -v $(@D)/var/www $(TARGET_DIR)/var/www/
-	$(Q)git -C $(DL_DIR)/nova-wi/git describe --tags --always --dirty > $(TARGET_DIR)/var/www/version
+	$(Q)cp -f -r -v $(@D)/var/www $(TARGET_DIR)/var/
+	$(Q)git -C $(DL_DIR)/nova-wi/git/ describe --tags --always --dirty > $(TARGET_DIR)/var/www/version
 endef
 
 define NOVA_WI_PERMISSIONS
