@@ -38,16 +38,6 @@
 		pwm-off-delay-ms = <10>;
 	};
 
-	leds {
-		compatible = "gpio-leds";
-		status_led0 {
-			//linux,default-trigger = "heartbeat";
-			default-state = "on";
-			label = "red:status";
-			gpios = <&pio 4 10 GPIO_ACTIVE_HIGH>; /* PE10 */
-		};
-	};
-
 #if 0
 	rotary@0 {
 		compatible = "rotary-encoder";

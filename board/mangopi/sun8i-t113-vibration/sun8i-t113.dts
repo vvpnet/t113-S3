@@ -54,10 +54,13 @@
 	};
 
 	leds {
-		led-0 {
-			linux,default-trigger = "heartbeat";
-			function = LED_FUNCTION_HEARTBEAT;
-			gpios = <&pio 3 22 GPIO_ACTIVE_HIGH>; /* PD22 */
+		compatible = "gpio-leds";
+		activity {
+			color = <LED_COLOR_ID_BLUE>;
+			function = LED_FUNCTION_STATUS;
+			linux,default-trigger = "mtd"; /* One of: activity, heartbeat, mtd */
+			gpios = <&pio 3 22 GPIO_ACTIVE_LOW>; /* PD22 */
+			panic-indicator;
 		};
 	};
 };
