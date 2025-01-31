@@ -1,7 +1,8 @@
 ssh root@192.168.99.1 "arecord -c 6 -r 192000 -f s32_le -d 10" >! test.wav 
 
 
-arecord -c 6 -r 192000 -f s16_le -d 1 -twav test.wav 
+arecord -c 8 -r 192000 -f s16_le -d 1 -twav ch1.wav 
+
 
 TDM 
 i2cset -y 0 0x4f 0x1 0x8b && i2cset -y 0 0x4f 0x4 0xff && i2cset -y 0 0x4f 0xa 0xfe
@@ -23,4 +24,9 @@ cat /sys/kernel/debug/clk/i2s2/clk_rate
 
  arecord -D hw:0,0 -c 8 -r 8000 -f s32_le  > /dev/zero
  
- [ 3424.087257] sun4i-i2s 2034000.i2s: Found new MCLK 90427392 rate 513368 diff 424 div 14 [ 3424.095353] sun4i-i2s 2034000.i2s: Settled for MCLK 90427392
+ 
+ 
+[ 3424.087257] sun4i-i2s 2034000.i2s: Found new MCLK 90427392 rate 513368 diff 424 div 14 [ 3424.095353] sun4i-i2s 2034000.i2s: Settled for MCLK 90427392
+
+
+arecord -D sysdefault:CARD=CS5368 -c 8 -r 192000 -f s16_le -d 1 -twav ch1.wav 
