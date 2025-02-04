@@ -1,0 +1,10 @@
+#!/bin/sh
+if grep -q 'console=ttynull' /proc/cmdline; then
+        while true; do
+                sleep 31557600 # 1 year is fine
+        done
+        exit 0
+else
+        exec /sbin/getty "${@}"
+        exit 1
+fi
