@@ -7,7 +7,7 @@
 NOVA_WI_SITE = ssh://git@github.com/Coxwain1987/t113_web_interface.git
 NOVA_WI_SITE_METHOD = git
 # device_01_app_v2.x
-NOVA_WI_VERSION = 4ee3f0d2e7a6127cc8e3b7fa1d952bcf1f7f0645
+NOVA_WI_VERSION = 60c508a50c5a31c05bdd41b5c925ed8f9bb1046a
 
 # install
 define NOVA_WI_INSTALL_TARGET_CMDS

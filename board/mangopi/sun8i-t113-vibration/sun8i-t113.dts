@@ -54,10 +54,13 @@
 	};
 
 	leds {
-		led-0 {
-			linux,default-trigger = "heartbeat";
-			function = LED_FUNCTION_HEARTBEAT;
-			gpios = <&pio 3 22 GPIO_ACTIVE_HIGH>; /* PD22 */
+		compatible = "gpio-leds";
+		activity {
+			color = <LED_COLOR_ID_BLUE>;
+			function = LED_FUNCTION_STATUS;
+			linux,default-trigger = "mtd"; /* One of: activity, heartbeat, mtd */
+			gpios = <&pio 3 22 GPIO_ACTIVE_LOW>; /* PD22 */
+			panic-indicator;
 		};
 	};
 };
@@ -86,7 +89,7 @@
 	pinctrl-0 = <&i2s2_pins>, <&i2s2_din_pins>;
 	pinctrl-names = "default";
 	status = "okay";
-	channel-slots = /bits/ 8 <7 5 3 1 6 4 2 0 0 1 2 3 4 5 6 7>;
+	channel-slots = /bits/ 8 <6 4 2 0 7 5 3 1 0 1 2 3 4 5 6 7>;
 	channel-dins = /bits/ 8 <0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2>;
 	i2s2_port: port {
 		i2s2_ep: endpoint {
