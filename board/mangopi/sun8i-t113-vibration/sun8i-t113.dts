@@ -63,17 +63,13 @@
 			panic-indicator;
 		};
 	};
-
-	rtc1: rtc1@68 {
-		compatible = "maxim,ds3231";
-		reg = <0x68>;
-	};
 };
 
 &i2c2 {
 	pinctrl-0 = <&i2c2_pe12_pins>;
 	pinctrl-names = "default";
 	status = "okay";
+
 	cs5368: tdm-adc-1@0x4c {
 		reg = <0x4c>;
 		compatible = "cirrus,cs5368";
@@ -87,6 +83,11 @@
 				remote-endpoint = <&card_ep_1>;
 			};
 		};
+	};
+
+	rtc1: rtc1@68 {
+		compatible = "maxim,ds3231";
+		reg = <0x68>;
 	};
 };
 
