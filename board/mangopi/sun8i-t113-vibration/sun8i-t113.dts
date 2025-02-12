@@ -63,6 +63,11 @@
 			panic-indicator;
 		};
 	};
+
+	rtc1: rtc1@68 {
+		compatible = "maxim,ds3231";
+		reg = <0x68>;
+	};
 };
 
 &i2c2 {
