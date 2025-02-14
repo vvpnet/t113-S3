@@ -1,0 +1,3231 @@
+diff --git a/Makefile b/Makefile
+index 34dd029d0cd..6a013fdb972 100644
+--- a/Makefile
++++ b/Makefile
+@@ -6,6 +6,8 @@ SUBLEVEL =
+ EXTRAVERSION =
+ NAME =
+ 
++PATCHESVERSION = -jookia20250209
++
+ # *DOCUMENTATION*
+ # To see a list of typical targets execute "make help"
+ # More info can be located in ./README
+@@ -458,7 +460,7 @@ KBUILD_AFLAGS	+= $(call cc-option,-fno-PIE)
+ 
+ # Read UBOOTRELEASE from include/config/uboot.release (if it exists)
+ UBOOTRELEASE = $(shell cat include/config/uboot.release 2> /dev/null)
+-UBOOTVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
++UBOOTVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)$(PATCHESVERSION)
+ 
+ export VERSION PATCHLEVEL SUBLEVEL UBOOTRELEASE UBOOTVERSION
+ export ARCH CPU BOARD VENDOR SOC CPUDIR BOARDDIR
+diff --git a/README b/README.md
+similarity index 97%
+rename from README
+rename to README.md
+index b76449b70a8..1ad7f4d0c80 100644
+--- a/README
++++ b/README.md
+@@ -1,3 +1,67 @@
++Jookia's U-Boot
++---------------
++
++This is my fork of U-Boot with out of tree features I use or have developed:
++
++General features:
++
++- Support for MIPI DBI panels
++- Support for NewVision NV3052C SPI panels
++
++Allwinner D1/T113 features:
++
++- SPI NAND booting
++- UART1 and UART2 support
++- LCD video output
++- PWM support
++- Working USB gadget
++
++This branch tracks mainline U-Boot. To see a list of commits from this branch
++only use this command:
++
++```
++git log --left-only --oneline jookia_main...master
++```
++
++I regularly sign my Git commits with my hardware SSH key, if you would like to
++verify them run this and subtitute TAG or COMMIT:
++
++```
++git -c gpg.ssh.allowedSignersFile=jookia/allowed_signers verify-tag TAG
++git -c gpg.ssh.allowedSignersFile=jookia/allowed_signers log --oneline --show-signature COMMIT
++```
++
++My key fingerprint is ```SHA256:/gEvgms/9HpbgpcH+K7O4GYXmqkP7siJx9zHeEWRZTg```.
++
++Please verify it by comparing it to my website: https://www.jookia.org/wiki/Keys
++
++Patch graveyard
++---------------
++
++I originally envisioned this repo as a place to hold patches I would mainline,
++but after a mental health event I've decided to abandon that attempt.
++
++Feel free to try and mainline these yourself.
++
++Allwinner D1 and T113 patches:
++- [sunxi: video: Support LCD and HDMI output on H6/D1](https://lore.kernel.org/r/20240420-d1_de2-v1-0-297efca674ba@jookia.org)
++- [pwm: sunxi: Add support Allwinner D1 PWM](https://lore.kernel.org/r/20240518-pwm_d1-v1-0-311fc5fe2248@jookia.org)
++- [Support SPI NAND booting on the T113](https://lore.kernel.org/r/20240411-spinand-v1-0-62d31bb188e8@jookia.org)
++- [sunxi: Support UART1 and UART2 on the T113](https://lore.kernel.org/r/20240411-t113serial-v1-0-41ff858a1235@jookia.org)
++- [sunxi: video: Support driver model LCDs](https://lore.kernel.org/r/20240614-sunxi_lcd-v1-1-1dc9257b0112@jookia.org)
++- [sunxi: video: Fix lcdc polarity display flags](https://lore.kernel.org/r/20240614-sunxipolarities-v1-0-15bbbf57dfff@jookia.org)
++
++Platform independent patches:
++- [video: add support for MIPI DBI interface](https://lore.kernel.org/r/20240614-mipi_dbi-v1-0-946eb82f8533@jookia.org)
++- [video: Add support for NewVision NV3052C SPI panels](https://lore.kernel.org/r/20240614-panel_nv3052c-v1-1-4d94f7abde6a@jookia.org)
++
++Cleanup patches:
++- [spi: Various Kconfig fixes](https://lore.kernel.org/r/20240427-spikconfig-v1-0-8a54772522f4@jookia.org)
++
++Mainline README
++---------------
++
++```
+ # SPDX-License-Identifier: GPL-2.0+
+ #
+ # (C) Copyright 2000 - 2013
+@@ -2631,3 +2695,4 @@ The U-Boot projects depends on contributions from the user community.
+ If you want to participate, please, have a look at the 'General'
+ section of https://docs.u-boot.org/en/latest/develop/index.html
+ where we describe coding standards and the patch submission process.
++```
+diff --git a/arch/arm/include/asm/arch-sunxi/clock_sun50i_h6.h b/arch/arm/include/asm/arch-sunxi/clock_sun50i_h6.h
+index a84a57e5b41..35bd3dd2d8f 100644
+--- a/arch/arm/include/asm/arch-sunxi/clock_sun50i_h6.h
++++ b/arch/arm/include/asm/arch-sunxi/clock_sun50i_h6.h
+@@ -236,6 +236,28 @@ struct sunxi_ccm_reg {
+ #define CCM_PLL1_CTRL_P(p)		((p) << 16)
+ #define CCM_PLL1_CTRL_N(n)		(((n) - 1) << 8)
+ 
++/* pll3 (video0) bit field */
++#define CCM_PLL3_CTRL_EN		BIT(31)
++#define CCM_PLL3_LDO_EN			BIT(30)
++#define CCM_PLL3_LOCK_EN		BIT(29)
++#define CCM_PLL3_LOCK			BIT(28)
++#define CCM_PLL3_OUT_EN			BIT(27)
++#define CCM_PLL3_INPUT_DIV2		BIT(1)
++#define CCM_PLL3_CTRL_N(n)		(((n) - 1) << 8)
++#define CCM_PLL3_CTRL_N_SHIFT		8
++#define CCM_PLL3_CTRL_N_MASK		(0xff << CCM_PLL3_CTRL_N_SHIFT)
++
++/* video1 bit field */
++#define CCM_VIDEO1_CTRL_EN		BIT(31)
++#define CCM_VIDEO1_LDO_EN		BIT(30)
++#define CCM_VIDEO1_LOCK_EN		BIT(29)
++#define CCM_VIDEO1_LOCK			BIT(28)
++#define CCM_VIDEO1_OUT_EN		BIT(27)
++#define CCM_VIDEO1_INPUT_DIV2		BIT(1)
++#define CCM_VIDEO1_CTRL_N(n)		(((n) - 1) << 8)
++#define CCM_VIDEO1_CTRL_N_SHIFT		8
++#define CCM_VIDEO1_CTRL_N_MASK		(0xff << CCM_VIDEO1_CTRL_N_SHIFT)
++
+ /* pll5 bit field */
+ #define CCM_PLL5_CTRL_EN		BIT(31)
+ #define CCM_PLL5_LOCK_EN		BIT(29)
+@@ -258,6 +280,16 @@ struct sunxi_ccm_reg {
+ #define CCM_PLL6_CTRL_DIV2_SHIFT	1
+ #define CCM_PLL6_CTRL_DIV2_MASK		(0x1 << CCM_PLL6_CTRL_DIV2_SHIFT)
+ 
++/* pll10 bit field */
++#define CCM_PLL10_CTRL_EN		BIT(31)
++#define CCM_PLL10_LOCK_EN		BIT(29)
++#define CCM_PLL10_LOCK			BIT(28)
++#define CCM_PLL10_OUT_EN		BIT(27)
++#define CCM_PLL10_INPUT_DIV2		BIT(1)
++#define CCM_PLL10_CTRL_N(n)		(((n) - 1) << 8)
++#define CCM_PLL10_CTRL_N_SHIFT		8
++#define CCM_PLL10_CTRL_N_MASK		(0xff << CCM_PLL10_CTRL_N_SHIFT)
++
+ /* cpu_axi bit field*/
+ #define CCM_CPU_AXI_MUX_MASK		(0x3 << 24)
+ #define CCM_CPU_AXI_MUX_OSC24M		(0x0 << 24)
+@@ -341,9 +373,42 @@ struct sunxi_ccm_reg {
+ #define CCM_MMC_CTRL_OCLK_DLY(a)	((void) (a), 0)
+ #define CCM_MMC_CTRL_SCLK_DLY(a)	((void) (a), 0)
+ 
++/* TCON0 clock bit field */
++#define CCM_TCON0_CTRL_ENABLE		(0x1 << 31)
++#define CCM_TCON0_CTRL_VIDEO0_4X	(0x1 << 24)
++#define CCM_TCON0_CTRL_VIDEO1_4X	(0x3 << 24)
++#define CCM_TCON0_CTRL_M(m)		((((m) - 1) & 0xf) << 0)
++
++/* TCON1 clock bit field */
++#define CCM_TCON1_CTRL_ENABLE		(0x1 << 31)
++#define CCM_TCON1_CTRL_VIDEO0_4X	(0x1 << 24)
++#define CCM_TCON1_CTRL_VIDEO1_4X	(0x3 << 24)
++#define CCM_TCON1_CTRL_M(m)		((((m) - 1) & 0xf) << 0)
++
++/* HDMI clock bit field */
++#define CCM_HDMI_CTRL_ENABLE		(0x1 << 31)
++#define CCM_HDMI_CTRL_VIDEO1_4X_H6	(0x2 << 24)
++#define CCM_HDMI_CTRL_VIDEO0_4X_H616	(0x1 << 24)
++#define CCM_HDMI_CTRL_M(m)		((((m) - 1) & 0xf) << 0)
++
++/* CCM bits common to all Display Engine 2.0 clock ctrl regs */
++#define CCM_DE2_CTRL_M(n)		((((n) - 1) & 0xf) << 0)
++#define CCM_DE2_CTRL_PLL_MASK		(3 << 24)
++#define CCM_DE2_CTRL_PLL10_H6		(0 << 24)
++#define CCM_DE2_CTRL_VIDEO1_4X_NCAT	(2 << 24)
++#define CCM_DE2_CTRL_GATE		(0x1 << 31)
++
+ #ifndef __ASSEMBLY__
+ void clock_set_pll1(unsigned int hz);
+ unsigned int clock_get_pll6(void);
++
++#ifdef CONFIG_SUNXI_DE2
++void clock_set_pll3(unsigned int hz);
++void clock_set_video1(unsigned int hz);
++void clock_set_pll10(unsigned int hz);
++unsigned int clock_get_pll3(void);
++unsigned int clock_get_video1(void);
++#endif
+ #endif
+ 
+ #endif /* _SUNXI_CLOCK_SUN50I_H6_H */
+diff --git a/arch/arm/include/asm/arch-sunxi/cpu_sun50i_h6.h b/arch/arm/include/asm/arch-sunxi/cpu_sun50i_h6.h
+index 8a3f465545a..2c9fe18289d 100644
+--- a/arch/arm/include/asm/arch-sunxi/cpu_sun50i_h6.h
++++ b/arch/arm/include/asm/arch-sunxi/cpu_sun50i_h6.h
+@@ -31,6 +31,9 @@
+ #define SUNXI_DRAM_PHY0_BASE		0x04800000
+ #endif
+ 
++#define SUNXI_DE2_BASE			0x01000000
++#define SUNXI_LCD0_BASE			0x06515000
++
+ #define SUNXI_TWI0_BASE			0x05002000
+ #define SUNXI_TWI1_BASE			0x05002400
+ #define SUNXI_TWI2_BASE			0x05002800
+diff --git a/arch/arm/include/asm/arch-sunxi/cpu_sunxi_ncat2.h b/arch/arm/include/asm/arch-sunxi/cpu_sunxi_ncat2.h
+index 908a582ae0f..4ae93b5095e 100644
+--- a/arch/arm/include/asm/arch-sunxi/cpu_sunxi_ncat2.h
++++ b/arch/arm/include/asm/arch-sunxi/cpu_sunxi_ncat2.h
+@@ -25,6 +25,9 @@
+ #define SUNXI_MMC1_BASE			0x04021000
+ #define SUNXI_MMC2_BASE			0x04022000
+ 
++#define SUNXI_DE2_BASE			0x05000000
++#define SUNXI_LCD0_BASE			0x05461000
++
+ #define SUNXI_R_CPUCFG_BASE		0x07000400
+ #define SUNXI_PRCM_BASE			0x07010000
+ 
+diff --git a/arch/arm/include/asm/arch-sunxi/lcdc.h b/arch/arm/include/asm/arch-sunxi/lcdc.h
+index 90216bcfd51..580cd6af20c 100644
+--- a/arch/arm/include/asm/arch-sunxi/lcdc.h
++++ b/arch/arm/include/asm/arch-sunxi/lcdc.h
+@@ -64,6 +64,8 @@ struct sunxi_lcdc_reg {
+ #define SUNXI_LCDC_Y(y)				(((y) - 1) << 0)
+ #define SUNXI_LCDC_TCON_VSYNC_MASK		(1 << 24)
+ #define SUNXI_LCDC_TCON_HSYNC_MASK		(1 << 25)
++#define SUNXI_LCDC_TCON_PIXDATA_MASK		(1 << 26)
++#define SUNXI_LCDC_TCON_DE_MASK			(1 << 27)
+ #define SUNXI_LCDC_CTRL_IO_MAP_MASK		(1 << 0)
+ #define SUNXI_LCDC_CTRL_IO_MAP_TCON0		(0 << 0)
+ #define SUNXI_LCDC_CTRL_IO_MAP_TCON1		(1 << 0)
+diff --git a/arch/arm/include/asm/arch-sunxi/spl.h b/arch/arm/include/asm/arch-sunxi/spl.h
+index 14944a20eac..a9b7c0daca4 100644
+--- a/arch/arm/include/asm/arch-sunxi/spl.h
++++ b/arch/arm/include/asm/arch-sunxi/spl.h
+@@ -16,8 +16,7 @@
+ #define SUNXI_BOOTED_FROM_NAND	1
+ #define SUNXI_BOOTED_FROM_MMC2	2
+ #define SUNXI_BOOTED_FROM_SPI	3
+-#define SUNXI_BOOTED_FROM_MMC0_HIGH	0x10
+-#define SUNXI_BOOTED_FROM_MMC2_HIGH	0x12
++#define SUNXI_BOOTED_FROM_SPINAND	4
+ 
+ /*
+  * Values taken from the F1C200s BootROM stack
+diff --git a/arch/arm/include/asm/spl.h b/arch/arm/include/asm/spl.h
+index ee79a19c05c..92deba8019d 100644
+--- a/arch/arm/include/asm/spl.h
++++ b/arch/arm/include/asm/spl.h
+@@ -22,6 +22,7 @@ enum {
+ 	BOOT_DEVICE_NOR,
+ 	BOOT_DEVICE_UART,
+ 	BOOT_DEVICE_SPI,
++	BOOT_DEVICE_SPINAND,
+ 	BOOT_DEVICE_USB,
+ 	BOOT_DEVICE_SATA,
+ 	BOOT_DEVICE_I2C,
+diff --git a/arch/arm/mach-sunxi/Kconfig b/arch/arm/mach-sunxi/Kconfig
+index 17666814c52..38138778292 100644
+--- a/arch/arm/mach-sunxi/Kconfig
++++ b/arch/arm/mach-sunxi/Kconfig
+@@ -202,6 +202,7 @@ config SUN50I_GEN_H6
+ 	select SPL_LOAD_FIT if SPL
+ 	select MMC_SUNXI_HAS_NEW_MODE
+ 	select SUPPORT_SPL
++	select SUNXI_DE2
+ 	---help---
+ 	Select this for sunxi SoCs which have H6 like peripherals, clocks
+ 	and memory map.
+@@ -210,6 +211,7 @@ config SUNXI_GEN_NCAT2
+ 	bool
+ 	select MMC_SUNXI_HAS_NEW_MODE
+ 	select SUPPORT_SPL
++	select SUNXI_DE2
+ 	---help---
+ 	Select this for sunxi SoCs which have D1 like peripherals, clocks
+ 	and memory map.
+@@ -746,6 +748,13 @@ config UART0_PORT_F
+ 	at the same time, the system can be only booted in the FEL mode.
+ 	Only enable this if you really know what you are doing.
+ 
++config UART2_PORT_D
++	bool "UART2 on PD1 and PD2"
++	depends on MACH_SUN8I_R528
++	---help---
++	Use PD1 and PD2 for UART2 on the R528, D1 and T113 chips.
++	Enable this if you need UART2 on these pins.
++
+ config OLD_SUNXI_KERNEL_COMPAT
+ 	bool "Enable workarounds for booting old kernels"
+ 	---help---
+diff --git a/arch/arm/mach-sunxi/board.c b/arch/arm/mach-sunxi/board.c
+index 046e9fbfc67..5aa1d31368c 100644
+--- a/arch/arm/mach-sunxi/board.c
++++ b/arch/arm/mach-sunxi/board.c
+@@ -166,6 +166,14 @@ static int gpio_init(void)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(0), SUN8I_GPB_UART2);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(1), SUN8I_GPB_UART2);
+ 	sunxi_gpio_set_pull(SUNXI_GPB(1), SUNXI_GPIO_PULL_UP);
++#elif CONFIG_CONS_INDEX == 3 && defined(CONFIG_MACH_SUN8I_R528) && defined(CONFIG_UART2_PORT_D)
++	sunxi_gpio_set_cfgpin(SUNXI_GPD(1), SUN8I_R528_GPD_UART2);
++	sunxi_gpio_set_cfgpin(SUNXI_GPD(2), SUN8I_R528_GPD_UART2);
++	sunxi_gpio_set_pull(SUNXI_GPB(2), SUNXI_GPIO_PULL_UP);
++#elif CONFIG_CONS_INDEX == 3 && defined(CONFIG_MACH_SUN8I_R528)
++	sunxi_gpio_set_cfgpin(SUNXI_GPB(0), SUN8I_R528_GPB_UART2);
++	sunxi_gpio_set_cfgpin(SUNXI_GPB(1), SUN8I_R528_GPB_UART2);
++	sunxi_gpio_set_pull(SUNXI_GPB(1), SUNXI_GPIO_PULL_UP);
+ #elif CONFIG_CONS_INDEX == 4 && defined(CONFIG_MACH_SUN8I_R528)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(6), 7);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPB(7), 7);
+@@ -174,8 +182,9 @@ static int gpio_init(void)
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPL(2), SUN8I_GPL_R_UART);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPL(3), SUN8I_GPL_R_UART);
+ 	sunxi_gpio_set_pull(SUNXI_GPL(3), SUNXI_GPIO_PULL_UP);
+-#elif CONFIG_CONS_INDEX == 2 && defined(CONFIG_MACH_SUN8I) && \
+-				!defined(CONFIG_MACH_SUN8I_R40)
++#elif CONFIG_CONS_INDEX == 2 && ((defined(CONFIG_MACH_SUN8I) && \
++				!defined(CONFIG_MACH_SUN8I_R40)) || \
++				defined(CONFIG_MACH_SUN8I_R528))
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPG(6), SUN8I_GPG_UART1);
+ 	sunxi_gpio_set_cfgpin(SUNXI_GPG(7), SUN8I_GPG_UART1);
+ 	sunxi_gpio_set_pull(SUNXI_GPG(7), SUNXI_GPIO_PULL_UP);
+@@ -222,13 +231,12 @@ static int suniv_get_boot_source(void)
+ 	switch (brom_call) {
+ 	case SUNIV_BOOTED_FROM_MMC0:
+ 		return SUNXI_BOOTED_FROM_MMC0;
+-	case SUNIV_BOOTED_FROM_SPI:
++	case SUNIV_BOOTED_FROM_NAND:
+ 		return SUNXI_BOOTED_FROM_SPI;
+ 	case SUNIV_BOOTED_FROM_MMC1:
+ 		return SUNXI_BOOTED_FROM_MMC2;
+-	/* SPI NAND is not supported yet. */
+-	case SUNIV_BOOTED_FROM_NAND:
+-		return SUNXI_INVALID_BOOT_SOURCE;
++	case SUNIV_BOOTED_FROM_SPI:
++		return SUNXI_BOOTED_FROM_SPINAND;
+ 	}
+ 	/* If we get here something went wrong try to boot from FEL.*/
+ 	printf("Unknown boot source from BROM: 0x%x\n", brom_call);
+@@ -278,6 +286,7 @@ static int sunxi_get_boot_source(void)
+ uint32_t sunxi_get_boot_device(void)
+ {
+ 	int boot_source = sunxi_get_boot_source();
++	int boot_dev = (boot_source & 0xF); /* Low nibble is device */
+ 
+ 	/*
+ 	 * When booting from the SD card or NAND memory, the "eGON.BT0"
+@@ -295,25 +304,34 @@ uint32_t sunxi_get_boot_device(void)
+ 	 * binary over USB. If it is found, it determines where SPL was
+ 	 * read from.
+ 	 */
+-	switch (boot_source) {
+-	case SUNXI_INVALID_BOOT_SOURCE:
++	if (boot_source == SUNXI_INVALID_BOOT_SOURCE)
+ 		return BOOT_DEVICE_BOARD;
++
++	switch (boot_dev) {
+ 	case SUNXI_BOOTED_FROM_MMC0:
+-	case SUNXI_BOOTED_FROM_MMC0_HIGH:
+ 		return BOOT_DEVICE_MMC1;
+ 	case SUNXI_BOOTED_FROM_NAND:
+ 		return BOOT_DEVICE_NAND;
+ 	case SUNXI_BOOTED_FROM_MMC2:
+-	case SUNXI_BOOTED_FROM_MMC2_HIGH:
+ 		return BOOT_DEVICE_MMC2;
+ 	case SUNXI_BOOTED_FROM_SPI:
+ 		return BOOT_DEVICE_SPI;
++	case SUNXI_BOOTED_FROM_SPINAND:
++		return BOOT_DEVICE_SPINAND;
+ 	}
+ 
+ 	panic("Unknown boot source %d\n", boot_source);
+ 	return -1;		/* Never reached */
+ }
+ 
++uint32_t sunxi_get_boot_position(void)
++{
++	int boot_source = sunxi_get_boot_source();
++	int boot_pos = ((boot_source >> 8) & 0xF); /* High nibble is position */
++
++	return boot_pos;
++}
++
+ #ifdef CONFIG_SPL_BUILD
+ uint32_t sunxi_get_spl_size(void)
+ {
+@@ -346,13 +364,10 @@ unsigned long board_spl_mmc_get_uboot_raw_sector(struct mmc *mmc,
+ 
+ 	sector = max(raw_sect, spl_size / 512);
+ 
+-	switch (sunxi_get_boot_source()) {
+-	case SUNXI_BOOTED_FROM_MMC0_HIGH:
+-	case SUNXI_BOOTED_FROM_MMC2_HIGH:
++	if (sunxi_get_boot_position() == 1) {
+ 		sector += (128 - 8) * 2;
+ 		if (IS_ENABLED(CONFIG_MACH_SUN50I_H616))
+ 			sector += 128 * 2;
+-		break;
+ 	}
+ 
+ 	return sector;
+diff --git a/arch/arm/mach-sunxi/clock_sun50i_h6.c b/arch/arm/mach-sunxi/clock_sun50i_h6.c
+index cc2ee336416..c63bb4b58e7 100644
+--- a/arch/arm/mach-sunxi/clock_sun50i_h6.c
++++ b/arch/arm/mach-sunxi/clock_sun50i_h6.c
+@@ -159,3 +159,84 @@ unsigned int clock_get_pll6(void)
+ 
+ 	return 24000000U * n / m / div1 / div2;
+ }
++
++#ifdef CONFIG_SUNXI_DE2
++
++void clock_set_pll3(unsigned int clk)
++{
++	struct sunxi_ccm_reg * const ccm =
++		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
++
++	if (clk == 0) {
++		clrbits_le32(&ccm->pll3_cfg, CCM_PLL3_CTRL_EN);
++		return;
++	}
++
++	/* PLL3 rate = 24000000 * n / 2 */
++	writel(CCM_PLL3_CTRL_EN | CCM_PLL3_LOCK_EN | CCM_PLL3_OUT_EN | CCM_PLL3_LDO_EN |
++	       CCM_PLL3_INPUT_DIV2 | CCM_PLL3_CTRL_N(clk / 12000000),
++	       &ccm->pll3_cfg);
++
++	while (!(readl(&ccm->pll3_cfg) & CCM_PLL3_LOCK))
++		;
++}
++
++void clock_set_video1(unsigned int clk)
++{
++	struct sunxi_ccm_reg * const ccm =
++		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
++
++	if (clk == 0) {
++		clrbits_le32(&ccm->pll_video1_cfg, CCM_VIDEO1_CTRL_EN);
++		return;
++	}
++
++	/* VIDEO1 rate = 24000000 * n / 2 */
++	writel(CCM_VIDEO1_CTRL_EN | CCM_VIDEO1_LOCK_EN | CCM_VIDEO1_OUT_EN | CCM_VIDEO1_LDO_EN |
++	       CCM_VIDEO1_INPUT_DIV2 | CCM_VIDEO1_CTRL_N(clk / 12000000),
++	       &ccm->pll_video1_cfg);
++
++	while (!(readl(&ccm->pll_video1_cfg) & CCM_VIDEO1_LOCK))
++		;
++}
++
++void clock_set_pll10(unsigned int clk)
++{
++	struct sunxi_ccm_reg * const ccm =
++		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
++
++	if (clk == 0) {
++		clrbits_le32(&ccm->pll10_cfg, CCM_PLL10_CTRL_EN);
++		return;
++	}
++
++	/* PLL10 rate = 24000000 * n / 2 */
++	writel(CCM_PLL10_CTRL_EN | CCM_PLL10_LOCK_EN | CCM_PLL10_OUT_EN |
++	       CCM_PLL10_INPUT_DIV2 | CCM_PLL10_CTRL_N(clk / 12000000),
++	       &ccm->pll_video1_cfg);
++
++	while (!(readl(&ccm->pll_video1_cfg) & CCM_PLL10_LOCK))
++		;
++}
++
++unsigned int clock_get_pll3(void)
++{
++	struct sunxi_ccm_reg *const ccm =
++		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
++	u32 rval = readl(&ccm->pll3_cfg);
++	int n = ((rval & CCM_PLL3_CTRL_N_MASK) >> CCM_PLL3_CTRL_N_SHIFT) + 1;
++
++	return 12000 * n * 1000;
++}
++
++unsigned int clock_get_video1(void)
++{
++	struct sunxi_ccm_reg *const ccm =
++		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
++	u32 rval = readl(&ccm->pll_video1_cfg);
++	int n = ((rval & CCM_VIDEO1_CTRL_N_MASK) >> CCM_VIDEO1_CTRL_N_SHIFT) + 1;
++
++	return 12000 * n * 1000;
++}
++
++#endif
+diff --git a/arch/arm/mach-sunxi/spl_spi_sunxi.c b/arch/arm/mach-sunxi/spl_spi_sunxi.c
+index d7abdc2e401..90062e2d114 100644
+--- a/arch/arm/mach-sunxi/spl_spi_sunxi.c
++++ b/arch/arm/mach-sunxi/spl_spi_sunxi.c
+@@ -283,77 +283,139 @@ static void spi0_deinit(void)
+ 
+ #define SPI_READ_MAX_SIZE 60 /* FIFO size, minus 4 bytes of the header */
+ 
+-static void sunxi_spi0_read_data(u8 *buf, u32 addr, u32 bufsize,
+-				 ulong spi_ctl_reg,
+-				 ulong spi_ctl_xch_bitmask,
+-				 ulong spi_fifo_reg,
+-				 ulong spi_tx_reg,
+-				 ulong spi_rx_reg,
+-				 ulong spi_bc_reg,
+-				 ulong spi_tc_reg,
+-				 ulong spi_bcc_reg)
++static void sunxi_spi0_xfer(const u8 *txbuf, u32 txlen,
++			    u8 *rxbuf, u32 rxlen,
++			    ulong spi_ctl_reg,
++			    ulong spi_ctl_xch_bitmask,
++			    ulong spi_fifo_reg,
++			    ulong spi_tx_reg,
++			    ulong spi_rx_reg,
++			    ulong spi_bc_reg,
++			    ulong spi_tc_reg,
++			    ulong spi_bcc_reg)
+ {
+-	writel(4 + bufsize, spi_bc_reg); /* Burst counter (total bytes) */
+-	writel(4, spi_tc_reg);           /* Transfer counter (bytes to send) */
++	writel(txlen + rxlen, spi_bc_reg); /* Burst counter (total bytes) */
++	writel(txlen, spi_tc_reg);         /* Transfer counter (bytes to send) */
+ 	if (spi_bcc_reg)
+-		writel(4, spi_bcc_reg);  /* SUN6I also needs this */
++		writel(txlen, spi_bcc_reg);  /* SUN6I also needs this */
+ 
+-	/* Send the Read Data Bytes (03h) command header */
+-	writeb(0x03, spi_tx_reg);
+-	writeb((u8)(addr >> 16), spi_tx_reg);
+-	writeb((u8)(addr >> 8), spi_tx_reg);
+-	writeb((u8)(addr), spi_tx_reg);
++	for (u32 i = 0; i < txlen; i++)
++		writeb(*(txbuf++), spi_tx_reg);
+ 
+ 	/* Start the data transfer */
+ 	setbits_le32(spi_ctl_reg, spi_ctl_xch_bitmask);
+ 
+ 	/* Wait until everything is received in the RX FIFO */
+-	while ((readl(spi_fifo_reg) & 0x7F) < 4 + bufsize)
++	while ((readl(spi_fifo_reg) & 0x7F) < txlen + rxlen)
+ 		;
+ 
+-	/* Skip 4 bytes */
+-	readl(spi_rx_reg);
++	/* Skip txlen bytes */
++	for (u32 i = 0; i < txlen; i++)
++		readb(spi_rx_reg);
+ 
+ 	/* Read the data */
+-	while (bufsize-- > 0)
+-		*buf++ = readb(spi_rx_reg);
++	while (rxlen-- > 0)
++		*rxbuf++ = readb(spi_rx_reg);
++}
+ 
+-	/* tSHSL time is up to 100 ns in various SPI flash datasheets */
+-	udelay(1);
++static void spi0_xfer(const u8 *txbuf, u32 txlen, u8 *rxbuf, u32 rxlen)
++{
++	uintptr_t base = spi0_base_address();
++
++	if (is_sun6i_gen_spi()) {
++		sunxi_spi0_xfer(txbuf, txlen, rxbuf, rxlen,
++				base + SUN6I_SPI0_TCR,
++				SUN6I_TCR_XCH,
++				base + SUN6I_SPI0_FIFO_STA,
++				base + SUN6I_SPI0_TXD,
++				base + SUN6I_SPI0_RXD,
++				base + SUN6I_SPI0_MBC,
++				base + SUN6I_SPI0_MTC,
++				base + SUN6I_SPI0_BCC);
++	} else {
++		sunxi_spi0_xfer(txbuf, txlen, rxbuf, rxlen,
++				base + SUN4I_SPI0_CTL,
++				SUN4I_CTL_XCH,
++				base + SUN4I_SPI0_FIFO_STA,
++				base + SUN4I_SPI0_TX,
++				base + SUN4I_SPI0_RX,
++				base + SUN4I_SPI0_BC,
++				base + SUN4I_SPI0_TC,
++				0);
++	}
+ }
+ 
+-static void spi0_read_data(void *buf, u32 addr, u32 len)
++#if defined(CONFIG_SPL_SPINAND_SUPPORT)
++static int spi0_nand_switch_page(u32 page)
++{
++	unsigned count;
++	u8 buf[4];
++
++	/* Configure the Page Data Read (13h) command header */
++	buf[0] = 0x13;
++	buf[1] = (u8)(page >> 16);
++	buf[2] = (u8)(page >> 8);
++	buf[3] = (u8)(page);
++
++	spi0_xfer(buf, 4, NULL, 0);
++
++	/* Wait for NAND chip to exit busy state */
++	buf[0] = 0x0f;
++	buf[1] = 0xc0;
++
++	/* Load a NAND page can take up to 2-decimal-digit microseconds */
++	for (count = 0; count < 100; count ++) {
++		udelay(1);
++		spi0_xfer(buf, 2, buf+2, 1);
++		if (!(buf[2] & 0x1))
++			return 0;
++	}
++
++	return -ETIMEDOUT;
++}
++
++static void spi0_nand_reset(void)
++{
++	u8 buf[1];
++
++	/* Configure the Device RESET (ffh) command */
++	buf[0] = 0xff;
++
++	spi0_xfer(buf, 1, NULL, 0);
++
++	/* Wait for the NAND to finish resetting */
++	udelay(10);
++}
++#endif
++
++static void spi0_read_data(void *buf, u32 addr, u32 len, u32 addr_len)
+ {
+ 	u8 *buf8 = buf;
+ 	u32 chunk_len;
+-	uintptr_t base = spi0_base_address();
++	u8 txbuf[4];
+ 
+ 	while (len > 0) {
+ 		chunk_len = len;
++
++		/* Configure the Read Data Bytes (03h) command header */
++		txbuf[0] = 0x03;
++		if (addr_len == 3) {
++			txbuf[1] = (u8)(addr >> 16);
++			txbuf[2] = (u8)(addr >> 8);
++			txbuf[3] = (u8)(addr);
++		} else if (addr_len == 2) {
++			txbuf[1] = (u8)(addr >> 8);
++			txbuf[2] = (u8)(addr);
++			txbuf[3] = 0; /* dummy */
++		}
++
+ 		if (chunk_len > SPI_READ_MAX_SIZE)
+ 			chunk_len = SPI_READ_MAX_SIZE;
+ 
+-		if (is_sun6i_gen_spi()) {
+-			sunxi_spi0_read_data(buf8, addr, chunk_len,
+-					     base + SUN6I_SPI0_TCR,
+-					     SUN6I_TCR_XCH,
+-					     base + SUN6I_SPI0_FIFO_STA,
+-					     base + SUN6I_SPI0_TXD,
+-					     base + SUN6I_SPI0_RXD,
+-					     base + SUN6I_SPI0_MBC,
+-					     base + SUN6I_SPI0_MTC,
+-					     base + SUN6I_SPI0_BCC);
+-		} else {
+-			sunxi_spi0_read_data(buf8, addr, chunk_len,
+-					     base + SUN4I_SPI0_CTL,
+-					     SUN4I_CTL_XCH,
+-					     base + SUN4I_SPI0_FIFO_STA,
+-					     base + SUN4I_SPI0_TX,
+-					     base + SUN4I_SPI0_RX,
+-					     base + SUN4I_SPI0_BC,
+-					     base + SUN4I_SPI0_TC,
+-					     0);
+-		}
++		spi0_xfer(txbuf, 4, buf8, chunk_len);
++
++		/* tSHSL time is up to 100 ns in various SPI flash datasheets */
++		udelay(1);
+ 
+ 		len  -= chunk_len;
+ 		buf8 += chunk_len;
+@@ -361,51 +423,129 @@ static void spi0_read_data(void *buf, u32 addr, u32 len)
+ 	}
+ }
+ 
+-static ulong spi_load_read(struct spl_load_info *load, ulong sector,
+-			   ulong count, void *buf)
++static ulong spi_load_read_nor(struct spl_load_info *load, ulong sector,
++			       ulong count, void *buf)
+ {
+-	spi0_read_data(buf, sector, count);
++	spi0_read_data(buf, sector, count, 3);
+ 
+ 	return count;
+ }
+ 
++#if defined(CONFIG_SPL_SPINAND_SUPPORT)
++static ulong spi_load_read_nand(struct spl_load_info *load, ulong sector,
++			       ulong count, void *buf)
++{
++	const ulong pagesize = CONFIG_SPL_SPINAND_PAGE_SIZE;
++	ulong remain = count;
++
++	while (remain) {
++		ulong count_in_page = min(remain, pagesize - (sector % pagesize));
++		ulong current_page = sector / pagesize;
++		if (spi0_nand_switch_page(current_page) != 0)
++			return 0;
++		spi0_read_data(buf, sector % pagesize, count_in_page, 2);
++		remain -= count_in_page;
++		sector += count_in_page;
++		buf += count_in_page;
++	}
++
++	return count;
++}
++
++void spinand_init(void)
++{
++	spi0_init();
++	spi0_nand_reset();
++}
++
++void spinand_deselect(void)
++{
++	spi0_deinit();
++}
++
++int spinand_spl_read_block(int block, int offset, int len, void *dst)
++{
++	ulong byte_offset = (block * CONFIG_SPL_SPINAND_BLOCK_SIZE) + offset;
++
++	spi_load_read_nand(NULL, byte_offset, len, dst);
++
++	return 0;
++}
++
++#endif
++
+ /*****************************************************************************/
+ 
+-static int spl_spi_load_image(struct spl_image_info *spl_image,
+-			      struct spl_boot_device *bootdev)
++static int spl_spi_try_load(struct spl_image_info *spl_image,
++			    struct spl_boot_device *bootdev,
++			    struct spl_load_info *load, u32 offset,
++			    bool allow_raw)
+ {
+ 	int ret = 0;
+ 	struct legacy_img_hdr *header;
+-	uint32_t load_offset = sunxi_get_spl_size();
+-
+ 	header = (struct legacy_img_hdr *)CONFIG_TEXT_BASE;
+-	load_offset = max_t(uint32_t, load_offset, CONFIG_SYS_SPI_U_BOOT_OFFS);
+-
+-	spi0_init();
+ 
+-	spi0_read_data((void *)header, load_offset, 0x40);
++	if (load->read(load, offset, 0x40, (void *)header) == 0)
++		return -EINVAL;
+ 
+         if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
+ 		image_get_magic(header) == FDT_MAGIC) {
+-		struct spl_load_info load;
+ 
+ 		debug("Found FIT image\n");
+-		spl_set_bl_len(&load, 1);
+-		load.read = spi_load_read;
+-		ret = spl_load_simple_fit(spl_image, &load,
+-					  load_offset, header);
++		ret = spl_load_simple_fit(spl_image, load,
++					  offset, header);
+ 	} else {
++		if (!allow_raw && image_get_magic(header) != IH_MAGIC)
++			return -EINVAL;
++
+ 		ret = spl_parse_image_header(spl_image, bootdev, header);
+ 		if (ret)
+ 			return ret;
+ 
+-		spi0_read_data((void *)spl_image->load_addr,
+-			       load_offset, spl_image->size);
++		if (load->read(load, offset, spl_image->size,
++			       (void *)spl_image->load_addr) == 0)
++			ret = -EINVAL;
++	}
++
++	return ret;
++}
++
++static int spl_spi_load_image(struct spl_image_info *spl_image,
++			      struct spl_boot_device *bootdev)
++{
++	int ret = 0;
++	uint32_t load_offset = sunxi_get_spl_size();
++	struct spl_load_info load;
++	bool allow_raw = false;
++
++	load_offset = max_t(uint32_t, load_offset, CONFIG_SYS_SPI_U_BOOT_OFFS);
++
++	spi0_init();
++
++	switch (bootdev->boot_device) {
++#if defined(CONFIG_SPL_SPINAND_SUPPORT)
++	case BOOT_DEVICE_SPINAND:
++		spi0_nand_reset();
++		load.read = spi_load_read_nand;
++		spl_set_bl_len(&load, 1);
++		break;
++#endif
++	case BOOT_DEVICE_SPI:
++		load.read = spi_load_read_nor;
++		spl_set_bl_len(&load, 1);
++		allow_raw = true;
++		break;
+ 	}
+ 
++	ret = spl_spi_try_load(spl_image, bootdev, &load, load_offset, allow_raw);
++
+ 	spi0_deinit();
+ 
+ 	return ret;
+ }
+ /* Use priorty 0 to override the default if it happens to be linked in */
+ SPL_LOAD_IMAGE_METHOD("sunxi SPI", 0, BOOT_DEVICE_SPI, spl_spi_load_image);
++
++#if IS_ENABLED(CONFIG_SPL_SPINAND_SUPPORT)
++SPL_LOAD_IMAGE_METHOD("sunxi SPI NAND", 0, BOOT_DEVICE_SPINAND, spl_spi_load_image);
++#endif
+diff --git a/arch/mips/include/asm/spl.h b/arch/mips/include/asm/spl.h
+index 0a847edec89..02b580079a9 100644
+--- a/arch/mips/include/asm/spl.h
++++ b/arch/mips/include/asm/spl.h
+@@ -16,6 +16,7 @@ enum {
+ 	BOOT_DEVICE_NOR,
+ 	BOOT_DEVICE_UART,
+ 	BOOT_DEVICE_SPI,
++	BOOT_DEVICE_SPINAND,
+ 	BOOT_DEVICE_USB,
+ 	BOOT_DEVICE_SATA,
+ 	BOOT_DEVICE_I2C,
+diff --git a/arch/riscv/dts/sunxi-d1s-t113.dtsi b/arch/riscv/dts/sunxi-d1s-t113.dtsi
+index 822f022eec2..92b6432f773 100644
+--- a/arch/riscv/dts/sunxi-d1s-t113.dtsi
++++ b/arch/riscv/dts/sunxi-d1s-t113.dtsi
+@@ -145,6 +145,18 @@
+ 			};
+ 		};
+ 
++		pwm: pwm@2000c00 {
++			compatible = "allwinner,sun20i-d1-pwm";
++			reg = <0x02000c00 0x400>;
++			clocks = <&ccu CLK_BUS_PWM>,
++				 <&dcxo>,
++				 <&ccu CLK_APB0>;
++			clock-names = "bus", "hosc", "apb0";
++			resets = <&ccu RST_BUS_PWM>;
++			status = "disabled";
++			#pwm-cells = <0x3>;
++		};
++
+ 		ccu: clock-controller@2001000 {
+ 			compatible = "allwinner,sun20i-d1-ccu";
+ 			reg = <0x2001000 0x1000>;
+diff --git a/arch/riscv/include/asm/spl.h b/arch/riscv/include/asm/spl.h
+index 9c0bf9755c9..56b5bf9d7ef 100644
+--- a/arch/riscv/include/asm/spl.h
++++ b/arch/riscv/include/asm/spl.h
+@@ -18,6 +18,7 @@ enum {
+ 	BOOT_DEVICE_NOR,
+ 	BOOT_DEVICE_UART,
+ 	BOOT_DEVICE_SPI,
++	BOOT_DEVICE_SPINAND,
+ 	BOOT_DEVICE_USB,
+ 	BOOT_DEVICE_SATA,
+ 	BOOT_DEVICE_NVME,
+diff --git a/arch/sandbox/include/asm/spl.h b/arch/sandbox/include/asm/spl.h
+index 4fab24cd156..70f8ad4b581 100644
+--- a/arch/sandbox/include/asm/spl.h
++++ b/arch/sandbox/include/asm/spl.h
+@@ -16,6 +16,7 @@ enum {
+ 	BOOT_DEVICE_NOR,
+ 	BOOT_DEVICE_SPI,
+ 	BOOT_DEVICE_NAND,
++	BOOT_DEVICE_SPINAND,
+ };
+ 
+ /**
+diff --git a/common/spl/Kconfig b/common/spl/Kconfig
+index 16b0241f770..d6e0b952559 100644
+--- a/common/spl/Kconfig
++++ b/common/spl/Kconfig
+@@ -914,6 +914,27 @@ config SPL_MUSB_NEW
+ 	  the drivers in drivers/usb/musb-new as part of an SPL build. The
+ 	  old drivers are in drivers/usb/musb.
+ 
++config SPL_SPINAND_SUPPORT
++	bool "Support SPINAND flash"
++	help
++	  Enable support for SPINAND (Negative AND) flash in SPL. SPINAND flash
++	  can be used to allow SPL to load U-Boot from supported devices.
++
++config SPL_SPINAND_PAGE_SIZE
++        hex "SPINAND chip page size"
++        depends on SPL_SPINAND_SUPPORT
++        help
++          Number of data bytes in one page for the SPINAND chip on the
++          board, not including the OOB area.
++
++config SPL_SPINAND_BLOCK_SIZE
++        hex "SPINAND chip eraseblock size"
++        depends on SPL_SPINAND_SUPPORT
++        help
++          Number of data bytes in one eraseblock for the SPINAND chip on the
++          board. This is the multiple of SPINAND_PAGE_SIZE and the number of
++          pages.
++
+ config SPL_NAND_SUPPORT
+ 	bool "Support NAND flash"
+ 	select SPL_LOAD_BLOCK
+diff --git a/common/spl/spl_ubi.c b/common/spl/spl_ubi.c
+index a8d3f43b452..ad06b051666 100644
+--- a/common/spl/spl_ubi.c
++++ b/common/spl/spl_ubi.c
+@@ -11,6 +11,16 @@
+ #include <ubispl.h>
+ #include <spl.h>
+ 
++static ulong ram_spl_load_read(struct spl_load_info *load, ulong sector,
++			       ulong count, void *buf)
++{
++	char *ubi_contents = load->priv;
++
++	memcpy(buf, ubi_contents + sector, count);
++
++	return count;
++}
++
+ int spl_ubi_load_image(struct spl_image_info *spl_image,
+ 		       struct spl_boot_device *bootdev)
+ {
+@@ -20,6 +30,13 @@ int spl_ubi_load_image(struct spl_image_info *spl_image,
+ 	int ret = 1;
+ 
+ 	switch (bootdev->boot_device) {
++#ifdef CONFIG_SPL_SPINAND_SUPPORT
++	case BOOT_DEVICE_SPINAND:
++		spinand_init();
++		info.read = spinand_spl_read_block;
++		info.peb_size = CONFIG_SPL_SPINAND_BLOCK_SIZE;
++		break;
++#endif
+ #ifdef CONFIG_SPL_NAND_SUPPORT
+ 	case BOOT_DEVICE_NAND:
+ 		nand_init();
+@@ -61,10 +78,11 @@ int spl_ubi_load_image(struct spl_image_info *spl_image,
+ 		puts("Loading Linux failed, falling back to U-Boot.\n");
+ 	}
+ #endif
+-	header = spl_get_load_buffer(-sizeof(*header), sizeof(header));
++	/* Ensure there's enough room for the full UBI volume! */
++	header = (void *)CONFIG_SYS_LOAD_ADDR;
+ #ifdef CONFIG_SPL_UBI_LOAD_BY_VOLNAME
+ 	volumes[0].vol_id = -1;
+-	strncpy(volumes[0].name,
++	strlcpy(volumes[0].name,
+ 		CONFIG_SPL_UBI_LOAD_MONITOR_VOLNAME,
+ 		UBI_VOL_NAME_MAX + 1);
+ #else
+@@ -73,15 +91,36 @@ int spl_ubi_load_image(struct spl_image_info *spl_image,
+ 	volumes[0].load_addr = (void *)header;
+ 
+ 	ret = ubispl_load_volumes(&info, volumes, 1);
+-	if (!ret)
+-		spl_parse_image_header(spl_image, bootdev, header);
++	if (ret)
++		goto out;
++
++	spl_parse_image_header(spl_image, bootdev, header);
++
++	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
++	    image_get_magic(header) == FDT_MAGIC) {
++		struct spl_load_info load;
++
++		printf("Found FIT\n");
++		load.priv = (char *)header;
++		load.read = ram_spl_load_read;
++		spl_set_bl_len(&load, 1);
++
++		ret = spl_load_simple_fit(spl_image, &load, 0, header);
++	}
++
+ out:
++#ifdef CONFIG_SPL_SPINAND_SUPPORT
++	if (bootdev->boot_device == BOOT_DEVICE_SPINAND)
++		spinand_deselect();
++#endif
+ #ifdef CONFIG_SPL_NAND_SUPPORT
+ 	if (bootdev->boot_device == BOOT_DEVICE_NAND)
+ 		nand_deselect();
+ #endif
+ 	return ret;
+ }
+-/* Use priorty 0 so that Ubi will override NAND and ONENAND methods */
++
++/* Use priority 0 so that UBI will override all NAND methods */
+ SPL_LOAD_IMAGE_METHOD("NAND", 0, BOOT_DEVICE_NAND, spl_ubi_load_image);
+ SPL_LOAD_IMAGE_METHOD("OneNAND", 0, BOOT_DEVICE_ONENAND, spl_ubi_load_image);
++SPL_LOAD_IMAGE_METHOD("SPINAND", 0, BOOT_DEVICE_SPINAND, spl_ubi_load_image);
+diff --git a/drivers/clk/sunxi/clk_d1.c b/drivers/clk/sunxi/clk_d1.c
+index b990a118594..a4a4f5a244b 100644
+--- a/drivers/clk/sunxi/clk_d1.c
++++ b/drivers/clk/sunxi/clk_d1.c
+@@ -14,6 +14,8 @@
+ static struct ccu_clk_gate d1_gates[] = {
+ 	[CLK_APB0]		= GATE_DUMMY,
+ 
++	[CLK_BUS_PWM]		= GATE(0x7ac, BIT(0)),
++
+ 	[CLK_BUS_MMC0]		= GATE(0x84c, BIT(0)),
+ 	[CLK_BUS_MMC1]		= GATE(0x84c, BIT(1)),
+ 	[CLK_BUS_MMC2]		= GATE(0x84c, BIT(2)),
+@@ -47,6 +49,8 @@ static struct ccu_clk_gate d1_gates[] = {
+ };
+ 
+ static struct ccu_reset d1_resets[] = {
++	[RST_BUS_PWM]		= RESET(0x7ac, BIT(16)),
++
+ 	[RST_BUS_MMC0]		= RESET(0x84c, BIT(16)),
+ 	[RST_BUS_MMC1]		= RESET(0x84c, BIT(17)),
+ 	[RST_BUS_MMC2]		= RESET(0x84c, BIT(18)),
+diff --git a/drivers/pinctrl/sunxi/pinctrl-sunxi.c b/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+index 37ea93715d1..27bc24bcebf 100644
+--- a/drivers/pinctrl/sunxi/pinctrl-sunxi.c
++++ b/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+@@ -613,8 +613,13 @@ static const struct sunxi_pinctrl_function sun20i_d1_pinctrl_functions[] = {
+ 	{ "uart0",	6 },	/* PB0-PB1, PB8-PB9, PE2-PE3 */
+ #endif
+ 	{ "uart1",	2 },	/* PG6-PG7 */
++#if IS_ENABLED(CONFIG_UART2_PORT_D)
++	{ "uart2",	5 },	/* PD1-PD2 */
++#else
+ 	{ "uart2",	7 },	/* PB0-PB1 */
++#endif
+ 	{ "uart3",	7 },	/* PB6-PB7 */
++	{ "pwm7",	5 },	/* PD22 */
+ };
+ 
+ static const struct sunxi_pinctrl_desc __maybe_unused sun20i_d1_pinctrl_desc = {
+diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
+index 6e79868d0ef..8c4c910ea7b 100644
+--- a/drivers/pwm/Kconfig
++++ b/drivers/pwm/Kconfig
+@@ -112,6 +112,12 @@ config PWM_SUNXI
+ 	  This PWM is found on H3, A64 and other Allwinner SoCs. It supports a
+ 	  programmable period and duty cycle. A 16-bit counter is used.
+ 
++config PWM_SUNXI_D1
++	bool "Enable support for the Allwinner D1 Sunxi PWM"
++	depends on DM_PWM
++	help
++	  This PWM is found on D1, T113-S3 and R329 SoCs.
++
+ config PWM_TI_EHRPWM
+ 	bool "Enable support for EHRPWM PWM"
+ 	depends on DM_PWM && ARCH_OMAP2PLUS
+diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
+index e4d10c8dc3e..ea96e7159b1 100644
+--- a/drivers/pwm/Makefile
++++ b/drivers/pwm/Makefile
+@@ -23,4 +23,5 @@ obj-$(CONFIG_PWM_SANDBOX)	+= sandbox_pwm.o
+ obj-$(CONFIG_PWM_SIFIVE)	+= pwm-sifive.o
+ obj-$(CONFIG_PWM_TEGRA)		+= tegra_pwm.o
+ obj-$(CONFIG_PWM_SUNXI)		+= sunxi_pwm.o
++obj-$(CONFIG_PWM_SUNXI_D1)	+= sunxi_pwm_d1.o
+ obj-$(CONFIG_PWM_TI_EHRPWM)	+= pwm-ti-ehrpwm.o
+diff --git a/drivers/pwm/sunxi_pwm_d1.c b/drivers/pwm/sunxi_pwm_d1.c
+new file mode 100644
+index 00000000000..7246ace049b
+--- /dev/null
++++ b/drivers/pwm/sunxi_pwm_d1.c
+@@ -0,0 +1,549 @@
++// SPDX-License-Identifier: GPL-2.0
++// Copyright 2024 John Watts <contact@jookia.org>
++/*
++ * The Allwinner D1's PWM channels are paired 16-bit counters.
++ *
++ * Each channel must be programmed using three variables:
++ * - The entire cycle count (used for the period)
++ * - The active cycle count (used for the duty cycle)
++ * - The active state polarity (specifies if the signal goes high or low)
++ *
++ * All counts are zero based, but the datasheet spends a lot of time
++ * adding 1 to the entire cycle count. There's no hidden extra cycle,
++ * it's just trying to make it human understandable. After all, you can
++ * have 0 active counts for a 100% duty cycle, but 0 entire cycles
++ * doesn't really mean sense or work in time calculations.
++ *
++ * The counter works like this (quoting the datasheet):
++ * - PCNTR = (PCNTR == PWM_ENTIRE_CYCLE) ? 0 : PCNTR + 1
++ * - PCNTR > (PWM_ENTIRE_CYCLE - PWM_ACT_CYCLE) = Output active state
++ * - PCNTR <= (PWM_ENTIRE_CYCLE - PWM_ACT_CYCLE) = Output inactive state
++ *
++ * Here's a 2-bit table of cycle counts versus active cycle counts:
++ *   Active:  |       0 |        1  |        2  |        3 |
++ *   Count 0  | Active  | Inactive  | Inactive  | Inactive |
++ *   Count 1  | Active  | Active    | Inactive  | Inactive |
++ *   Count 2  | Active  | Active    | Active    | Inactive |
++ *   Count 3  | Active  | Active    | Active    | Active   |
++ *
++ * An entire count of 2 and active count of 3 would always be inactive.
++ *
++ * The main takeaways here for us are:
++ * - The counter wraps around when it hits the entire cycle count
++ * - The output is active after the counter equals the active cycle count
++ * - An active count of 0 means the period is a 100% active cycle
++ * - An active count larger than the entire cycle count is a 0% active cycle
++ *
++ * This driver deals with the last problem by limiting the entire cycles
++ * to 65534 so we can always specify 65535 for a 0% active cycle.
++ *
++ * The PWM channels are paired and clocked together, resulting in a
++ * cycle time found using the following formula:
++ *
++ * PWM0_CYCLE_NS = 1000000000 / (BUS_CLOCK / COMMON_DIV / PWM0_PRESCALER_K)
++ * PWM1_CYCLE_NS = 1000000000 / (BUS_CLOCK / COMMON_DIV / PWM1_PRESCALER_K)
++ *
++ * This means both clocks should ideally be set at the same time and not
++ * impact each other too much.
++ */
++
++#include <dm.h>
++#include <dm/device_compat.h>
++#include <dm/devres.h>
++#include <clk.h>
++#include <reset.h>
++#include <pwm.h>
++#include <asm/io.h>
++
++/* PWM channel information */
++struct pwm_channel {
++	uint period_ns;
++	uint duty_ns;
++	bool polarity;
++	bool enable;
++	bool updated;
++};
++
++/* Timings found for a PWM channel */
++struct pwm_timings {
++	uint cycle_ns;
++	uint period_ns;
++	uint duty_ns;
++	uint clock_id;
++	uint common_div;
++	uint prescale_k;
++	uint entire_cycles;
++	uint active_cycles;
++	uint polarity;
++};
++
++/* Driver state */
++struct sunxi_pwm_d1_priv {
++	void *base;
++	struct clk *clk_bus;
++	struct clk *clk_srcs[3]; /* Last value must be NULL */
++	struct reset_ctl *reset;
++	int npwm;
++	struct pwm_channel *channels;
++};
++
++/* Divides a nanosecond value, rounding up for very low values */
++uint div_ns(uint ns, uint div)
++{
++	uint result = (ns / div);
++
++	/* If the number is less than 1000, round it to the nearest digit */
++	if (result < 1000)
++		result = (ns + (div - 1)) / div;
++
++	if (result < 1)
++		result = 1;
++
++	return result;
++}
++
++/* Checks if an error is relatively too large */
++int error_too_large(uint actual, uint target)
++{
++	/* For a target of zero we want zero */
++	if (target == 0)
++		return (actual == 0);
++
++	/* Don't overflow large numbers when we multiply by 100 */
++	while (actual > 1000) {
++		actual /= 100;
++		target /= 100;
++	}
++
++	int error_percent = (actual * 100) / target;
++
++	return (error_percent < 80 || 120 < error_percent);
++}
++
++/* Calculates the cycle nanoseconds from clock parameters */
++int get_cycle_ns(uint parent_hz, uint common_div, uint prescaler)
++{
++	return 1000000000 / ((parent_hz / common_div) / prescaler);
++}
++
++int find_channel_dividers(uint period_ns,
++			  uint parent_hz,
++			  struct pwm_timings *out)
++{
++	uint ideal_cycle_ns = div_ns(period_ns, 65535);
++	int common_div = out->common_div;
++	int prescaler = 1;
++	uint cycle_ns = 0;
++
++	for (;;) {
++		cycle_ns = get_cycle_ns(parent_hz, common_div, prescaler);
++		if (cycle_ns >= ideal_cycle_ns)
++			break;
++
++		prescaler *= 2;
++		if (prescaler > 256) {
++			if (common_div < 256) {
++				prescaler = 1;
++				common_div *= 2;
++			} else {
++				return -1;
++			}
++		}
++	}
++
++	out->common_div = common_div;
++	out->prescale_k = prescaler;
++	out->cycle_ns = cycle_ns;
++
++	return 0;
++}
++
++int find_channel_timings(const struct pwm_channel *in,
++			 struct pwm_timings *out,
++			 uint parent_hz)
++{
++	struct pwm_timings new = *out;
++
++	if (find_channel_dividers(in->period_ns, parent_hz, &new))
++		return -1;
++
++	new.entire_cycles = (in->period_ns / new.cycle_ns);
++	new.active_cycles = (in->duty_ns / new.cycle_ns);
++	new.period_ns = (new.entire_cycles * new.cycle_ns);
++	new.duty_ns = (new.active_cycles * new.cycle_ns);
++	new.polarity = in->polarity;
++
++	if (error_too_large(new.period_ns, in->period_ns))
++		return -1;
++
++	if (in->duty_ns && error_too_large(new.duty_ns, in->duty_ns))
++		return -1;
++
++	*out = new;
++
++	return 0;
++}
++
++int find_pair_timings(const struct pwm_channel *channel0,
++		      const struct pwm_channel *channel1,
++		      struct pwm_timings *timings0,
++		      struct pwm_timings *timings1,
++		      int clock_hz)
++{
++	struct pwm_timings new0 = *timings0;
++	struct pwm_timings new1 = *timings1;
++	int err0 = 0;
++	int err1 = 0;
++
++	new0.common_div = 1;
++	new1.common_div = 1;
++
++	if (channel0->enable) {
++		err0 = find_channel_timings(channel0, &new0, clock_hz);
++		new1.common_div = new0.common_div;
++	}
++
++	if (channel1->enable) {
++		err1 = find_channel_timings(channel1, &new1, clock_hz);
++		new0 = *timings0;
++		new0.common_div = new1.common_div;
++	}
++
++	if (channel0->enable && channel1->enable) {
++		err0 = find_channel_timings(channel0, &new0, clock_hz);
++
++		if (new0.common_div != new1.common_div)
++			return -1;
++	}
++
++	if (err0 || err1)
++		return -1;
++
++	*timings0 = new0;
++	*timings1 = new1;
++
++	return 0;
++}
++
++int find_pair_timings_clocked(struct clk **clk_srcs,
++			      const struct pwm_channel *channel0,
++			      const struct pwm_channel *channel1,
++			      struct pwm_timings *timings0,
++			      struct pwm_timings *timings1)
++{
++	struct clk *clock = *clk_srcs;
++
++	for (int clock_id = 0; clock; clock = clk_srcs[++clock_id]) {
++		int clock_hz = clk_get_rate(clock);
++
++		if (clock_hz == 0 || IS_ERR_VALUE(clock_hz))
++			continue;
++
++		timings0->clock_id = clock_id;
++		timings1->clock_id = clock_id;
++
++		if (find_pair_timings(channel0, channel1,
++				      timings0, timings1,
++				      clock_hz))
++			continue;
++
++		return 0;
++	}
++
++	return -1;
++}
++
++#define PCGR(base) ((base) + 0x40)
++#define PCGR_CLK_GATE(channel) BIT(channel)
++
++#define PER(base) ((base) + 0x80)
++#define PER_ENABLE_PWM(channel) BIT(channel)
++
++#define PCCR(base, pair) ((base) + 0x20 + ((pair) * 2))
++#define PCCR_CLK_SRC(src) ((src) << 7)
++#define PCCR_CLK_SRC_MASK GENMASK(8, 7)
++#define PCCR_CLK_DIV_M(m) (m)
++#define PCCR_CLK_DIV_M_MASK GENMASK(3, 0)
++
++#define PCR(base, channel) ((base) + 0x100 + ((channel) * 0x20))
++#define PCR_PRESCAL_K(k) (k)
++#define PCR_PRESCAL_K_MASK GENMASK(7, 0)
++#define PCR_PWM_ACTIVE BIT(8)
++
++#define PPR(base, channel) ((base) + 0x104 + ((channel) * 0x20))
++#define PPR_ENTIRE_CYCLE(n) ((n) << 16)
++#define PPR_ENTIRE_CYCLE_MASK GENMASK(31, 16)
++#define PPR_ACT_CYCLE(n) (n)
++#define PPR_ACT_CYCLE_MASK GENMASK(15, 0)
++
++/* Like clrsetbits_le32 but with memory barriers */
++void clrsetreg(void *addr, u32 clear, u32 set)
++{
++	u32 val = readl(addr);
++
++	val &= ~clear;
++	val |= set;
++
++	writel(val, addr);
++}
++
++void disable_pair(void *base, int pair)
++{
++	u32 PER_clear = (PER_ENABLE_PWM(pair) | PER_ENABLE_PWM(pair + 1));
++	u32 PCGR_clear = (PCGR_CLK_GATE(pair) | PCGR_CLK_GATE(pair + 1));
++
++	clrsetreg(PER(base), PER_clear, 0);
++	clrsetreg(PCGR(base), PCGR_clear, 0);
++
++	log_debug("%s: pair %i, PCGR 0x%x, PER 0x%x\n",
++		  __func__, pair, readl(PCGR(base)), readl(PER(base)));
++}
++
++void enable_pair(void *base, int pair, int clk_src, int clk_div)
++{
++	int div_m = fls(clk_div) - 1;
++
++	u32 PCGR_set = (PCGR_CLK_GATE(pair) | PCGR_CLK_GATE(pair + 1));
++	u32 PCCR_clear = (PCCR_CLK_SRC_MASK | PCCR_CLK_DIV_M_MASK);
++	u32 PCCR_set = (PCCR_CLK_SRC(clk_src) | PCCR_CLK_DIV_M(div_m));
++
++	clrsetreg(PCGR(base), 0, PCGR_set);
++	clrsetreg(PCCR(base, pair), PCCR_clear, PCCR_set);
++
++	log_debug("%s: pair %i, clk_src %i, div_m %i, PCCR 0x%x\n",
++		  __func__, pair, clk_src, div_m, readl(PCCR(base, pair)));
++}
++
++void enable_channel(void *base, int channel, struct pwm_timings *timings)
++{
++	u32 pwm_active = (timings->polarity) ? 0 : PCR_PWM_ACTIVE;
++	u32 prescale = (timings->prescale_k - 1);
++	u32 entire_cycles = (timings->entire_cycles - 1);
++	u32 active_cycles = timings->active_cycles;
++
++	u32 PCR_clear = (PCR_PRESCAL_K_MASK | PCR_PWM_ACTIVE);
++	u32 PCR_set = (PCR_PRESCAL_K(prescale) | pwm_active);
++	u32 PPR_clear = (PPR_ENTIRE_CYCLE_MASK | PPR_ACT_CYCLE_MASK);
++	u32 PPR_set = (PPR_ENTIRE_CYCLE(entire_cycles) | PPR_ACT_CYCLE(active_cycles));
++	u32 PER_set = PER_ENABLE_PWM(channel);
++
++	clrsetreg(PCR(base, channel), PCR_clear, PCR_set);
++	clrsetreg(PPR(base, channel), PPR_clear, PPR_set);
++	clrsetreg(PER(base), 0, PER_set);
++
++	log_debug("%s: channel %u, clock_id %u, period_ns %u, duty_ns %u, common_div %u, prescale_k %u, entire_cycles %u, active_cycles %u, polarity %u, PCGR 0x%x, PCR 0x%x, PPR 0x%x, PER 0x%x\n",
++		  __func__, channel, timings->clock_id, timings->period_ns,
++		  timings->duty_ns, timings->common_div, timings->prescale_k,
++		  timings->entire_cycles, timings->active_cycles,
++		  timings->polarity, readl(PCGR(base)),
++		  readl(PCR(base, channel)), readl(PPR(base, channel)),
++		  readl(PER(base)));
++}
++
++int update_channel_pair(struct sunxi_pwm_d1_priv *priv, int pair)
++{
++	struct pwm_timings timings0 = {0};
++	struct pwm_timings timings1 = {0};
++	struct pwm_channel *channel0 = &priv->channels[pair + 0];
++	struct pwm_channel *channel1 = &priv->channels[pair + 1];
++	void *base = priv->base;
++
++	if (channel0->updated && channel1->updated)
++		return 0;
++
++	disable_pair(base, pair);
++
++	if (find_pair_timings_clocked(priv->clk_srcs, channel0, channel1, &timings0, &timings1))
++		return -1;
++
++	if (channel0->enable || channel1->enable)
++		enable_pair(base, pair, timings0.clock_id, timings0.common_div);
++
++	if (channel0->enable)
++		enable_channel(base, pair + 0, &timings0);
++
++	if (channel1->enable)
++		enable_channel(base, pair + 1, &timings1);
++
++	channel0->updated = true;
++	channel1->updated = true;
++
++	return 0;
++}
++
++static int update_channels(struct udevice *dev)
++{
++	struct sunxi_pwm_d1_priv *priv = dev_get_priv(dev);
++	int i;
++
++	for (i = 0; i < priv->npwm; i += 2) {
++		int ret = update_channel_pair(priv, i);
++
++		if (ret != 0)
++			return ret;
++	}
++
++	return 0;
++}
++
++static int sunxi_pwm_d1_set_invert(struct udevice *dev, uint channel_num,
++				   bool polarity)
++{
++	struct sunxi_pwm_d1_priv *priv = dev_get_priv(dev);
++	struct pwm_channel *channel;
++
++	if (channel_num >= priv->npwm)
++		return -EINVAL;
++
++	channel = &priv->channels[channel_num];
++	channel->updated = (channel->polarity == polarity);
++	channel->polarity = polarity;
++
++	return update_channels(dev);
++}
++
++static int sunxi_pwm_d1_set_config(struct udevice *dev, uint channel_num,
++				   uint period_ns, uint duty_ns)
++{
++	struct sunxi_pwm_d1_priv *priv = dev_get_priv(dev);
++	struct pwm_channel *channel;
++
++	if (channel_num >= priv->npwm)
++		return -EINVAL;
++
++	channel = &priv->channels[channel_num];
++	channel->updated = (channel->period_ns == period_ns && channel->duty_ns == duty_ns);
++	channel->period_ns = period_ns;
++	channel->duty_ns = duty_ns;
++
++	return update_channels(dev);
++}
++
++static int sunxi_pwm_d1_set_enable(struct udevice *dev, uint channel_num, bool enable)
++{
++	struct sunxi_pwm_d1_priv *priv = dev_get_priv(dev);
++	struct pwm_channel *channel;
++
++	if (channel_num >= priv->npwm)
++		return -EINVAL;
++
++	channel = &priv->channels[channel_num];
++	channel->updated = (channel->enable == enable);
++	channel->enable = enable;
++
++	return update_channels(dev);
++}
++
++static int sunxi_pwm_d1_of_to_plat(struct udevice *dev)
++{
++	struct sunxi_pwm_d1_priv *priv = dev_get_priv(dev);
++	struct clk *clk_hosc;
++	struct clk *clk_apb;
++	int ret;
++
++	priv->base = dev_read_addr_ptr(dev);
++
++	if (!priv->base)  {
++		dev_err(dev, "Unset device tree offset?\n");
++		return -EINVAL;
++	}
++
++	priv->clk_bus = devm_clk_get(dev, "bus");
++
++	if (IS_ERR(priv->clk_bus)) {
++		dev_err(dev, "failed to get bus clock: %ld",
++			PTR_ERR(priv->clk_bus));
++		return PTR_ERR(priv->clk_bus);
++	}
++
++	ret = clk_enable(priv->clk_bus);
++
++	if (ret) {
++		dev_err(dev, "failed to enable bus clk: %d", ret);
++		return ret;
++	}
++
++	clk_hosc = devm_clk_get(dev, "hosc");
++
++	if (IS_ERR(clk_hosc)) {
++		dev_err(dev, "failed to get hosc clock: %ld",
++			PTR_ERR(clk_hosc));
++		return PTR_ERR(clk_hosc);
++	}
++
++	clk_apb = devm_clk_get(dev, "apb");
++
++	if (IS_ERR(clk_apb)) {
++		dev_err(dev, "failed to get apb clock: %ld",
++			PTR_ERR(clk_apb));
++		return PTR_ERR(clk_apb);
++	}
++
++	priv->clk_srcs[0] = clk_hosc;
++	priv->clk_srcs[1] = clk_apb;
++	priv->clk_srcs[2] = NULL;
++
++	priv->reset = devm_reset_control_get(dev, NULL);
++
++	if (IS_ERR(priv->reset)) {
++		dev_err(dev, "failed to get reset: %ld",
++			PTR_ERR(priv->reset));
++		return PTR_ERR(priv->reset);
++	}
++
++	priv->npwm = 8;
++	ret = dev_read_u32(dev, "allwinner,pwm-channels", &priv->npwm);
++
++	if (ret < 0 && ret != -EINVAL) {
++		dev_err(dev, "failed to read allwinner,pwm-channels: %d",
++			ret);
++		return ret;
++	}
++
++	priv->channels = devm_kzalloc(dev,
++				      sizeof(struct pwm_channel) * priv->npwm,
++				      GFP_KERNEL);
++
++	if (!priv->channels) {
++		dev_err(dev, "failed to read allocate pwm channels");
++		return -ENOMEM;
++	}
++
++	return 0;
++}
++
++static int sunxi_pwm_d1_probe(struct udevice *dev)
++{
++	struct sunxi_pwm_d1_priv *priv = dev_get_priv(dev);
++	int ret;
++
++	ret = reset_deassert(priv->reset);
++
++	if (ret < 0) {
++		dev_err(dev, "failed to deassert reset: %d", ret);
++		return ret;
++	}
++
++	return update_channels(dev);
++}
++
++static const struct pwm_ops sunxi_pwm_d1_ops = {
++	.set_invert	= sunxi_pwm_d1_set_invert,
++	.set_config	= sunxi_pwm_d1_set_config,
++	.set_enable	= sunxi_pwm_d1_set_enable,
++};
++
++static const struct udevice_id sunxi_pwm_d1_ids[] = {
++	{ .compatible = "allwinner,sun20i-d1-pwm" },
++	{ }
++};
++
++U_BOOT_DRIVER(sunxi_pwm_d1) = {
++	.name	= "sunxi_pwm_d1",
++	.id	= UCLASS_PWM,
++	.of_match = sunxi_pwm_d1_ids,
++	.ops	= &sunxi_pwm_d1_ops,
++	.of_to_plat	= sunxi_pwm_d1_of_to_plat,
++	.probe		= sunxi_pwm_d1_probe,
++	.priv_auto	= sizeof(struct sunxi_pwm_d1_priv),
++};
+diff --git a/drivers/spi/Kconfig b/drivers/spi/Kconfig
+index cd785aefd56..18d45bd029c 100644
+--- a/drivers/spi/Kconfig
++++ b/drivers/spi/Kconfig
+@@ -93,6 +93,7 @@ config ATMEL_QSPI
+ 
+ config ATMEL_SPI
+ 	bool "Atmel SPI driver"
++	depends on ARCH_AT91
+ 	default y if ARCH_AT91
+ 	help
+ 	  This enables driver for the Atmel SPI Controller, present on
+@@ -126,6 +127,7 @@ config BCM63XX_SPI
+ 
+ config BCMSTB_SPI
+ 	bool "BCMSTB SPI driver"
++	depends on ARCH_BCMSTB
+ 	help
+ 	  Enable the Broadcom set-top box SPI driver. This driver can
+ 	  be used to access the SPI flash on platforms embedding this
+@@ -164,6 +166,7 @@ config CADENCE_OSPI_VERSAL
+ 
+ config CF_SPI
+         bool "ColdFire SPI driver"
++        depends on M68K
+         help
+           Enable the ColdFire SPI driver. This driver can be used on
+           some m68k SoCs.
+@@ -191,6 +194,7 @@ config DESIGNWARE_SPI
+ 
+ config EXYNOS_SPI
+ 	bool "Samsung Exynos SPI driver"
++	depends on ARCH_EXYNOS
+ 	help
+ 	  Enable the Samsung Exynos SPI driver. This driver can be used to
+ 	  access the SPI NOR flash on platforms embedding this Samsung
+@@ -198,6 +202,7 @@ config EXYNOS_SPI
+ 
+ config FSL_DSPI
+ 	bool "Freescale DSPI driver"
++	depends on FSL_LAYERSCAPE || ARCH_VF610 || ARCH_LS1021A || ARCH_LS1028A
+ 	help
+ 	  Enable the Freescale DSPI driver. This driver can be used to
+ 	  access the SPI NOR flash and SPI Data flash on platforms embedding
+@@ -228,6 +233,7 @@ config GXP_SPI
+ 
+ config ICH_SPI
+ 	bool "Intel ICH SPI driver"
++	depends on X86
+ 	help
+ 	  Enable the Intel ICH SPI driver. This driver can be used to
+ 	  access the SPI NOR flash on platforms embedding this Intel
+@@ -241,6 +247,7 @@ config IPROC_QSPI
+ 
+ config KIRKWOOD_SPI
+ 	bool "Marvell Kirkwood SPI Driver"
++	depends on ARCH_KIRKWOOD
+ 	help
+ 	  Enable support for SPI on various Marvell SoCs, such as
+ 	  Kirkwood and Armada 375.
+@@ -276,6 +283,7 @@ config MPC8XX_SPI
+ 
+ config MPC8XXX_SPI
+ 	bool "MPC8XXX SPI Driver"
++	depends on MPC83xx || MPC85xx
+ 	help
+ 	  Enable support for SPI on the MPC8XXX PowerPC SoCs.
+ 
+@@ -335,6 +343,7 @@ config MVEBU_A3700_SPI
+ 
+ config MXS_SPI
+ 	bool "MXS SPI Driver"
++	depends on MACH_IMX
+ 	help
+ 	  Enable the MXS SPI controller driver. This driver can be used
+ 	  on the i.MX23 and i.MX28 SoCs.
+@@ -416,6 +425,7 @@ config RENESAS_RPC_SPI
+ 
+ config ROCKCHIP_SFC
+ 	bool "Rockchip SFC Driver"
++	select BOUNCE_BUFFER
+ 	help
+ 	  Enable the Rockchip SFC Driver for SPI NOR flash. This device is
+ 	  a limited purpose SPI controller for driving NOR flash on certain
+@@ -520,6 +530,7 @@ config STM32_SPI
+ 
+ config TEGRA114_SPI
+ 	bool "nVidia Tegra114 SPI driver"
++	depends on ARCH_TEGRA
+ 	help
+ 	  Enable the nVidia Tegra114 SPI driver. This driver can be used to
+ 	  access the SPI NOR flash on platforms embedding this nVidia Tegra114
+@@ -530,6 +541,7 @@ config TEGRA114_SPI
+ 
+ config TEGRA20_SFLASH
+ 	bool "nVidia Tegra20 Serial Flash controller driver"
++	depends on ARCH_TEGRA
+ 	help
+ 	  Enable the nVidia Tegra20 Serial Flash controller driver. This driver
+ 	  can be used to access the SPI NOR flash on platforms embedding this
+@@ -537,6 +549,7 @@ config TEGRA20_SFLASH
+ 
+ config TEGRA20_SLINK
+ 	bool "nVidia Tegra20/Tegra30 SLINK driver"
++	depends on ARCH_TEGRA
+ 	help
+ 	  Enable the nVidia Tegra20/Tegra30 SLINK driver. This driver can
+ 	  be used to access the SPI NOR flash on platforms embedding this
+@@ -544,6 +557,7 @@ config TEGRA20_SLINK
+ 
+ config TEGRA210_QSPI
+ 	bool "nVidia Tegra210 QSPI driver"
++	depends on ARCH_TEGRA
+ 	help
+ 	  Enable the Tegra Quad-SPI (QSPI) driver for T210. This driver
+ 	  be used to access SPI chips on platforms embedding this
+@@ -552,6 +566,7 @@ config TEGRA210_QSPI
+ config TI_QSPI
+ 	bool "TI QSPI driver"
+ 	imply TI_EDMA3
++	depends on ARCH_OMAP2PLUS
+ 	help
+ 	  Enable the TI Quad-SPI (QSPI) driver for DRA7xx and AM43xx evms.
+ 	  This driver support spi flash single, quad and memory reads.
+@@ -607,12 +622,14 @@ config FSL_ESPI
+ 
+ config SH_QSPI
+ 	bool "Renesas Quad SPI driver"
++	depends on ARCH_RENESAS
+ 	help
+ 	  Enable the Renesas Quad SPI controller driver. This driver can be
+ 	  used on Renesas SoCs.
+ 
+ config MXC_SPI
+ 	bool "MXC SPI Driver"
++	depends on MACH_IMX
+ 	help
+ 	  Enable the MXC SPI controller driver. This driver can be used
+ 	  on various i.MX SoCs such as i.MX31/35/51/6/7.
+diff --git a/drivers/spi/ca_sflash.c b/drivers/spi/ca_sflash.c
+index a99a8a4485a..db32e39add2 100644
+--- a/drivers/spi/ca_sflash.c
++++ b/drivers/spi/ca_sflash.c
+@@ -10,6 +10,7 @@
+ #include <malloc.h>
+ #include <clk.h>
+ #include <dm.h>
++#include <dm/device_compat.h>
+ #include <errno.h>
+ #include <fdtdec.h>
+ #include <linux/compat.h>
+diff --git a/drivers/spi/mtk_spim.c b/drivers/spi/mtk_spim.c
+index b360eca2b91..b66bcfc4233 100644
+--- a/drivers/spi/mtk_spim.c
++++ b/drivers/spi/mtk_spim.c
+@@ -18,7 +18,6 @@
+ #include <dm/devres.h>
+ #include <dm/pinctrl.h>
+ #include <linux/bitops.h>
+-#include <linux/completion.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/io.h>
+ #include <linux/iopoll.h>
+diff --git a/drivers/spi/soft_spi.c b/drivers/spi/soft_spi.c
+index 9bdb4a5bff9..7c54261bc5f 100644
+--- a/drivers/spi/soft_spi.c
++++ b/drivers/spi/soft_spi.c
+@@ -203,6 +203,12 @@ static int soft_spi_xfer(struct udevice *dev, unsigned int bitlen,
+ 	return 0;
+ }
+ 
++static int soft_spi_set_wordlen(struct udevice *dev, unsigned int wordlen)
++{
++	/* Support any wordlen as this driver clock out bits individually. */
++	return 0;
++}
++
+ static int soft_spi_set_speed(struct udevice *dev, unsigned int speed)
+ {
+ 	/* Ignore any speed settings. Speed is implemented via "spi-delay-us" */
+@@ -222,6 +228,7 @@ static const struct dm_spi_ops soft_spi_ops = {
+ 	.claim_bus	= soft_spi_claim_bus,
+ 	.release_bus	= soft_spi_release_bus,
+ 	.xfer		= soft_spi_xfer,
++	.set_wordlen    = soft_spi_set_wordlen,
+ 	.set_speed	= soft_spi_set_speed,
+ 	.set_mode	= soft_spi_set_mode,
+ };
+diff --git a/drivers/spi/spi-uclass.c b/drivers/spi/spi-uclass.c
+index 6e281725239..379fd35d650 100644
+--- a/drivers/spi/spi-uclass.c
++++ b/drivers/spi/spi-uclass.c
+@@ -129,6 +129,35 @@ void spi_release_bus(struct spi_slave *slave)
+ 	dm_spi_release_bus(slave->dev);
+ }
+ 
++static int spi_try_set_wordlen(struct spi_slave *slave, unsigned int wordlen)
++{
++	struct dm_spi_ops *ops;
++
++	ops = spi_get_ops(slave->dev->parent);
++	if (ops->set_wordlen)
++		return ops->set_wordlen(slave->dev->parent, wordlen);
++	else if (wordlen == SPI_DEFAULT_WORDLEN)
++		return 0;
++	else
++		return -EINVAL;
++}
++
++int spi_set_wordlen(struct spi_slave *slave, unsigned int wordlen)
++{
++	int oldwordlen = slave->wordlen;
++	int ret;
++
++	ret = spi_try_set_wordlen(slave, wordlen);
++	if (ret < 0) {
++		dev_err(slave->dev, "Cannot set wordlen (err=%d)\n", ret);
++		return ret;
++	}
++
++	slave->wordlen = wordlen;
++
++	return oldwordlen;
++}
++
+ int spi_set_speed(struct spi_slave *slave, uint hz)
+ {
+ 	struct dm_spi_ops *ops;
+diff --git a/drivers/spi/spi.c b/drivers/spi/spi.c
+index 50a076a98be..52d88cb3129 100644
+--- a/drivers/spi/spi.c
++++ b/drivers/spi/spi.c
+@@ -9,14 +9,16 @@
+ 
+ int spi_set_wordlen(struct spi_slave *slave, unsigned int wordlen)
+ {
+-	if (wordlen == 0 || wordlen > 32) {
++	int oldwordlen = slave->wordlen;
++
++	if (wordlen != SPI_DEFAULT_WORDLEN) {
+ 		printf("spi: invalid wordlen %u\n", wordlen);
+ 		return -1;
+ 	}
+ 
+ 	slave->wordlen = wordlen;
+ 
+-	return 0;
++	return oldwordlen;
+ }
+ 
+ void *spi_do_alloc_slave(int offset, int size, unsigned int bus,
+diff --git a/drivers/usb/musb-new/sunxi.c b/drivers/usb/musb-new/sunxi.c
+index b577ba41878..7dbe62c1027 100644
+--- a/drivers/usb/musb-new/sunxi.c
++++ b/drivers/usb/musb-new/sunxi.c
+@@ -428,6 +428,19 @@ static struct musb_hdrc_config musb_config_h3 = {
+ 	.ram_bits	= SUNXI_MUSB_RAM_BITS,
+ };
+ 
++static int sunxi_gadget_handle_interrupts(struct udevice *dev)
++{
++	struct sunxi_glue *glue = dev_get_priv(dev);
++	struct musb_host_data *host = &glue->mdata;
++
++	host->host->isr(0, host->host);
++	return 0;
++}
++
++static const struct usb_gadget_generic_ops sunxi_gadget_ops = {
++	.handle_interrupts	= sunxi_gadget_handle_interrupts,
++};
++
+ static int musb_usb_probe(struct udevice *dev)
+ {
+ 	struct sunxi_glue *glue = dev_get_priv(dev);
+@@ -436,10 +449,6 @@ static int musb_usb_probe(struct udevice *dev)
+ 	void *base = dev_read_addr_ptr(dev);
+ 	int ret;
+ 
+-#ifdef CONFIG_USB_MUSB_HOST
+-	struct usb_bus_priv *priv = dev_get_uclass_priv(dev);
+-#endif
+-
+ 	if (!base)
+ 		return -EINVAL;
+ 
+@@ -470,27 +479,31 @@ static int musb_usb_probe(struct udevice *dev)
+ 	pdata.platform_ops = &sunxi_musb_ops;
+ 	pdata.config = glue->cfg->config;
+ 
+-#ifdef CONFIG_USB_MUSB_HOST
+-	priv->desc_before_addr = true;
++	if (IS_ENABLED(CONFIG_USB_MUSB_HOST)) {
++		struct usb_bus_priv *priv = dev_get_uclass_priv(dev);
++		priv->desc_before_addr = true;
+ 
+-	pdata.mode = MUSB_HOST;
+-	host->host = musb_init_controller(&pdata, &glue->dev, base);
+-	if (!host->host)
+-		return -EIO;
++		pdata.mode = MUSB_HOST;
++		host->host = musb_init_controller(&pdata, &glue->dev, base);
++		if (!host->host)
++			return -EIO;
+ 
+-	ret = musb_lowlevel_init(host);
+-	if (!ret)
+-		printf("Allwinner mUSB OTG (Host)\n");
+-#else
+-	pdata.mode = MUSB_PERIPHERAL;
+-	host->host = musb_register(&pdata, &glue->dev, base);
+-	if (IS_ERR_OR_NULL(host->host))
+-		return -EIO;
++		return musb_lowlevel_init(host);
++	} else if (CONFIG_IS_ENABLED(DM_USB_GADGET)) {
++		pdata.mode = MUSB_PERIPHERAL;
++		host->host = musb_init_controller(&pdata, &glue->dev, base);
++		if (!host->host)
++			return -EIO;
+ 
+-	printf("Allwinner mUSB OTG (Peripheral)\n");
+-#endif
++		return usb_add_gadget_udc(&glue->dev, &host->host->g);
++	} else {
++		pdata.mode = MUSB_PERIPHERAL;
++		host->host = musb_register(&pdata, &glue->dev, base);
++		if (IS_ERR_OR_NULL(host->host))
++			return -EIO;
+ 
+-	return ret;
++		return 0;
++	}
+ }
+ 
+ static int musb_usb_remove(struct udevice *dev)
+@@ -553,6 +566,7 @@ U_BOOT_DRIVER(usb_musb) = {
+ 	.id		= UCLASS_USB_GADGET_GENERIC,
+ #endif
+ 	.of_match	= sunxi_musb_ids,
++	.ops		= &sunxi_gadget_ops,
+ 	.probe		= musb_usb_probe,
+ 	.remove		= musb_usb_remove,
+ #ifdef CONFIG_USB_MUSB_HOST
+diff --git a/drivers/video/Kconfig b/drivers/video/Kconfig
+index 6e79694fd19..bc25dc26a0a 100644
+--- a/drivers/video/Kconfig
++++ b/drivers/video/Kconfig
+@@ -163,6 +163,12 @@ config VIDEO_MIPI_DSI
+ 	  The MIPI Display Serial Interface (MIPI DSI) defines a high-speed
+ 	  serial interface between a host processor and a display module.
+ 
++config VIDEO_MIPI_DBI
++	bool "Support MIPI DBI interface"
++	help
++	  Support MIPI DBI interface for driving a MIPI compatible device
++	  over a SPI interface.
++
+ config CONSOLE_NORMAL
+ 	bool "Support a simple text console"
+ 	default y
+@@ -641,6 +647,12 @@ config VIDEO_LCD_HITACHI_TX18D42VM
+ 	lcd controller which needs to be initialized over SPI, once that is
+ 	done they work like a regular LVDS panel.
+ 
++config VIDEO_LCD_NEWVISION_NV3052C
++	bool "NewVision NV3052C RGB/SPI panel support"
++	select VIDEO_MIPI_DBI
++	---help---
++	Support for panels built around the NewVision NV3052C controller.
++
+ config VIDEO_LCD_SPI_CS
+ 	string "SPI CS pin for LCD related config job"
+ 	depends on VIDEO_LCD_SSD2828 || VIDEO_LCD_HITACHI_TX18D42VM
+diff --git a/drivers/video/Makefile b/drivers/video/Makefile
+index f3f70cd04a1..c82588ba0b0 100644
+--- a/drivers/video/Makefile
++++ b/drivers/video/Makefile
+@@ -66,9 +66,11 @@ obj-$(CONFIG_VIDEO_LCD_RENESAS_R69328) += renesas-r69328.o
+ obj-$(CONFIG_VIDEO_LCD_SAMSUNG_LTL106HL02) += samsung-ltl106hl02.o
+ obj-$(CONFIG_VIDEO_LCD_SSD2828) += ssd2828.o
+ obj-$(CONFIG_VIDEO_LCD_TDO_TL070WSH30) += tdo-tl070wsh30.o
++obj-$(CONFIG_VIDEO_LCD_NEWVISION_NV3052C) += newvision-nv3052c.o
+ obj-$(CONFIG_VIDEO_MCDE_SIMPLE) += mcde_simple.o
+ obj-${CONFIG_VIDEO_MESON} += meson/
+ obj-${CONFIG_VIDEO_MIPI_DSI} += mipi_dsi.o
++obj-${CONFIG_VIDEO_MIPI_DBI} += mipi_dbi.o
+ obj-$(CONFIG_VIDEO_MVEBU) += mvebu_lcd.o
+ obj-$(CONFIG_VIDEO_MXS) += mxsfb.o videomodes.o
+ obj-$(CONFIG_VIDEO_NX) += nexell_display.o videomodes.o nexell/
+diff --git a/drivers/video/mipi_dbi.c b/drivers/video/mipi_dbi.c
+new file mode 100644
+index 00000000000..d7457bb6e2b
+--- /dev/null
++++ b/drivers/video/mipi_dbi.c
+@@ -0,0 +1,70 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * MIPI DBI Bus support
++ *
++ * Copyright 2024 John Watts <contact@jookia.org>
++ */
++
++#include <mipi_dbi.h>
++
++int mipi_dbi_spi_init(struct spi_slave *slave, struct mipi_dbi *dbi,
++		      struct gpio_desc *dc)
++{
++	/* D/C GPIO isn't supported yet */
++	if (dc)
++		return -1;
++
++	dbi->spi = slave;
++
++	return 0;
++}
++
++int mipi_dbi_xfer(struct mipi_dbi *dbi, u8 data, int pos, int len)
++{
++	struct spi_slave *spi = dbi->spi;
++	bool is_data = (pos != 0);
++	int flags = 0;
++	u8 buf[2];
++
++	/* Mimic Linux's behaviour of pulling CS active each word */
++	flags |= SPI_XFER_ONCE;
++
++	buf[0] = (is_data ? 0x80 : 0x00) | (data >> 1);
++	buf[1] = ((data & 0x1) << 7);
++
++	return spi_xfer(spi, 9, &buf, NULL, flags);
++}
++
++int mipi_dbi_command_buf(struct mipi_dbi *dbi, u8 cmd, const u8 *data, size_t len)
++{
++	struct spi_slave *spi = dbi->spi;
++	int wordlen;
++	int retval = -1;
++
++	if (spi_claim_bus(spi))
++		return -1;
++
++	wordlen = spi_set_wordlen(spi, 9);
++	if (wordlen == -1)
++		goto done;
++
++	if (mipi_dbi_xfer(dbi, cmd, 0, len) != 0)
++		goto done;
++
++	for (int i = 1; i <= len; ++i) {
++		u8 dat = data[i - 1];
++
++		if (mipi_dbi_xfer(dbi, dat, i, len) != 0)
++			goto done;
++	}
++
++	retval = 0;
++
++done:
++	if (wordlen != -1)
++		spi_set_wordlen(spi, wordlen);
++
++	spi_release_bus(spi);
++
++	return retval;
++}
+diff --git a/drivers/video/newvision-nv3052c.c b/drivers/video/newvision-nv3052c.c
+new file mode 100644
+index 00000000000..2ffa6ae9ed8
+--- /dev/null
++++ b/drivers/video/newvision-nv3052c.c
+@@ -0,0 +1,608 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * NewVision NV3052C IPS LCD panel driver
++ *
++ * Copyright (C) 2020, Paul Cercueil <paul@crapouillou.net>
++ * Copyright (C) 2022, Christophe Branchereau <cbranchereau@gmail.com>
++ */
++
++#include <asm/gpio.h>
++#include <backlight.h>
++#include <dm/device_compat.h>
++#include <dm.h>
++#include <linux/delay.h>
++#include <mipi_dbi.h>
++#include <panel.h>
++#include <power/regulator.h>
++
++struct nv3052c_reg {
++	u8 cmd;
++	u8 val;
++};
++
++struct nv3052c_panel_info {
++	struct display_timing default_timing;
++	const struct nv3052c_reg *panel_regs;
++	unsigned int panel_regs_len;
++};
++
++struct nv3052c {
++	const struct nv3052c_panel_info *panel_info;
++	struct udevice *supply;
++	struct gpio_desc reset_gpio;
++	struct udevice *backlight;
++	struct spi_slave *spi;
++	struct mipi_dbi dbi;
++};
++
++static const struct nv3052c_reg ltk035c5444t_panel_regs[] = {
++	// EXTC Command set enable, select page 1
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x01 },
++	// Mostly unknown registers
++	{ 0xe3, 0x00 },
++	{ 0x40, 0x00 },
++	{ 0x03, 0x40 },
++	{ 0x04, 0x00 },
++	{ 0x05, 0x03 },
++	{ 0x08, 0x00 },
++	{ 0x09, 0x07 },
++	{ 0x0a, 0x01 },
++	{ 0x0b, 0x32 },
++	{ 0x0c, 0x32 },
++	{ 0x0d, 0x0b },
++	{ 0x0e, 0x00 },
++	{ 0x23, 0xa0 },
++	{ 0x24, 0x0c },
++	{ 0x25, 0x06 },
++	{ 0x26, 0x14 },
++	{ 0x27, 0x14 },
++	{ 0x38, 0xcc }, // VCOM_ADJ1
++	{ 0x39, 0xd7 }, // VCOM_ADJ2
++	{ 0x3a, 0x4a }, // VCOM_ADJ3
++	{ 0x28, 0x40 },
++	{ 0x29, 0x01 },
++	{ 0x2a, 0xdf },
++	{ 0x49, 0x3c },
++	{ 0x91, 0x77 }, // EXTPW_CTRL2
++	{ 0x92, 0x77 }, // EXTPW_CTRL3
++	{ 0xa0, 0x55 },
++	{ 0xa1, 0x50 },
++	{ 0xa4, 0x9c },
++	{ 0xa7, 0x02 },
++	{ 0xa8, 0x01 },
++	{ 0xa9, 0x01 },
++	{ 0xaa, 0xfc },
++	{ 0xab, 0x28 },
++	{ 0xac, 0x06 },
++	{ 0xad, 0x06 },
++	{ 0xae, 0x06 },
++	{ 0xaf, 0x03 },
++	{ 0xb0, 0x08 },
++	{ 0xb1, 0x26 },
++	{ 0xb2, 0x28 },
++	{ 0xb3, 0x28 },
++	{ 0xb4, 0x33 },
++	{ 0xb5, 0x08 },
++	{ 0xb6, 0x26 },
++	{ 0xb7, 0x08 },
++	{ 0xb8, 0x26 },
++	{ 0xf0, 0x00 },
++	{ 0xf6, 0xc0 },
++	// EXTC Command set enable, select page 2
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x02 },
++	// Set gray scale voltage to adjust gamma
++	{ 0xb0, 0x0b }, // PGAMVR0
++	{ 0xb1, 0x16 }, // PGAMVR1
++	{ 0xb2, 0x17 }, // PGAMVR2
++	{ 0xb3, 0x2c }, // PGAMVR3
++	{ 0xb4, 0x32 }, // PGAMVR4
++	{ 0xb5, 0x3b }, // PGAMVR5
++	{ 0xb6, 0x29 }, // PGAMPR0
++	{ 0xb7, 0x40 }, // PGAMPR1
++	{ 0xb8, 0x0d }, // PGAMPK0
++	{ 0xb9, 0x05 }, // PGAMPK1
++	{ 0xba, 0x12 }, // PGAMPK2
++	{ 0xbb, 0x10 }, // PGAMPK3
++	{ 0xbc, 0x12 }, // PGAMPK4
++	{ 0xbd, 0x15 }, // PGAMPK5
++	{ 0xbe, 0x19 }, // PGAMPK6
++	{ 0xbf, 0x0e }, // PGAMPK7
++	{ 0xc0, 0x16 }, // PGAMPK8
++	{ 0xc1, 0x0a }, // PGAMPK9
++	// Set gray scale voltage to adjust gamma
++	{ 0xd0, 0x0c }, // NGAMVR0
++	{ 0xd1, 0x17 }, // NGAMVR0
++	{ 0xd2, 0x14 }, // NGAMVR1
++	{ 0xd3, 0x2e }, // NGAMVR2
++	{ 0xd4, 0x32 }, // NGAMVR3
++	{ 0xd5, 0x3c }, // NGAMVR4
++	{ 0xd6, 0x22 }, // NGAMPR0
++	{ 0xd7, 0x3d }, // NGAMPR1
++	{ 0xd8, 0x0d }, // NGAMPK0
++	{ 0xd9, 0x07 }, // NGAMPK1
++	{ 0xda, 0x13 }, // NGAMPK2
++	{ 0xdb, 0x13 }, // NGAMPK3
++	{ 0xdc, 0x11 }, // NGAMPK4
++	{ 0xdd, 0x15 }, // NGAMPK5
++	{ 0xde, 0x19 }, // NGAMPK6
++	{ 0xdf, 0x10 }, // NGAMPK7
++	{ 0xe0, 0x17 }, // NGAMPK8
++	{ 0xe1, 0x0a }, // NGAMPK9
++	// EXTC Command set enable, select page 3
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x03 },
++	// Set various timing settings
++	{ 0x00, 0x2a }, // GIP_VST_1
++	{ 0x01, 0x2a }, // GIP_VST_2
++	{ 0x02, 0x2a }, // GIP_VST_3
++	{ 0x03, 0x2a }, // GIP_VST_4
++	{ 0x04, 0x61 }, // GIP_VST_5
++	{ 0x05, 0x80 }, // GIP_VST_6
++	{ 0x06, 0xc7 }, // GIP_VST_7
++	{ 0x07, 0x01 }, // GIP_VST_8
++	{ 0x08, 0x03 }, // GIP_VST_9
++	{ 0x09, 0x04 }, // GIP_VST_10
++	{ 0x70, 0x22 }, // GIP_ECLK1
++	{ 0x71, 0x80 }, // GIP_ECLK2
++	{ 0x30, 0x2a }, // GIP_CLK_1
++	{ 0x31, 0x2a }, // GIP_CLK_2
++	{ 0x32, 0x2a }, // GIP_CLK_3
++	{ 0x33, 0x2a }, // GIP_CLK_4
++	{ 0x34, 0x61 }, // GIP_CLK_5
++	{ 0x35, 0xc5 }, // GIP_CLK_6
++	{ 0x36, 0x80 }, // GIP_CLK_7
++	{ 0x37, 0x23 }, // GIP_CLK_8
++	{ 0x40, 0x03 }, // GIP_CLKA_1
++	{ 0x41, 0x04 }, // GIP_CLKA_2
++	{ 0x42, 0x05 }, // GIP_CLKA_3
++	{ 0x43, 0x06 }, // GIP_CLKA_4
++	{ 0x44, 0x11 }, // GIP_CLKA_5
++	{ 0x45, 0xe8 }, // GIP_CLKA_6
++	{ 0x46, 0xe9 }, // GIP_CLKA_7
++	{ 0x47, 0x11 }, // GIP_CLKA_8
++	{ 0x48, 0xea }, // GIP_CLKA_9
++	{ 0x49, 0xeb }, // GIP_CLKA_10
++	{ 0x50, 0x07 }, // GIP_CLKB_1
++	{ 0x51, 0x08 }, // GIP_CLKB_2
++	{ 0x52, 0x09 }, // GIP_CLKB_3
++	{ 0x53, 0x0a }, // GIP_CLKB_4
++	{ 0x54, 0x11 }, // GIP_CLKB_5
++	{ 0x55, 0xec }, // GIP_CLKB_6
++	{ 0x56, 0xed }, // GIP_CLKB_7
++	{ 0x57, 0x11 }, // GIP_CLKB_8
++	{ 0x58, 0xef }, // GIP_CLKB_9
++	{ 0x59, 0xf0 }, // GIP_CLKB_10
++	// Map internal GOA signals to GOA output pad
++	{ 0xb1, 0x01 }, // PANELD2U2
++	{ 0xb4, 0x15 }, // PANELD2U5
++	{ 0xb5, 0x16 }, // PANELD2U6
++	{ 0xb6, 0x09 }, // PANELD2U7
++	{ 0xb7, 0x0f }, // PANELD2U8
++	{ 0xb8, 0x0d }, // PANELD2U9
++	{ 0xb9, 0x0b }, // PANELD2U10
++	{ 0xba, 0x00 }, // PANELD2U11
++	{ 0xc7, 0x02 }, // PANELD2U24
++	{ 0xca, 0x17 }, // PANELD2U27
++	{ 0xcb, 0x18 }, // PANELD2U28
++	{ 0xcc, 0x0a }, // PANELD2U29
++	{ 0xcd, 0x10 }, // PANELD2U30
++	{ 0xce, 0x0e }, // PANELD2U31
++	{ 0xcf, 0x0c }, // PANELD2U32
++	{ 0xd0, 0x00 }, // PANELD2U33
++	// Map internal GOA signals to GOA output pad
++	{ 0x81, 0x00 }, // PANELU2D2
++	{ 0x84, 0x15 }, // PANELU2D5
++	{ 0x85, 0x16 }, // PANELU2D6
++	{ 0x86, 0x10 }, // PANELU2D7
++	{ 0x87, 0x0a }, // PANELU2D8
++	{ 0x88, 0x0c }, // PANELU2D9
++	{ 0x89, 0x0e }, // PANELU2D10
++	{ 0x8a, 0x02 }, // PANELU2D11
++	{ 0x97, 0x00 }, // PANELU2D24
++	{ 0x9a, 0x17 }, // PANELU2D27
++	{ 0x9b, 0x18 }, // PANELU2D28
++	{ 0x9c, 0x0f }, // PANELU2D29
++	{ 0x9d, 0x09 }, // PANELU2D30
++	{ 0x9e, 0x0b }, // PANELU2D31
++	{ 0x9f, 0x0d }, // PANELU2D32
++	{ 0xa0, 0x01 }, // PANELU2D33
++	// EXTC Command set enable, select page 2
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x02 },
++	// Unknown registers
++	{ 0x01, 0x01 },
++	{ 0x02, 0xda },
++	{ 0x03, 0xba },
++	{ 0x04, 0xa8 },
++	{ 0x05, 0x9a },
++	{ 0x06, 0x70 },
++	{ 0x07, 0xff },
++	{ 0x08, 0x91 },
++	{ 0x09, 0x90 },
++	{ 0x0a, 0xff },
++	{ 0x0b, 0x8f },
++	{ 0x0c, 0x60 },
++	{ 0x0d, 0x58 },
++	{ 0x0e, 0x48 },
++	{ 0x0f, 0x38 },
++	{ 0x10, 0x2b },
++	// EXTC Command set enable, select page 0
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x00 },
++	// Display Access Control
++	{ 0x36, 0x0a }, // bgr = 1, ss = 1, gs = 0
++};
++
++static const struct nv3052c_reg fs035vg158_panel_regs[] = {
++	// EXTC Command set enable, select page 1
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x01 },
++	// Mostly unknown registers
++	{ 0xe3, 0x00 },
++	{ 0x40, 0x00 },
++	{ 0x03, 0x40 },
++	{ 0x04, 0x00 },
++	{ 0x05, 0x03 },
++	{ 0x08, 0x00 },
++	{ 0x09, 0x07 },
++	{ 0x0a, 0x01 },
++	{ 0x0b, 0x32 },
++	{ 0x0c, 0x32 },
++	{ 0x0d, 0x0b },
++	{ 0x0e, 0x00 },
++	{ 0x23, 0x20 }, // RGB interface control: DE MODE PCLK-N
++	{ 0x24, 0x0c },
++	{ 0x25, 0x06 },
++	{ 0x26, 0x14 },
++	{ 0x27, 0x14 },
++	{ 0x38, 0x9c }, //VCOM_ADJ1, different to ltk035c5444t
++	{ 0x39, 0xa7 }, //VCOM_ADJ2, different to ltk035c5444t
++	{ 0x3a, 0x50 }, //VCOM_ADJ3, different to ltk035c5444t
++	{ 0x28, 0x40 },
++	{ 0x29, 0x01 },
++	{ 0x2a, 0xdf },
++	{ 0x49, 0x3c },
++	{ 0x91, 0x57 }, //EXTPW_CTRL2, different to ltk035c5444t
++	{ 0x92, 0x57 }, //EXTPW_CTRL3, different to ltk035c5444t
++	{ 0xa0, 0x55 },
++	{ 0xa1, 0x50 },
++	{ 0xa4, 0x9c },
++	{ 0xa7, 0x02 },
++	{ 0xa8, 0x01 },
++	{ 0xa9, 0x01 },
++	{ 0xaa, 0xfc },
++	{ 0xab, 0x28 },
++	{ 0xac, 0x06 },
++	{ 0xad, 0x06 },
++	{ 0xae, 0x06 },
++	{ 0xaf, 0x03 },
++	{ 0xb0, 0x08 },
++	{ 0xb1, 0x26 },
++	{ 0xb2, 0x28 },
++	{ 0xb3, 0x28 },
++	{ 0xb4, 0x03 }, // Unknown, different to ltk035c5444
++	{ 0xb5, 0x08 },
++	{ 0xb6, 0x26 },
++	{ 0xb7, 0x08 },
++	{ 0xb8, 0x26 },
++	{ 0xf0, 0x00 },
++	{ 0xf6, 0xc0 },
++	// EXTC Command set enable, select page 0
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x02 },
++	// Set gray scale voltage to adjust gamma
++	{ 0xb0, 0x0b }, // PGAMVR0
++	{ 0xb1, 0x16 }, // PGAMVR1
++	{ 0xb2, 0x17 }, // PGAMVR2
++	{ 0xb3, 0x2c }, // PGAMVR3
++	{ 0xb4, 0x32 }, // PGAMVR4
++	{ 0xb5, 0x3b }, // PGAMVR5
++	{ 0xb6, 0x29 }, // PGAMPR0
++	{ 0xb7, 0x40 }, // PGAMPR1
++	{ 0xb8, 0x0d }, // PGAMPK0
++	{ 0xb9, 0x05 }, // PGAMPK1
++	{ 0xba, 0x12 }, // PGAMPK2
++	{ 0xbb, 0x10 }, // PGAMPK3
++	{ 0xbc, 0x12 }, // PGAMPK4
++	{ 0xbd, 0x15 }, // PGAMPK5
++	{ 0xbe, 0x19 }, // PGAMPK6
++	{ 0xbf, 0x0e }, // PGAMPK7
++	{ 0xc0, 0x16 }, // PGAMPK8
++	{ 0xc1, 0x0a }, // PGAMPK9
++	// Set gray scale voltage to adjust gamma
++	{ 0xd0, 0x0c }, // NGAMVR0
++	{ 0xd1, 0x17 }, // NGAMVR0
++	{ 0xd2, 0x14 }, // NGAMVR1
++	{ 0xd3, 0x2e }, // NGAMVR2
++	{ 0xd4, 0x32 }, // NGAMVR3
++	{ 0xd5, 0x3c }, // NGAMVR4
++	{ 0xd6, 0x22 }, // NGAMPR0
++	{ 0xd7, 0x3d }, // NGAMPR1
++	{ 0xd8, 0x0d }, // NGAMPK0
++	{ 0xd9, 0x07 }, // NGAMPK1
++	{ 0xda, 0x13 }, // NGAMPK2
++	{ 0xdb, 0x13 }, // NGAMPK3
++	{ 0xdc, 0x11 }, // NGAMPK4
++	{ 0xdd, 0x15 }, // NGAMPK5
++	{ 0xde, 0x19 }, // NGAMPK6
++	{ 0xdf, 0x10 }, // NGAMPK7
++	{ 0xe0, 0x17 }, // NGAMPK8
++	{ 0xe1, 0x0a }, // NGAMPK9
++	// EXTC Command set enable, select page 3
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x03 },
++	// Set various timing settings
++	{ 0x00, 0x2a }, // GIP_VST_1
++	{ 0x01, 0x2a }, // GIP_VST_2
++	{ 0x02, 0x2a }, // GIP_VST_3
++	{ 0x03, 0x2a }, // GIP_VST_4
++	{ 0x04, 0x61 }, // GIP_VST_5
++	{ 0x05, 0x80 }, // GIP_VST_6
++	{ 0x06, 0xc7 }, // GIP_VST_7
++	{ 0x07, 0x01 }, // GIP_VST_8
++	{ 0x08, 0x03 }, // GIP_VST_9
++	{ 0x09, 0x04 }, // GIP_VST_10
++	{ 0x70, 0x22 }, // GIP_ECLK1
++	{ 0x71, 0x80 }, // GIP_ECLK2
++	{ 0x30, 0x2a }, // GIP_CLK_1
++	{ 0x31, 0x2a }, // GIP_CLK_2
++	{ 0x32, 0x2a }, // GIP_CLK_3
++	{ 0x33, 0x2a }, // GIP_CLK_4
++	{ 0x34, 0x61 }, // GIP_CLK_5
++	{ 0x35, 0xc5 }, // GIP_CLK_6
++	{ 0x36, 0x80 }, // GIP_CLK_7
++	{ 0x37, 0x23 }, // GIP_CLK_8
++	{ 0x40, 0x03 }, // GIP_CLKA_1
++	{ 0x41, 0x04 }, // GIP_CLKA_2
++	{ 0x42, 0x05 }, // GIP_CLKA_3
++	{ 0x43, 0x06 }, // GIP_CLKA_4
++	{ 0x44, 0x11 }, // GIP_CLKA_5
++	{ 0x45, 0xe8 }, // GIP_CLKA_6
++	{ 0x46, 0xe9 }, // GIP_CLKA_7
++	{ 0x47, 0x11 }, // GIP_CLKA_8
++	{ 0x48, 0xea }, // GIP_CLKA_9
++	{ 0x49, 0xeb }, // GIP_CLKA_10
++	{ 0x50, 0x07 }, // GIP_CLKB_1
++	{ 0x51, 0x08 }, // GIP_CLKB_2
++	{ 0x52, 0x09 }, // GIP_CLKB_3
++	{ 0x53, 0x0a }, // GIP_CLKB_4
++	{ 0x54, 0x11 }, // GIP_CLKB_5
++	{ 0x55, 0xec }, // GIP_CLKB_6
++	{ 0x56, 0xed }, // GIP_CLKB_7
++	{ 0x57, 0x11 }, // GIP_CLKB_8
++	{ 0x58, 0xef }, // GIP_CLKB_9
++	{ 0x59, 0xf0 }, // GIP_CLKB_10
++	// Map internal GOA signals to GOA output pad
++	{ 0xb1, 0x01 }, // PANELD2U2
++	{ 0xb4, 0x15 }, // PANELD2U5
++	{ 0xb5, 0x16 }, // PANELD2U6
++	{ 0xb6, 0x09 }, // PANELD2U7
++	{ 0xb7, 0x0f }, // PANELD2U8
++	{ 0xb8, 0x0d }, // PANELD2U9
++	{ 0xb9, 0x0b }, // PANELD2U10
++	{ 0xba, 0x00 }, // PANELD2U11
++	{ 0xc7, 0x02 }, // PANELD2U24
++	{ 0xca, 0x17 }, // PANELD2U27
++	{ 0xcb, 0x18 }, // PANELD2U28
++	{ 0xcc, 0x0a }, // PANELD2U29
++	{ 0xcd, 0x10 }, // PANELD2U30
++	{ 0xce, 0x0e }, // PANELD2U31
++	{ 0xcf, 0x0c }, // PANELD2U32
++	{ 0xd0, 0x00 }, // PANELD2U33
++	// Map internal GOA signals to GOA output pad
++	{ 0x81, 0x00 }, // PANELU2D2
++	{ 0x84, 0x15 }, // PANELU2D5
++	{ 0x85, 0x16 }, // PANELU2D6
++	{ 0x86, 0x10 }, // PANELU2D7
++	{ 0x87, 0x0a }, // PANELU2D8
++	{ 0x88, 0x0c }, // PANELU2D9
++	{ 0x89, 0x0e }, // PANELU2D10
++	{ 0x8a, 0x02 }, // PANELU2D11
++	{ 0x97, 0x00 }, // PANELU2D24
++	{ 0x9a, 0x17 }, // PANELU2D27
++	{ 0x9b, 0x18 }, // PANELU2D28
++	{ 0x9c, 0x0f }, // PANELU2D29
++	{ 0x9d, 0x09 }, // PANELU2D30
++	{ 0x9e, 0x0b }, // PANELU2D31
++	{ 0x9f, 0x0d }, // PANELU2D32
++	{ 0xa0, 0x01 }, // PANELU2D33
++	// EXTC Command set enable, select page 2
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x02 },
++	// Unknown registers
++	{ 0x01, 0x01 },
++	{ 0x02, 0xda },
++	{ 0x03, 0xba },
++	{ 0x04, 0xa8 },
++	{ 0x05, 0x9a },
++	{ 0x06, 0x70 },
++	{ 0x07, 0xff },
++	{ 0x08, 0x91 },
++	{ 0x09, 0x90 },
++	{ 0x0a, 0xff },
++	{ 0x0b, 0x8f },
++	{ 0x0c, 0x60 },
++	{ 0x0d, 0x58 },
++	{ 0x0e, 0x48 },
++	{ 0x0f, 0x38 },
++	{ 0x10, 0x2b },
++	// EXTC Command set enable, select page 0
++	{ 0xff, 0x30 }, { 0xff, 0x52 }, { 0xff, 0x00 },
++	// Display Access Control
++	{ 0x36, 0x0a }, // bgr = 1, ss = 1, gs = 0
++};
++
++static const struct nv3052c_panel_info ltk035c5444t_panel_info = {
++	.default_timing = {
++		.pixelclock.typ		= 24000000,
++		.hactive.typ		= 640,
++		.hfront_porch.typ	= 96,
++		.hback_porch.typ	= 16,
++		.hsync_len.typ		= 48,
++		.vactive.typ		= 480,
++		.vfront_porch.typ	= 5,
++		.vback_porch.typ	= 2,
++		.vsync_len.typ		= 13,
++		.flags			= DISPLAY_FLAGS_HSYNC_LOW | DISPLAY_FLAGS_VSYNC_LOW | DISPLAY_FLAGS_DE_HIGH | DISPLAY_FLAGS_PIXDATA_NEGEDGE,
++	},
++	.panel_regs = ltk035c5444t_panel_regs,
++	.panel_regs_len = ARRAY_SIZE(ltk035c5444t_panel_regs),
++};
++
++static const struct nv3052c_panel_info fs035vg158_panel_info = {
++	.default_timing = {
++		.pixelclock.typ		= 21000000,
++		.hactive.typ		= 640,
++		.hfront_porch.typ	= 34,
++		.hback_porch.typ	= 20,
++		.hsync_len.typ		= 4,
++		.vactive.typ		= 480,
++		.vfront_porch.typ	= 12,
++		.vback_porch.typ	= 6,
++		.vsync_len.typ		= 4,
++		.flags			= DISPLAY_FLAGS_VSYNC_LOW | DISPLAY_FLAGS_VSYNC_LOW | DISPLAY_FLAGS_DE_HIGH | DISPLAY_FLAGS_PIXDATA_NEGEDGE,
++	},
++	.panel_regs = fs035vg158_panel_regs,
++	.panel_regs_len = ARRAY_SIZE(fs035vg158_panel_regs),
++};
++
++static const struct nv3052c_panel_info *panel_infos[] = {
++	&ltk035c5444t_panel_info,
++	&fs035vg158_panel_info,
++};
++
++static int nv3052c_panel_enable_backlight(struct udevice *dev)
++{
++	struct nv3052c *priv = dev_get_priv(dev);
++	struct mipi_dbi *dbi = &priv->dbi;
++	int err;
++
++	err = mipi_dbi_command(dbi, MIPI_DCS_SET_DISPLAY_ON);
++	if (err) {
++		dev_err(dev, "Unable to enable display: %d\n", err);
++		return err;
++	}
++
++	if (priv->backlight) {
++		/* Wait for the picture to be ready before enabling backlight */
++		mdelay(120);
++		err = backlight_enable(priv->backlight);
++	}
++
++	return err;
++}
++
++static int nv3052c_panel_get_display_timing(struct udevice *dev,
++					    struct display_timing *timing)
++{
++	struct nv3052c *priv = dev_get_priv(dev);
++	const struct nv3052c_panel_info *info = priv->panel_info;
++	const struct display_timing *our_timing = &info->default_timing;
++
++	memcpy(timing, our_timing, sizeof(*our_timing));
++
++	return 0;
++}
++
++static int nv3052c_panel_of_to_plat(struct udevice *dev)
++{
++	struct nv3052c *priv = dev_get_priv(dev);
++	int panel_info_index = dev_get_driver_data(dev);
++	int err;
++
++	priv->spi = dev_get_parent_priv(dev);
++	priv->panel_info = panel_infos[panel_info_index];
++
++	if (CONFIG_IS_ENABLED(DM_REGULATOR)) {
++		err = device_get_supply_regulator(dev, "power-supply",
++						  &priv->supply);
++		if (err) {
++			dev_err(dev, "Failed to get power supply: %d\n", err);
++			return err;
++		}
++	}
++
++	err = gpio_request_by_name(dev, "reset-gpios", 0, &priv->reset_gpio,
++				   GPIOD_IS_OUT);
++	if (err) {
++		dev_err(dev, "Failed to get reset GPIO: %d\n", err);
++		return err;
++	}
++
++	err = uclass_get_device_by_phandle(UCLASS_PANEL_BACKLIGHT, dev,
++					   "backlight", &priv->backlight);
++	if (err) {
++		dev_err(dev, "Failed to get backlight: %d\n", err);
++		return err;
++	}
++
++	return 0;
++}
++
++static int nv3052c_panel_probe(struct udevice *dev)
++{
++	struct nv3052c *priv = dev_get_priv(dev);
++	const struct nv3052c_reg *panel_regs = priv->panel_info->panel_regs;
++	unsigned int panel_regs_len = priv->panel_info->panel_regs_len;
++	struct mipi_dbi *dbi = &priv->dbi;
++	unsigned int i;
++	int err;
++
++	err = mipi_dbi_spi_init(priv->spi, &priv->dbi, NULL);
++	if (err) {
++		dev_err(dev, "MPI DBI init failed: %d\n", err);
++		return err;
++	}
++
++	if (CONFIG_IS_ENABLED(DM_REGULATOR)) {
++		err = regulator_set_enable(priv->supply, true);
++		if (err) {
++			dev_err(dev, "Failed to enable power supply: %d\n", err);
++			return err;
++		}
++	}
++
++	/* Reset the chip */
++	dm_gpio_set_value(&priv->reset_gpio, true);
++	mdelay(1);
++	dm_gpio_set_value(&priv->reset_gpio, false);
++	mdelay(150);
++
++	for (i = 0; i < panel_regs_len; i++) {
++		err = mipi_dbi_command(dbi, panel_regs[i].cmd,
++				       panel_regs[i].val);
++
++		if (err) {
++			dev_err(dev, "Unable to set register: %d\n", err);
++			goto err_disable_regulator;
++		}
++	}
++
++	err = mipi_dbi_command(dbi, MIPI_DCS_EXIT_SLEEP_MODE);
++	if (err) {
++		dev_err(dev, "Unable to exit sleep mode: %d\n", err);
++		goto err_disable_regulator;
++	}
++
++	return 0;
++
++err_disable_regulator:
++	if (CONFIG_IS_ENABLED(DM_REGULATOR))
++		regulator_set_enable(priv->supply, false);
++
++	return err;
++}
++
++static const struct panel_ops nv3052c_panel_ops = {
++	.enable_backlight = nv3052c_panel_enable_backlight,
++	.get_display_timing = nv3052c_panel_get_display_timing,
++};
++
++static const struct udevice_id nv3052c_panel_ids[] = {
++	{ .compatible = "leadtek,ltk035c5444t", .data = 0 },
++	{ .compatible = "fascontek,fs035vg158", .data = 1 },
++	{ }
++};
++
++U_BOOT_DRIVER(nv3052c_panel) = {
++	.name			  = "nv3052c_panel",
++	.id			  = UCLASS_PANEL,
++	.of_match		  = nv3052c_panel_ids,
++	.ops			  = &nv3052c_panel_ops,
++	.of_to_plat		  = nv3052c_panel_of_to_plat,
++	.probe			  = nv3052c_panel_probe,
++	.priv_auto		  = sizeof(struct nv3052c),
++};
+diff --git a/drivers/video/sunxi/lcdc.c b/drivers/video/sunxi/lcdc.c
+index 264d775c125..171dc640a4d 100644
+--- a/drivers/video/sunxi/lcdc.c
++++ b/drivers/video/sunxi/lcdc.c
+@@ -132,10 +132,14 @@ void lcdc_tcon0_mode_set(struct sunxi_lcdc_reg * const lcdc,
+ 	}
+ 
+ 	val = SUNXI_LCDC_TCON0_IO_POL_DCLK_PHASE(dclk_phase);
+-	if (mode->flags & DISPLAY_FLAGS_HSYNC_LOW)
++	if (mode->flags & DISPLAY_FLAGS_HSYNC_HIGH)
+ 		val |= SUNXI_LCDC_TCON_HSYNC_MASK;
+-	if (mode->flags & DISPLAY_FLAGS_VSYNC_LOW)
++	if (mode->flags & DISPLAY_FLAGS_VSYNC_HIGH)
+ 		val |= SUNXI_LCDC_TCON_VSYNC_MASK;
++	if (mode->flags & DISPLAY_FLAGS_DE_LOW)
++		val |= SUNXI_LCDC_TCON_DE_MASK;
++	if (mode->flags & DISPLAY_FLAGS_PIXDATA_NEGEDGE)
++		val |= SUNXI_LCDC_TCON_PIXDATA_MASK;
+ 
+ #ifdef CONFIG_VIDEO_VGA_VIA_LCD_FORCE_SYNC_ACTIVE_HIGH
+ 	if (for_ext_vga_dac)
+@@ -215,7 +219,10 @@ void lcdc_pll_set(struct sunxi_ccm_reg *ccm, int tcon, int dotclock,
+ 	int value, n, m, min_m, max_m, diff, step;
+ 	int best_n = 0, best_m = 0, best_diff = 0x0FFFFFFF;
+ 	int best_double = 0;
++
++#ifdef CONFIG_MACH_SUN6I
+ 	bool use_mipi_pll = false;
++#endif
+ 
+ #ifdef CONFIG_SUNXI_DE2
+ 	step = 6000;
+@@ -276,6 +283,12 @@ void lcdc_pll_set(struct sunxi_ccm_reg *ccm, int tcon, int dotclock,
+ 		}
+ 	}
+ 
++#if IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)
++	/* No need to clock doubling, just ask for a higher PLL clock */
++	best_double = 0;
++	step *= 2;
++#endif
++
+ #ifdef CONFIG_MACH_SUN6I
+ 	/*
+ 	 * Use the MIPI pll if we've been unable to find any matching setting
+@@ -301,6 +314,19 @@ void lcdc_pll_set(struct sunxi_ccm_reg *ccm, int tcon, int dotclock,
+ 		      best_double + 1, step, best_n, best_m);
+ 	}
+ 
++#if IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)
++	if (tcon == 0) {
++		writel(CCM_TCON0_CTRL_VIDEO0_4X | CCM_TCON0_CTRL_ENABLE,
++		       &ccm->tcon_lcd0_clk_cfg);
++		setbits_le32(&ccm->tcon_lcd_gate_reset, BIT(RESET_SHIFT));
++		setbits_le32(&ccm->tcon_lcd_gate_reset, BIT(GATE_SHIFT));
++	} else {
++		writel(CCM_TCON1_CTRL_VIDEO0_4X | CCM_TCON1_CTRL_ENABLE,
++		       &ccm->tcon_tv0_clk_cfg);
++		setbits_le32(&ccm->tcon_tv_gate_reset, BIT(RESET_SHIFT));
++		setbits_le32(&ccm->tcon_tv_gate_reset, BIT(GATE_SHIFT));
++	}
++#else
+ 	if (tcon == 0) {
+ 		u32 pll;
+ 
+@@ -328,6 +354,7 @@ void lcdc_pll_set(struct sunxi_ccm_reg *ccm, int tcon, int dotclock,
+ 			setbits_le32(&ccm->lcd0_ch1_clk_cfg,
+ 				     CCM_LCD_CH1_CTRL_HALF_SCLK1);
+ 	}
++#endif
+ #endif
+ 
+ 	*clk_div = best_m;
+diff --git a/drivers/video/sunxi/sunxi_de2.c b/drivers/video/sunxi/sunxi_de2.c
+index 154641b9a69..8a12425583e 100644
+--- a/drivers/video/sunxi/sunxi_de2.c
++++ b/drivers/video/sunxi/sunxi_de2.c
+@@ -44,6 +44,23 @@ static void sunxi_de2_composer_init(void)
+ 	writel(reg_value, SUNXI_SRAMC_BASE + 0x04);
+ #endif
+ 
++#if IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)
++	if (IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)) {
++		/* Set DE parent to video1 */
++		clock_set_video1(432000000);
++		clrsetbits_le32(&ccm->de_clk_cfg, CCM_DE2_CTRL_PLL_MASK,
++				CCM_DE2_CTRL_VIDEO1_4X_NCAT);
++	} else {
++		/* Set DE parent to pll10 */
++		clock_set_pll10(432000000);
++		clrsetbits_le32(&ccm->de_clk_cfg, CCM_DE2_CTRL_PLL_MASK,
++				CCM_DE2_CTRL_PLL10_H6);
++	}
++
++	/* Ungate the DE */
++	setbits_le32(&ccm->de_gate_reset, BIT(RESET_SHIFT));
++	setbits_le32(&ccm->de_gate_reset, BIT(GATE_SHIFT));
++#else
+ 	clock_set_pll10(432000000);
+ 
+ 	/* Set DE parent to pll10 */
+@@ -53,6 +70,7 @@ static void sunxi_de2_composer_init(void)
+ 	/* Set ahb gating to pass */
+ 	setbits_le32(&ccm->ahb_reset1_cfg, 1 << AHB_RESET_OFFSET_DE);
+ 	setbits_le32(&ccm->ahb_gate1, 1 << AHB_GATE_OFFSET_DE);
++#endif
+ 
+ 	/* Clock on */
+ 	setbits_le32(&ccm->de_clk_cfg, CCM_DE2_CTRL_GATE);
+diff --git a/drivers/video/sunxi/sunxi_dw_hdmi.c b/drivers/video/sunxi/sunxi_dw_hdmi.c
+index b9c03ea0386..87f1dd7ed55 100644
+--- a/drivers/video/sunxi/sunxi_dw_hdmi.c
++++ b/drivers/video/sunxi/sunxi_dw_hdmi.c
+@@ -197,6 +197,12 @@ static void sunxi_dw_hdmi_pll_set(uint clk_khz, int *phy_div)
+ {
+ 	int value, n, m, div, diff;
+ 	int best_n = 0, best_m = 0, best_div = 0, best_diff = 0x0FFFFFFF;
++	int step = 24000, max_m = 16, pll_value = 0;
++
++	if (IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)) {
++		step = 12000;
++		max_m = 1;
++	}
+ 
+ 	/*
+ 	 * Find the lowest divider resulting in a matching clock. If there
+@@ -211,11 +217,11 @@ static void sunxi_dw_hdmi_pll_set(uint clk_khz, int *phy_div)
+ 		if (target > 912000)
+ 			continue;
+ 
+-		for (m = 1; m <= 16; m++) {
+-			n = (m * target) / 24000;
++		for (m = 1; m <= max_m; m++) {
++			n = (m * target) / step;
+ 
+ 			if (n >= 1 && n <= 128) {
+-				value = (24000 * n) / m / div;
++				value = (step * n) / m / div;
+ 				diff = clk_khz - value;
+ 				if (diff < best_diff) {
+ 					best_diff = diff;
+@@ -229,9 +235,21 @@ static void sunxi_dw_hdmi_pll_set(uint clk_khz, int *phy_div)
+ 
+ 	*phy_div = best_div;
+ 
++#if IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)
++	if (IS_ENABLED(CONFIG_MACH_SUN50I_H6)) {
++		clock_set_video1(step * best_n);
++		pll_value = clock_get_video1();
++	} else {
++		clock_set_pll3(step * best_n);
++		pll_value = clock_get_pll3();
++	}
++#else
+ 	clock_set_pll3_factors(best_m, best_n);
++	pll_value = clock_get_pll3();
++#endif
++
+ 	debug("dotclock: %dkHz = %dkHz: (24MHz * %d) / %d / %d\n",
+-	      clk_khz, (clock_get_pll3() / 1000) / best_div,
++	      clk_khz, (pll_value / 1000) / best_div,
+ 	      best_n, best_m, best_div);
+ }
+ 
+@@ -240,9 +258,34 @@ static void sunxi_dw_hdmi_lcdc_init(int mux, const struct display_timing *edid,
+ {
+ 	struct sunxi_ccm_reg * const ccm =
+ 		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
+-	int div = DIV_ROUND_UP(clock_get_pll3(), edid->pixelclock.typ);
++	int div, pll_value;
+ 	struct sunxi_lcdc_reg *lcdc;
+ 
++#if IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)
++	int tcon1_src;
++
++	if (IS_ENABLED(CONFIG_MACH_SUN50I_H6)) {
++		tcon1_src = CCM_TCON1_CTRL_VIDEO1_4X;
++		pll_value = clock_get_video1();
++	} else {
++		tcon1_src = CCM_TCON1_CTRL_VIDEO0_4X;
++		pll_value = clock_get_pll3();
++	}
++
++	div = DIV_ROUND_UP(pll_value, edid->pixelclock.typ);
++
++	if (mux == 0) {
++		writel(tcon1_src | CCM_TCON1_CTRL_ENABLE | CCM_TCON1_CTRL_M(div),
++		       &ccm->tcon_tv0_clk_cfg);
++		setbits_le32(&ccm->tcon_tv_gate_reset, BIT(RESET_SHIFT));
++		setbits_le32(&ccm->tcon_tv_gate_reset, BIT(GATE_SHIFT));
++	} else {
++		/* TODO: H616 supports a second TV encoder */
++		panic("using HDMI lcdc mux 1 is not implemented");
++	}
++#else
++	div = DIV_ROUND_UP(pll_value, edid->pixelclock.typ);
++
+ 	if (mux == 0) {
+ 		lcdc = (struct sunxi_lcdc_reg *)SUNXI_LCD0_BASE;
+ 
+@@ -264,6 +307,7 @@ static void sunxi_dw_hdmi_lcdc_init(int mux, const struct display_timing *edid,
+ 		writel(CCM_LCD1_CTRL_GATE | CCM_LCD1_CTRL_M(div),
+ 		       &ccm->lcd1_clk_cfg);
+ 	}
++#endif
+ 
+ 	lcdc_init(lcdc);
+ 	lcdc_tcon1_mode_set(lcdc, edid, false, false);
+@@ -290,7 +334,12 @@ static int sunxi_dw_hdmi_read_edid(struct udevice *dev, u8 *buf, int buf_size)
+ static bool sunxi_dw_hdmi_mode_valid(struct udevice *dev,
+ 				     const struct display_timing *timing)
+ {
+-	return timing->pixelclock.typ <= 297000000;
++	int max_clock = 297000000;
++
++	if(IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2))
++		max_clock = 594000;
++
++	return timing->pixelclock.typ <= max_clock;
+ }
+ 
+ static int sunxi_dw_hdmi_enable(struct udevice *dev, int panel_bpp,
+@@ -337,6 +386,21 @@ static int sunxi_dw_hdmi_probe(struct udevice *dev)
+ 	if (priv->hvcc)
+ 		regulator_set_enable(priv->hvcc, true);
+ 
++#if IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_SUNXI_GEN_NCAT2)
++	int hdmi_src = CCM_HDMI_CTRL_VIDEO0_4X_H616;
++
++	/* Set HDMI PLL to 297 MHz */
++	if (IS_ENABLED(CONFIG_MACH_SUN50I_H6)) {
++		hdmi_src = CCM_HDMI_CTRL_VIDEO1_4X_H6;
++		clock_set_video1(297000000);
++	} else {
++		clock_set_pll3(297000000);
++	}
++
++	writel(hdmi_src | CCM_HDMI_CTRL_ENABLE, &ccm->hdmi_clk_cfg);
++	setbits_le32(&ccm->hdmi_gate_reset, BIT(RESET_SHIFT));
++	setbits_le32(&ccm->hdmi_gate_reset, BIT(GATE_SHIFT));
++#else
+ 	/* Set pll3 to 297 MHz */
+ 	clock_set_pll3(297000000);
+ 
+@@ -346,6 +410,7 @@ static int sunxi_dw_hdmi_probe(struct udevice *dev)
+ 
+ 	/* This reset is referenced from the PHY devicetree node. */
+ 	setbits_le32(&ccm->ahb_reset1_cfg, 1 << AHB_RESET_OFFSET_HDMI2);
++#endif
+ 
+ 	ret = reset_deassert_bulk(&priv->resets);
+ 	if (ret)
+diff --git a/drivers/video/sunxi/sunxi_lcd.c b/drivers/video/sunxi/sunxi_lcd.c
+index 953233fcd68..cc8a1d22a4b 100644
+--- a/drivers/video/sunxi/sunxi_lcd.c
++++ b/drivers/video/sunxi/sunxi_lcd.c
+@@ -7,6 +7,7 @@
+ 
+ #include <display.h>
+ #include <log.h>
++#include <panel.h>
+ #include <video_bridge.h>
+ #include <backlight.h>
+ #include <dm.h>
+@@ -25,7 +26,7 @@ struct sunxi_lcd_priv {
+ 
+ static void sunxi_lcdc_config_pinmux(void)
+ {
+-#ifdef CONFIG_MACH_SUN50I
++#if IS_ENABLED(CONFIG_MACH_SUN50I) || IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_MACH_SUN8I_R528)
+ 	int pin;
+ 
+ 	for (pin = SUNXI_GPD(0); pin <= SUNXI_GPD(21); pin++) {
+@@ -44,12 +45,15 @@ static int sunxi_lcd_enable(struct udevice *dev, int bpp,
+ 	       (struct sunxi_lcdc_reg *)SUNXI_LCD0_BASE;
+ 	struct sunxi_lcd_priv *priv = dev_get_priv(dev);
+ 	struct udevice *backlight;
++	struct udevice *panel;
+ 	int clk_div, clk_double, ret;
+ 
++#if !IS_ENABLED(CONFIG_SUN50I_GEN_H6) && !IS_ENABLED(CONFIG_MACH_SUN8I_R528)
+ 	/* Reset off */
+ 	setbits_le32(&ccm->ahb_reset1_cfg, 1 << AHB_RESET_OFFSET_LCD0);
+ 	/* Clock on */
+ 	setbits_le32(&ccm->ahb_gate1, 1 << AHB_GATE_OFFSET_LCD0);
++#endif
+ 
+ 	lcdc_init(lcdc);
+ 	sunxi_lcdc_config_pinmux();
+@@ -59,6 +63,12 @@ static int sunxi_lcd_enable(struct udevice *dev, int bpp,
+ 			    priv->panel_bpp, CONFIG_VIDEO_LCD_DCLK_PHASE);
+ 	lcdc_enable(lcdc, priv->panel_bpp);
+ 
++	ret = uclass_get_device(UCLASS_PANEL, 0, &panel);
++	if (ret == 0) {
++		if (panel_enable_backlight(panel) == 0)
++			return 0;
++	}
++
+ 	ret = uclass_get_device(UCLASS_PANEL_BACKLIGHT, 0, &backlight);
+ 	if (!ret)
+ 		backlight_enable(backlight);
+@@ -115,6 +125,11 @@ static int sunxi_lcd_probe(struct udevice *dev)
+ 		return ret;
+ 	}
+ 
++	if (panel_get_display_timing(cdev, &priv->timing) == 0) {
++		priv->panel_bpp = 32;
++		return 0;
++	}
++
+ 	if (fdtdec_decode_display_timing(gd->fdt_blob, dev_of_offset(cdev),
+ 					 0, &priv->timing)) {
+ 		debug("%s: Failed to decode display timing\n", __func__);
+@@ -145,7 +160,7 @@ U_BOOT_DRIVER(sunxi_lcd) = {
+ 	.priv_auto	= sizeof(struct sunxi_lcd_priv),
+ };
+ 
+-#ifdef CONFIG_MACH_SUN50I
++#if IS_ENABLED(CONFIG_MACH_SUN50I) || IS_ENABLED(CONFIG_SUN50I_GEN_H6) || IS_ENABLED(CONFIG_MACH_SUN8I_R528)
+ U_BOOT_DRVINFO(sunxi_lcd) = {
+ 	.name = "sunxi_lcd"
+ };
+diff --git a/dts/upstream/src/riscv/allwinner/sunxi-d1s-t113.dtsi b/dts/upstream/src/riscv/allwinner/sunxi-d1s-t113.dtsi
+index 5a9d7f5a75b..22821b21b9a 100644
+--- a/dts/upstream/src/riscv/allwinner/sunxi-d1s-t113.dtsi
++++ b/dts/upstream/src/riscv/allwinner/sunxi-d1s-t113.dtsi
+@@ -145,6 +145,18 @@
+ 			};
+ 		};
+ 
++		pwm: pwm@2000c00 {
++			compatible = "allwinner,sun20i-d1-pwm";
++			reg = <0x02000c00 0x400>;
++			clocks = <&ccu CLK_BUS_PWM>,
++				 <&dcxo>,
++				 <&ccu CLK_APB0>;
++			clock-names = "bus", "hosc", "apb";
++			resets = <&ccu RST_BUS_PWM>;
++			status = "disabled";
++			#pwm-cells = <0x3>;
++		};
++
+ 		ccu: clock-controller@2001000 {
+ 			compatible = "allwinner,sun20i-d1-ccu";
+ 			reg = <0x2001000 0x1000>;
+diff --git a/include/mipi_dbi.h b/include/mipi_dbi.h
+new file mode 100644
+index 00000000000..1c0c21ba812
+--- /dev/null
++++ b/include/mipi_dbi.h
+@@ -0,0 +1,73 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * MIPI DBI Bus support
++ *
++ * Copyright 2024 John Watts <contact@jookia.org>
++ */
++#ifndef MIPI_DBI_H
++#define MIPI_DBI_H
++
++#include <asm/gpio.h>
++#include <mipi_display.h>
++#include <spi.h>
++
++/**
++ * struct mipi_dbi - MIPI DBI bus info
++ *
++ * This contains information about a MIPI DBI bus.
++ * Use mipi_dbi_spi_init to create and initialize this structure.
++ *
++ * @spi:	SPI slave this bus operates on.
++ */
++struct mipi_dbi {
++	struct spi_slave *spi;
++};
++
++/**
++ * mipi_dbi_spi_init - Creates a new MIPI DBI bus
++ *
++ * Creates and sets up a 'struct mipi_dbi' using the provided SPI slave
++ * and optional D/C GPIO.
++ *
++ * @slave:	SPI slave the bus is on
++ * @dbi:	Destination mipi_dbi structure to initialize
++ * @dc:		D/C GPIO (NULL if unused)
++ *
++ * Returns: 0 on success, -1 on failure.
++ */
++int mipi_dbi_spi_init(struct spi_slave *slave, struct mipi_dbi *dbi,
++		      struct gpio_desc *dc);
++
++/**
++ * mipi_dbi_command_buf - Sends a command and data over the bus
++ *
++ * Sends a command and any optional data over a bus.
++ *
++ * @dbi:	MIPI DBI bus to use
++ * @cmd:	MIPI DBI command
++ * @data:	Command data (NULL if len is 0)
++ * @len:	Length of data in bytes
++ *
++ * Returns: 0 on success, -1 on failure.
++ */
++int mipi_dbi_command_buf(struct mipi_dbi *dbi, u8 cmd, const u8 *data, size_t len);
++
++/**
++ * mipi_dbi_command - Sends a command and data sequence over the bus
++ *
++ * Sends a command and any optional data over a bus.
++ * The data is a variadic sequence.
++ *
++ * @dbi:	MIPI DBI bus to use
++ * @cmd:	MIPI DBI command
++ * @seq:	Command data bytes
++ *
++ * Returns: 0 on success, -1 on failure.
++ */
++#define mipi_dbi_command(dbi, cmd, seq...) \
++({ \
++	const u8 data[] = { seq }; \
++	mipi_dbi_command_buf(dbi, cmd, data, ARRAY_SIZE(data)); \
++})
++
++#endif /* MIPI_DBI_H */
+diff --git a/include/nand.h b/include/nand.h
+index 3a0ef6ad9cc..5a56420949e 100644
+--- a/include/nand.h
++++ b/include/nand.h
+@@ -8,6 +8,7 @@
+ #ifndef _NAND_H_
+ #define _NAND_H_
+ 
++extern void spinand_init(void);
+ extern void nand_init(void);
+ void nand_reinit(void);
+ unsigned long nand_size(void);
+@@ -107,7 +108,9 @@ int nand_get_lock_status(struct mtd_info *mtd, loff_t offset);
+ u32 nand_spl_adjust_offset(u32 sector, u32 offs);
+ int nand_spl_load_image(uint32_t offs, unsigned int size, void *dst);
+ int nand_spl_read_block(int block, int offset, int len, void *dst);
++int spinand_spl_read_block(int block, int offset, int len, void *dst);
+ void nand_deselect(void);
++void spinand_deselect(void);
+ 
+ #ifdef CONFIG_SYS_NAND_SELECT_DEVICE
+ void board_nand_select_device(struct nand_chip *nand, int chip);
+diff --git a/include/spi.h b/include/spi.h
+index 9e9851284c8..fd9f50821d1 100644
+--- a/include/spi.h
++++ b/include/spi.h
+@@ -259,7 +259,7 @@ void spi_release_bus(struct spi_slave *slave);
+  * @slave:	The SPI slave
+  * @wordlen:	The number of bits in a word
+  *
+- * Returns: 0 on success, -1 on failure.
++ * Returns: The old word length on success, -1 on failure.
+  */
+ int spi_set_wordlen(struct spi_slave *slave, unsigned int wordlen);
+ 
+diff --git a/include/sunxi_gpio.h b/include/sunxi_gpio.h
+index db3742c0397..eb1821622fb 100644
+--- a/include/sunxi_gpio.h
++++ b/include/sunxi_gpio.h
+@@ -119,6 +119,8 @@ enum sunxi_gpio_number {
+ #define SUN8I_A33_GPB_UART0	3
+ #define SUN8I_A83T_GPB_UART0	2
+ #define SUN8I_V3S_GPB_UART0	3
++#define SUN8I_R528_GPB_UART2	7
++#define SUN8I_R528_GPD_UART2	5
+ #define SUN50I_GPB_UART0	4
+ 
+ #define SUNXI_GPC_NAND		2
+diff --git a/jookia/allowed_signers b/jookia/allowed_signers
+new file mode 100644
+index 00000000000..6a8eacc5b48
+--- /dev/null
++++ b/jookia/allowed_signers
+@@ -0,0 +1 @@
++jookia sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAID7OzA3dl0YNrkRPXGldZTzz3rtFcyBvXz661ZmMgIS3AAAABHNzaDo= jookia@titan
+diff --git a/jookia/create_release.sh b/jookia/create_release.sh
+new file mode 100755
+index 00000000000..5b13367729e
+--- /dev/null
++++ b/jookia/create_release.sh
+@@ -0,0 +1,30 @@
++#!/bin/bash
++# SPDX-License-Identifier: CC0
++# Copyright 2025 John Watts <contact@jookia.org>
++
++set -e
++set -x
++TODAY="$(date +"%Y%m%d")"
++MERGEBASE="$(git describe --exact-match "$(git merge-base HEAD master)")"
++sed -i "s/\(PATCHESVERSION = \).*/\1-jookia$TODAY/g" Makefile
++git commit -m "Bump PATCHESVERSION to -jookia$TODAY" -s -S Makefile
++git tag -s -m "Release $TODAY" jookia/$TODAY
++mkdir -p release/
++FILE=uboot-$MERGEBASE-jookia-$TODAY.patch
++git diff $MERGEBASE jookia/$TODAY > release/$FILE
++cp jookia/allowed_signers release
++ssh-keygen -Y sign -f ~/.ssh/id_ed25519_sk_solo.pub -n file release/$FILE
++(cd release; sha256sum * > sha256sums)
++git push mine jookia_main jookia/$TODAY
++cat <<EOF >release/GITHUB
++(add some comment here)
++
++How to check the integrity and authenticity of these files:
++
++\`\`\`
++sha256sum -c sha256sums
++ssh-keygen -Y verify -f allowed_signers -I jookia -n file -s $FILE.sig < $FILE
++\`\`\`
++
++Make sure to check the key fingerprint against my website: https://www.jookia.org/wiki/Keys
++EOF
