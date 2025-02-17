@@ -8,7 +8,11 @@ else
 	cp $BOARD_DIR/kernel.its $BINARIES_DIR/kernel.its
 fi
 
-(cd $BINARIES_DIR; $HOST_DIR/bin/mkimage -f kernel.its kernel.itb; rm kernel.its)
+cd $BINARIES_DIR
+DTB="$(cd "$BINARIES_DIR"; find * -name "*.dtb")"
+sed -i "s/REPLACEME.DTB/${DTB}/g" $BINARIES_DIR/kernel.its
+$HOST_DIR/bin/mkimage -f kernel.its kernel.itb
+cd $OLDPWD
 
 if grep -Eq "^BR2_TARGET_AWBOOT_T113=y$" ${BR2_CONFIG}; then
 	BRD="sun8i-t113"

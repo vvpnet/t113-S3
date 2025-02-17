@@ -7,7 +7,7 @@
     images {
         fdt {
             description = "Device tree";
-            data = /incbin/("./sun8i-t113.dtb");
+            data = /incbin/("./REPLACEME.DTB");
             type = "flat_dt";
             compression = "none";
             arch = "arm";

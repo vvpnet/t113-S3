@@ -4,8 +4,8 @@
 /dts-v1/;
 
 #include <dt-bindings/gpio/gpio.h>
-#include "allwinner/sun8i-t113s.dtsi"
-#include "allwinner/sunxi-d1s-t113-mangopi-mq-r.dtsi"
+#include "sun8i-t113s.dtsi"
+#include "sunxi-d1s-t113-mangopi-mq-r.dtsi"
 
 / {
 	model = "MangoPi MQ-Dual";
