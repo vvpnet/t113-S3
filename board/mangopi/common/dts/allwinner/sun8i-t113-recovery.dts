@@ -6,8 +6,7 @@
 #include "mangopi-common.dtsi"
 
 / {
-	model = "MangoPi MQ-Dual MCD_2310";
-	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
+	compatible = "sun8i-t113-recovery";
 
 	uboot,fastboot-pin = "always";
 

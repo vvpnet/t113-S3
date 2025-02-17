@@ -8,9 +8,6 @@
 #include "sunxi-d1s-t113-mangopi-mq-r.dtsi"
 
 / {
-	model = "MangoPi MQ-Dual";
-	compatible = "allwinner,sun20i-d1", "allwinner,sun8i";
-
 	uboot,fastboot-led = "PD22";
 
 	aliases {
